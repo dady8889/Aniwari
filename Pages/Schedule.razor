@@ -1,7 +1,26 @@
 ﻿@page "/schedule"
+@inject IScheduleService ScheduleService;
+@implements IDisposable
 
 <h3>Schedule</h3>
 
-@code {
+Count:
+@(ScheduleDict == null ? 0 : ScheduleDict.Sum(x => x.Value.Count()))
 
+@code {
+    private CancellationTokenSource cts = new CancellationTokenSource();
+    public Dictionary<ScheduleDay, List<AnimeSchedule>>? ScheduleDict { get; private set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        ScheduleDict = await ScheduleService.GetSchedule(cts.Token);
+    }
+
+    public void Dispose()
+    {
+        cts.Cancel();
+        cts.Dispose();
+    }
 }

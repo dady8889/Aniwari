@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Aniwari.Data;
+using Aniwari.BL;
 
 namespace Aniwari;
 
@@ -19,10 +20,12 @@ public static class MauiProgram
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
+		builder.Logging.SetMinimumLevel(LogLevel.Trace);
 		builder.Logging.AddDebug();
 #endif
 
 		builder.Services.AddSingleton<WeatherForecastService>();
+		builder.Services.AddAniwari();
 
 		return builder.Build();
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading.RateLimiting;
 using System.Xml.Linq;
@@ -17,6 +18,7 @@ public class ScheduleService : IScheduleService
     private readonly IJikan _jikan;
     private readonly ILogger<ScheduleService> _logger;
     private readonly FixedWindowRateLimiter _limiter;
+    private readonly FixedWindowRateLimiter _limiterMinute;
 
     public ScheduleService(ILogger<ScheduleService> logger, IJikan jikan)
     {
@@ -24,10 +26,19 @@ public class ScheduleService : IScheduleService
         _logger = logger;
         _limiter = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions()
         {
-            Window = TimeSpan.FromMilliseconds(650),
+            Window = TimeSpan.FromMilliseconds(750),
             AutoReplenishment = true,
             PermitLimit = 1,
-            QueueLimit = 3,
+            QueueLimit = 1,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        });
+
+        _limiterMinute = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions()
+        {
+            Window = TimeSpan.FromSeconds(60),
+            AutoReplenishment = true,
+            PermitLimit = 30,
+            QueueLimit = 1,
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst
         });
     }
@@ -57,6 +68,7 @@ public class ScheduleService : IScheduleService
     {
         try
         {
+            bool next = false;
             int page = 1;
             PaginatedJikanResponse<ICollection<Anime>> info;
             Dictionary<ScheduleDay, List<AnimeSchedule>> schedule = new();
@@ -70,8 +82,18 @@ public class ScheduleService : IScheduleService
             do
             {
                 using RateLimitLease lease = await _limiter.AcquireAsync(1, cancellationToken);
+                using RateLimitLease leaseMinute = await _limiterMinute.AcquireAsync(1, cancellationToken);
+
+                // retry if the queue is full
+                if (!lease.IsAcquired || !leaseMinute.IsAcquired)
+                {
+                    next = true;
+                    await Task.Delay(100);
+                    continue;
+                }
 
                 info = await _jikan.GetScheduleAsync(page); // todo cts
+                next = info.Pagination.HasNextPage;
 
                 foreach (Anime anime in info.Data)
                 {
@@ -138,7 +160,9 @@ public class ScheduleService : IScheduleService
 
                 page++;
 
-            } while (info.Pagination.HasNextPage);
+                _logger.LogDebug("Free limits: S = {}, M = {}", _limiter.GetStatistics()?.CurrentAvailablePermits, _limiterMinute.GetStatistics()?.CurrentAvailablePermits);
+
+            } while (next);
 
             return schedule;
         }

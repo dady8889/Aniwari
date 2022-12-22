@@ -1,15 +1,68 @@
 ﻿.schedule-day {
-    
-}
-
-.schedule-day__title {
-
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f4f4;
+    border-radius: 4px;
+    box-shadow: 4px -4px 8px rgba(220, 220, 220, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.9), 4px 4px 10px rgba(220, 220, 220, 0.9);
+    min-height: 250px;
+    padding-bottom: 10px;
 }
 
 .schedule-day__body {
-
 }
 
 .schedule-item {
     display: flex;
+    min-height: 30px;
+    align-items: center;
+}
+
+    .schedule-item:hover {
+        background-color: #d7d7d7;
+    }
+
+.schedule-item__time {
+    min-width: 100px;
+    text-align: center;
+}
+
+.schedule {
+    padding: 25px 25px 25px 25px;
+    gap: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-header {
+    display: flex;
+    height: 40px;
+    align-items: end;
+}
+
+.schedule-hr {
+    height: 1px;
+    margin: 10px;
+}
+
+.schedule-header__title {
+    font-size: 1.8rem;
+    line-height: 1.8rem;
+}
+
+.schedule-date {
+    width: 100px;
+    text-align: center;
+    position: relative;
+}
+
+.schedule-date__relative-name {
+    text-transform: uppercase;
+    font-size: 0.6rem;
+    position: absolute;
+    top: -10px;
+    width: 100px;
+}
+
+.schedule-date__date {
+    text-transform: uppercase;
 }

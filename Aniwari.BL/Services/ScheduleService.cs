@@ -91,7 +91,7 @@ public class ScheduleService : IScheduleService
             catch (Exception ex)
             {
                 _logger.LogError("Could not obtain schedule from Jikan. Exception: {}", ex.Message.ToString());
-                throw;
+                yield break;
             }
 
             next = info.Pagination.HasNextPage;

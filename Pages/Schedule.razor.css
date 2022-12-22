@@ -1,9 +1,9 @@
 ﻿.schedule-day {
     display: flex;
     flex-direction: column;
-    background-color: #f4f4f4;
+    background-color: var(--aniwari-bg-alt);
     border-radius: 4px;
-    box-shadow: 4px -4px 8px rgba(220, 220, 220, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.9), 4px 4px 10px rgba(220, 220, 220, 0.9);
+    box-shadow: var(--aniwari-boxshadow);
     min-height: 250px;
     padding-bottom: 10px;
 }
@@ -25,9 +25,9 @@
     }
 }
 
-    .schedule-item:hover {
-        background-color: #d7d7d7;
-    }
+.schedule-item:hover {
+    background-color: var(--aniwari-li-hover);
+}
 
 .schedule-item__time {
     min-width: 100px;

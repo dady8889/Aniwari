@@ -1,13 +1,27 @@
 ﻿@import url('bootstrap-icons/font/bootstrap-icons.min.css');
 
+:root {
+    --aniwari-primary-h: 0;
+    --aniwari-primary-s: 0%;
+    --aniwari-primary-l: 93%;
+    --aniwari-secondary-h: 0%;
+    --aniwari-secondary-s: 0%;
+    --aniwari-secondary-l: 0%;
+    --aniwari-primary: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), var(--aniwari-primary-l));
+    /* --aniwari-bg: #efefef; */
+    /* --aniwari-bg-alt: #f4f4f4; */
+    /* --aniwari-li-hover: #d7d7d7; */
+    --aniwari-bg: var(--aniwari-primary);
+    --aniwari-bg-alt: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), calc(var(--aniwari-primary-l) + 20%));
+    --aniwari-li-hover: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), var(--aniwari-primary-l));
+    --aniwari-boxshadow: 4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), -4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), 4px 4px 10px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     height: 100%;
     width: 100%;
-}
-
-body {
-    background-color: #efefef;
+    background-color: var(--aniwari-bg);
 }
 
 #app {

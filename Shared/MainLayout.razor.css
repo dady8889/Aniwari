@@ -8,11 +8,10 @@
 
 main {
     flex: 1;
+    overflow: auto;
 }
 
 .menu {
-    position: fixed;
-    bottom: 0;
     height: auto;
     width: 100%;
     background-color: #efefef;

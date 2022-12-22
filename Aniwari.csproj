@@ -83,6 +83,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Aniwari.BL\**" />
+      <Content Remove="Aniwari.BL\**" />
+      <EmbeddedResource Remove="Aniwari.BL\**" />
+      <MauiXaml Remove="Aniwari.BL\**" />
+      <None Remove="Aniwari.BL\**" />
+      <TypeScriptCompile Remove="Aniwari.BL\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Remove="libman.json" />
     </ItemGroup>
 
@@ -99,6 +108,14 @@
         </PackageReference>
         <PackageReference Include="System.Reactive" Version="5.0.0" />
         <PackageReference Include="System.Threading.RateLimiting" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PRIResource Remove="Aniwari.BL\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="Aniwari.BL\Aniwari.BL.csproj" />
     </ItemGroup>
 
 </Project>

@@ -12,9 +12,17 @@
 }
 
 .schedule-item {
+    animation: show 0.2s 0.1s ease forwards;
     display: flex;
     min-height: 30px;
     align-items: center;
+    opacity: 0;
+}
+
+@keyframes show {
+    100% {
+        opacity: 1;
+    }
 }
 
     .schedule-item:hover {

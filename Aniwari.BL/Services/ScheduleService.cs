@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Threading.RateLimiting;
 using System.Xml.Linq;
 using JikanDotNet;
@@ -10,7 +11,7 @@ namespace Aniwari.BL.Services;
 
 public interface IScheduleService
 {
-    Task<Dictionary<ScheduleDay, List<AnimeSchedule>>?> GetSchedule(CancellationToken cancellationToken = default);
+    IAsyncEnumerable<KeyValuePair<ScheduleDay, AnimeSchedule>> GetSchedule(CancellationToken cancellationToken = default);
 }
 
 public class ScheduleService : IScheduleService
@@ -64,114 +65,107 @@ public class ScheduleService : IScheduleService
         return Enum.TryParse(day, out scheduleDay);
     }
 
-    public async Task<Dictionary<ScheduleDay, List<AnimeSchedule>>?> GetSchedule(CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<KeyValuePair<ScheduleDay, AnimeSchedule>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        try
-        {
-            bool next = false;
-            int page = 1;
-            PaginatedJikanResponse<ICollection<Anime>> info;
-            Dictionary<ScheduleDay, List<AnimeSchedule>> schedule = new();
+        bool next = false;
+        int page = 1;
+        PaginatedJikanResponse<ICollection<Anime>> info;
 
-            // initialize empty list for each day
-            foreach (ScheduleDay day in Enum.GetValues(typeof(ScheduleDay)))
+        do
+        {
+            using RateLimitLease lease = await _limiter.AcquireAsync(1, cancellationToken);
+            using RateLimitLease leaseMinute = await _limiterMinute.AcquireAsync(1, cancellationToken);
+
+            // retry if the queue is full
+            if (!lease.IsAcquired || !leaseMinute.IsAcquired)
             {
-                schedule.Add(day, new List<AnimeSchedule>());
+                next = true;
+                await Task.Delay(100);
+                continue;
+            }
+            try
+            {
+                info = await _jikan.GetScheduleAsync(page); // todo cts
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Could not obtain schedule from Jikan. Exception: {}", ex.Message.ToString());
+                throw;
             }
 
-            do
-            {
-                using RateLimitLease lease = await _limiter.AcquireAsync(1, cancellationToken);
-                using RateLimitLease leaseMinute = await _limiterMinute.AcquireAsync(1, cancellationToken);
+            next = info.Pagination.HasNextPage;
 
-                // retry if the queue is full
-                if (!lease.IsAcquired || !leaseMinute.IsAcquired)
+            foreach (Anime anime in info.Data)
+            {
+                AnimeSchedule animeSchedule = new();
+
+                ScheduleDay day;
+                if (!TryParseScheduleDay(anime.Broadcast.String, out day))
                 {
-                    next = true;
-                    await Task.Delay(100);
+                    _logger.LogDebug("Could not parse \"{}\" for anime \"{}\"", anime.Broadcast.String, anime.MalId);
                     continue;
                 }
 
-                info = await _jikan.GetScheduleAsync(page); // todo cts
-                next = info.Pagination.HasNextPage;
+                animeSchedule.ScheduleDay = day;
+                animeSchedule.Titles = new Dictionary<TitleType, List<string>>();
 
-                foreach (Anime anime in info.Data)
+                // initialize empty list for each title type
+                foreach (TitleType type in Enum.GetValues(typeof(TitleType)))
                 {
-                    AnimeSchedule animeSchedule = new();
-
-                    ScheduleDay day;
-                    if (!TryParseScheduleDay(anime.Broadcast.String, out day))
-                    {
-                        _logger.LogDebug("Could not parse \"{}\" for anime \"{}\"", anime.Broadcast.String, anime.MalId);
-                        continue;
-                    }
-
-                    animeSchedule.ScheduleDay = day;
-                    animeSchedule.Titles = new Dictionary<TitleType, List<string>>();
-
-                    // initialize empty list for each title type
-                    foreach (TitleType type in Enum.GetValues(typeof(TitleType)))
-                    {
-                        animeSchedule.Titles.Add(type, new List<string>());
-                    }
-
-                    foreach (var title in anime.Titles)
-                    {
-                        if (!Enum.TryParse(title.Type, out TitleType language))
-                            continue;
-
-                        animeSchedule.Titles[language].Add(title.Title);
-                    }
-
-                    if (anime.Broadcast.Time != null && anime.Broadcast.Timezone != null)
-                    {
-                        animeSchedule.AirTime = TimeOnly.Parse(anime.Broadcast.Time, CultureInfo.InvariantCulture);
-                        animeSchedule.Timezone = anime.Broadcast.Timezone;
-
-                        var tz = TimeZoneInfo.FindSystemTimeZoneById(anime.Broadcast.Timezone);
-
-                        var sourceTime = DateTime.Today.Add(animeSchedule.AirTime.Value.ToTimeSpan());
-                        sourceTime = DateTime.SpecifyKind(sourceTime, DateTimeKind.Unspecified);
-                        var convertedTime = TimeZoneInfo.ConvertTime(sourceTime, tz, TimeZoneInfo.Local);
-
-                        animeSchedule.ConvertedAirTime = TimeOnly.FromDateTime(convertedTime);
-
-                        int currentDay = (int)animeSchedule.ScheduleDay;
-
-                        // we have to check if the converted time shifted the day
-                        if (convertedTime.Day > sourceTime.Day)
-                            currentDay++;
-                        else if (convertedTime.Day < sourceTime.Day)
-                            currentDay--;
-
-                        // fix overflow
-                        if (currentDay < 0)
-                            currentDay = 6;
-                        else if (currentDay > 6)
-                            currentDay = 0;
-
-                        animeSchedule.ConvertedScheduleDay = (ScheduleDay)currentDay;
-                    }
-
-                    animeSchedule.RawAirTime = anime.Broadcast.String;
-
-                    schedule[day].Add(animeSchedule);
+                    animeSchedule.Titles.Add(type, new List<string>());
                 }
 
-                page++;
+                foreach (var title in anime.Titles)
+                {
+                    if (!Enum.TryParse(title.Type, out TitleType language))
+                        continue;
 
-                _logger.LogDebug("Free limits: S = {}, M = {}", _limiter.GetStatistics()?.CurrentAvailablePermits, _limiterMinute.GetStatistics()?.CurrentAvailablePermits);
+                    animeSchedule.Titles[language].Add(title.Title);
+                }
 
-            } while (next);
+                if (anime.Broadcast.Time != null && anime.Broadcast.Timezone != null)
+                {
+                    animeSchedule.AirTime = TimeOnly.Parse(anime.Broadcast.Time, CultureInfo.InvariantCulture);
+                    animeSchedule.Timezone = anime.Broadcast.Timezone;
 
-            return schedule;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Could not obtain schedule from Jikan. Exception: {}", ex.Message.ToString());
-        }
+                    var tz = TimeZoneInfo.FindSystemTimeZoneById(anime.Broadcast.Timezone);
 
-        return null;
+                    var sourceTime = DateTime.Today.Add(animeSchedule.AirTime.Value.ToTimeSpan());
+                    sourceTime = DateTime.SpecifyKind(sourceTime, DateTimeKind.Unspecified);
+                    var convertedTime = TimeZoneInfo.ConvertTime(sourceTime, tz, TimeZoneInfo.Local);
+
+                    animeSchedule.ConvertedAirTime = TimeOnly.FromDateTime(convertedTime);
+
+                    int currentDay = (int)animeSchedule.ScheduleDay;
+
+                    // we have to check if the converted time shifted the day
+                    if (convertedTime.Day > sourceTime.Day)
+                        currentDay++;
+                    else if (convertedTime.Day < sourceTime.Day)
+                        currentDay--;
+
+                    // fix overflow
+                    if (currentDay < 0)
+                        currentDay = 6;
+                    else if (currentDay > 6)
+                        currentDay = 0;
+
+                    animeSchedule.ConvertedScheduleDay = (ScheduleDay)currentDay;
+                }
+
+                animeSchedule.RawAirTime = anime.Broadcast.String;
+
+                yield return KeyValuePair.Create(day, animeSchedule);
+            }
+
+            page++;
+
+            _logger.LogDebug("Free limits: S = {}, M = {}", _limiter.GetStatistics()?.CurrentAvailablePermits, _limiterMinute.GetStatistics()?.CurrentAvailablePermits);
+
+            
+
+        } while (next);
     }
 }
 
@@ -185,6 +179,11 @@ public class AnimeSchedule
     public TimeOnly? ConvertedAirTime { get; set; }
     public string? Timezone { get; set; }
     public string RawAirTime { get; set; } = string.Empty;
+
+    public string GetDefaultTitle()
+    {
+        return Titles[TitleType.Default][0];
+    }
 }
 
 public enum ScheduleDay

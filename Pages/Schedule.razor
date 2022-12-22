@@ -2,20 +2,47 @@
 @inject IScheduleService ScheduleService;
 @implements IDisposable
 
-<h3>Schedule</h3>
-
-Count:
-@(ScheduleDict == null ? 0 : ScheduleDict.Sum(x => x.Value.Count()))
+@foreach (ScheduleDay day in Enum.GetValues<ScheduleDay>())
+{
+    <div class="schedule-day @(day.ToString().ToLower())">
+        <div class="schedule-day__title">
+            <h2>@day.ToString()</h2>
+        </div>
+        <div class="schedule-day__body">
+            @foreach(var anime in dict[day])
+            {
+                <div class="schedule-item">
+                    <div class="schedule-item__time">
+                        @anime.AirTime
+                    </div>
+                    <div class="schedule-item__title">
+                        @anime.GetDefaultTitle()
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
 
 @code {
-    private CancellationTokenSource cts = new CancellationTokenSource();
-    public Dictionary<ScheduleDay, List<AnimeSchedule>>? ScheduleDict { get; private set; } = new();
+    private CancellationTokenSource cts = new();
+
+    private Dictionary<ScheduleDay, List<AnimeSchedule>> dict = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        ScheduleDict = await ScheduleService.GetSchedule(cts.Token);
+        foreach (ScheduleDay day in Enum.GetValues(typeof(ScheduleDay)))
+        {
+            dict.Add(day, new List<AnimeSchedule>());
+        }
+
+        await foreach (var (day, anime) in ScheduleService.GetSchedule(cts.Token))
+        {
+            dict[day].Add(anime);
+            StateHasChanged();
+        }
     }
 
     public void Dispose()

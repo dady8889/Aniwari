@@ -18,30 +18,11 @@ public class ScheduleService : IScheduleService
 {
     private readonly IJikan _jikan;
     private readonly ILogger<ScheduleService> _logger;
-    private readonly FixedWindowRateLimiter _limiter;
-    private readonly FixedWindowRateLimiter _limiterMinute;
 
     public ScheduleService(ILogger<ScheduleService> logger, IJikan jikan)
     {
         _jikan = jikan;
         _logger = logger;
-        _limiter = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions()
-        {
-            Window = TimeSpan.FromMilliseconds(750),
-            AutoReplenishment = true,
-            PermitLimit = 1,
-            QueueLimit = 1,
-            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
-        });
-
-        _limiterMinute = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions()
-        {
-            Window = TimeSpan.FromSeconds(60),
-            AutoReplenishment = true,
-            PermitLimit = 30,
-            QueueLimit = 1,
-            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
-        });
     }
 
     /// <summary>
@@ -67,32 +48,32 @@ public class ScheduleService : IScheduleService
 
     public async IAsyncEnumerable<KeyValuePair<ScheduleDay, AnimeSchedule>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        bool next = false;
+        bool next = true;
         int page = 1;
-        PaginatedJikanResponse<ICollection<Anime>> info;
+        PaginatedJikanResponse<ICollection<Anime>>? info = null;
 
         do
         {
-            using RateLimitLease lease = await _limiter.AcquireAsync(1, cancellationToken);
-            using RateLimitLease leaseMinute = await _limiterMinute.AcquireAsync(1, cancellationToken);
-
-            // retry if the queue is full
-            if (!lease.IsAcquired || !leaseMinute.IsAcquired)
-            {
-                next = true;
-                await Task.Delay(100);
-                continue;
-            }
             try
             {
                 info = await _jikan.GetScheduleAsync(page); // todo cts
-
+            }
+            catch (HttpRequestException httpException)
+            {
+                if (httpException.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    await Task.Delay(500);
+                    continue;
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError("Could not obtain schedule from Jikan. Exception: {}", ex.Message.ToString());
                 yield break;
             }
+
+            if (info == null)
+                yield break;
 
             next = info.Pagination.HasNextPage;
 
@@ -160,10 +141,6 @@ public class ScheduleService : IScheduleService
             }
 
             page++;
-
-            _logger.LogDebug("Free limits: S = {}, M = {}", _limiter.GetStatistics()?.CurrentAvailablePermits, _limiterMinute.GetStatistics()?.CurrentAvailablePermits);
-
-            
 
         } while (next);
     }

@@ -79,6 +79,10 @@ public class ScheduleService : IScheduleService
 
             foreach (Anime anime in info.Data)
             {
+                // ignore non-approved animes
+                if (!anime.Approved)
+                    continue;
+
                 AnimeSchedule animeSchedule = new();
 
                 ScheduleDay day;
@@ -88,6 +92,8 @@ public class ScheduleService : IScheduleService
                     continue;
                 }
 
+                animeSchedule.MalId = anime.MalId?.ToString() ?? "";
+                animeSchedule.Url = anime.Url;
                 animeSchedule.ScheduleDay = day;
                 animeSchedule.Titles = new Dictionary<TitleType, List<string>>();
 
@@ -148,6 +154,7 @@ public class ScheduleService : IScheduleService
 
 public class AnimeSchedule
 {
+    public string MalId { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public ScheduleDay ScheduleDay { get; set; } = ScheduleDay.Monday;
     public ScheduleDay ConvertedScheduleDay { get; set; } = ScheduleDay.Monday;

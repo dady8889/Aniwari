@@ -24,8 +24,6 @@
 }
 
 .schedule-item-detail {
-    animation: show 0.2s 0.1s ease forwards;
-    opacity: 0;
     background-color: var(--aniwari-li-hover);
     display: flex;
     padding-left: 100px;
@@ -35,8 +33,13 @@
     gap: 15px;
     border-bottom: 5px solid var(--aniwari-bg);
     border-radius: 0 0 10px 10px;
-    transform-origin: 50% 0;
+    clip-path: inset(0);
+    transition: clip-path 0.5s ease-in-out;
 }
+
+    .schedule-item-detail.expanding {
+        clip-path: inset(0 0 100% 0);
+    }
 
 .schedule-item-detail__group {
     display: flex;

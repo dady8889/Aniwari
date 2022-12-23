@@ -10,9 +10,9 @@
     </div>
 </div>
 
-@if (expanded)
+@if (expanded || expanding)
 {
-    <div class="schedule-item-detail">
+    <div class="schedule-item-detail @(expandingClass)">
         <img class="schedule-item-detail__img" src="@Anime.Image" />
         <div class="schedule-item-detail__info">
 
@@ -50,9 +50,36 @@
     [Parameter] public AnimeSchedule? Anime { get; set; }
 
     private bool expanded = false;
+    private bool expanding = false;
+    private string expandingClass = "expanding";
 
-    private void OnRowClicked()
+    private async Task OnRowClicked()
     {
-        expanded = !expanded;
+        if (expanding)
+            return;
+
+        expanding = true;
+
+        if (!expanded)
+        {
+            expanded = true;
+            expandingClass = "expanding";
+            await Task.Delay(100);
+            StateHasChanged();
+            expandingClass = "";
+            StateHasChanged();
+            await Task.Delay(450);
+        }
+        else
+        {
+            expandingClass = "expanding";
+            await Task.Delay(450);
+
+            expanded = false;
+        }
+
+        expanding = false;
+        StateHasChanged();
+        expandingClass = "";
     }
 }

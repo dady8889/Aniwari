@@ -83,21 +83,15 @@
             }
         }
 
-        var obs = ScheduleService.GetSchedule(cts.Token).ToObservable();
-        await obs
-        .Do((kv) =>
+        await foreach(var list in ScheduleService.GetSchedule(cts.Token))
         {
-            dict[kv.Key].Add(kv.Value);
-        })
-        .Buffer(10)
-        .Do((buffer) =>
-        {
+            foreach (var (day, anime) in list)
+            {
+                dict[day].Add(anime);
+            }
+
             StateHasChanged();
-        })
-        .Finally(() =>
-        {
-            StateHasChanged();
-        });
+        }
 
         if (!_disposed)
         {

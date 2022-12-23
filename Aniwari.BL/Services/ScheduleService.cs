@@ -11,7 +11,7 @@ namespace Aniwari.BL.Services;
 
 public interface IScheduleService
 {
-    IAsyncEnumerable<KeyValuePair<ScheduleDay, AnimeSchedule>> GetSchedule(CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IList<KeyValuePair<ScheduleDay, AnimeSchedule>>> GetSchedule(CancellationToken cancellationToken = default);
 }
 
 public class ScheduleService : IScheduleService
@@ -46,7 +46,7 @@ public class ScheduleService : IScheduleService
         return Enum.TryParse(day, out scheduleDay);
     }
 
-    public async IAsyncEnumerable<KeyValuePair<ScheduleDay, AnimeSchedule>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<IList<KeyValuePair<ScheduleDay, AnimeSchedule>>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         bool next = true;
         int page = 1;
@@ -56,7 +56,7 @@ public class ScheduleService : IScheduleService
         {
             try
             {
-                info = await _jikan.GetScheduleAsync(page); // todo cts
+                info = await _jikan.GetScheduleAsync(page);
             }
             catch (HttpRequestException httpException)
             {
@@ -76,6 +76,8 @@ public class ScheduleService : IScheduleService
                 yield break;
 
             next = info.Pagination.HasNextPage;
+
+            List<KeyValuePair<ScheduleDay, AnimeSchedule>> list = new();
 
             foreach (Anime anime in info.Data)
             {
@@ -146,8 +148,10 @@ public class ScheduleService : IScheduleService
                     animeSchedule.ConvertedScheduleDay = (ScheduleDay)currentDay;
                 }
 
-                yield return KeyValuePair.Create(day, animeSchedule);
+                list.Add(KeyValuePair.Create(day, animeSchedule));
             }
+
+            yield return list;
 
             page++;
 

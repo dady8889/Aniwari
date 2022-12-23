@@ -6,7 +6,7 @@
     justify-content: center;
     flex-direction: column;
     text-decoration: none;
-    color: black;
+    color: var(--aniwari-text);
     gap: 5px;
     transition: background-color 0.5s ease;
 }
@@ -23,7 +23,7 @@
         background-color: var(--aniwari-bg-alt);
         box-shadow: var(--aniwari-boxshadow);
         text-decoration: none;
-        color: black;
+        color: var(--aniwari-text);
     }
 
 .nav-item__icon {

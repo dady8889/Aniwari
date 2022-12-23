@@ -4,11 +4,11 @@
     background-color: var(--aniwari-bg-alt);
     border-radius: 4px;
     box-shadow: var(--aniwari-boxshadow);
-    min-height: 250px;
-    padding-bottom: 10px;
+    min-height: 50px;
 }
 
 .schedule-day__body {
+    padding-bottom: 10px;
 }
 
 .schedule-item {
@@ -47,14 +47,20 @@
     align-items: end;
 }
 
-.schedule-hr {
-    height: 1px;
-    margin: 10px;
-}
-
 .schedule-header__title {
     font-size: 1.8rem;
     line-height: 1.8rem;
+}
+
+.schedule-header__noanime {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+}
+
+.schedule-hr {
+    height: 1px;
+    margin: 10px;
 }
 
 .schedule-date {
@@ -74,3 +80,4 @@
 .schedule-date__date {
     text-transform: uppercase;
 }
+

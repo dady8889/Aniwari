@@ -1,0 +1,58 @@
+﻿@if (Anime == null)
+    return;
+
+<div class="schedule-item @(expanded ? "expanded" : "")" @onclick="OnRowClicked">
+    <div class="schedule-item__time" title="@Anime.RawAirTime">
+        @(Anime.AirTime == null ? "??:??" : Anime.AirTime.Value.ToString("HH:mm"))
+    </div>
+    <div class="schedule-item__title">
+        @Anime.GetDefaultTitle()
+    </div>
+</div>
+
+@if (expanded)
+{
+    <div class="schedule-item-detail">
+        <img class="schedule-item-detail__img" src="@Anime.Image" />
+        <div class="schedule-item-detail__info">
+
+            <div class="schedule-item-detail__group">
+                <div class="schedule-item-detail__label">
+                    Known as
+                </div>
+                <div class="schedule-item-detail__text">
+                    @string.Join("; ", Anime.Titles.SelectMany(x => x.Value).ToArray())
+                </div>
+            </div>
+
+            <div class="schedule-item-detail__group">
+                <div class="schedule-item-detail__label">
+                    Link to MAL
+                </div>
+                <div class="schedule-item-detail__text text-break">
+                    <a href="@Anime.Url">@Anime.Url</a>
+                </div>
+            </div>
+
+            <div class="schedule-item-detail__group">
+                <div class="schedule-item-detail__label">
+                    Synopsis
+                </div>
+                <div class="schedule-item-detail__text">
+                    @Anime.Synopsis
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public AnimeSchedule? Anime { get; set; }
+
+    private bool expanded = false;
+
+    private void OnRowClicked()
+    {
+        expanded = !expanded;
+    }
+}

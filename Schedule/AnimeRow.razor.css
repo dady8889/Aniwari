@@ -1,0 +1,67 @@
+﻿.schedule-item {
+    animation: show 0.2s 0.1s ease forwards;
+    display: flex;
+    min-height: 30px;
+    align-items: center;
+    opacity: 0;
+}
+
+    .schedule-item.expanded {
+        background-color: var(--aniwari-bg);
+    }
+
+    .schedule-item:hover {
+        background-color: var(--aniwari-li-hover);
+        cursor: pointer;
+    }
+
+.schedule-item__time {
+    min-width: 100px;
+    text-align: center;
+}
+
+.schedule-item__title {
+}
+
+.schedule-item-detail {
+    animation: show 0.2s 0.1s ease forwards;
+    opacity: 0;
+    background-color: var(--aniwari-li-hover);
+    display: flex;
+    padding-left: 100px;
+    padding-right: 25px;
+    padding-bottom: 10px;
+    margin-bottom: 5px;
+    gap: 15px;
+    border-bottom: 5px solid var(--aniwari-bg);
+    border-radius: 0 0 10px 10px;
+    transform-origin: 50% 0;
+}
+
+.schedule-item-detail__group {
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-item-detail__img {
+    height: 100%;
+}
+
+.schedule-item-detail__info {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.schedule-item-detail__label {
+    font-weight: bold;
+}
+
+.schedule-item-detail__text {
+}
+
+@keyframes show {
+    100% {
+        opacity: 1;
+    }
+}

@@ -95,6 +95,10 @@ public class ScheduleService : IScheduleService
                 animeSchedule.MalId = anime.MalId?.ToString() ?? "";
                 animeSchedule.Url = anime.Url;
                 animeSchedule.ScheduleDay = day;
+                animeSchedule.RawAirTime = anime.Broadcast.String;
+                animeSchedule.Image = anime.Images.WebP.ImageUrl;
+                animeSchedule.Synopsis = anime.Synopsis;
+
                 animeSchedule.Titles = new Dictionary<TitleType, List<string>>();
 
                 // initialize empty list for each title type
@@ -116,6 +120,7 @@ public class ScheduleService : IScheduleService
                     animeSchedule.AirTime = TimeOnly.Parse(anime.Broadcast.Time, CultureInfo.InvariantCulture);
                     animeSchedule.Timezone = anime.Broadcast.Timezone;
 
+                    // convert JST to local time
                     var tz = TimeZoneInfo.FindSystemTimeZoneById(anime.Broadcast.Timezone);
 
                     var sourceTime = DateTime.Today.Add(animeSchedule.AirTime.Value.ToTimeSpan());
@@ -141,8 +146,6 @@ public class ScheduleService : IScheduleService
                     animeSchedule.ConvertedScheduleDay = (ScheduleDay)currentDay;
                 }
 
-                animeSchedule.RawAirTime = anime.Broadcast.String;
-
                 yield return KeyValuePair.Create(day, animeSchedule);
             }
 
@@ -156,6 +159,8 @@ public class AnimeSchedule
 {
     public string MalId { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
+    public string Image { get; set; } = string.Empty;
+    public string Synopsis { get; set; } = string.Empty;
     public ScheduleDay ScheduleDay { get; set; } = ScheduleDay.Monday;
     public ScheduleDay ConvertedScheduleDay { get; set; } = ScheduleDay.Monday;
     public Dictionary<TitleType, List<string>> Titles { get; set; } = new();

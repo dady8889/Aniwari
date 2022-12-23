@@ -1,4 +1,6 @@
-﻿@page "/schedule"
+﻿@using Aniwari.Schedule;
+
+@page "/schedule"
 @inject IScheduleService ScheduleService;
 @inject IJSRuntime JS
 @implements IDisposable
@@ -37,14 +39,7 @@
                 <div class="schedule-day__body">
                     @foreach (var anime in dict[day].OrderBy(x => x.AirTime))
                     {
-                        <div class="schedule-item">
-                            <div class="schedule-item__time" title="@anime.RawAirTime">
-                                @(anime.AirTime == null ? "??:??" : anime.AirTime.Value.ToString("HH:mm"))
-                            </div>
-                            <div class="schedule-item__title">
-                                @anime.GetDefaultTitle()
-                            </div>
-                        </div>
+                        <AnimeRow Anime="anime"/>
                     }
                 </div>
             }
@@ -88,11 +83,21 @@
             }
         }
 
-        await foreach (var (day, anime) in ScheduleService.GetSchedule(cts.Token))
+        var obs = ScheduleService.GetSchedule(cts.Token).ToObservable();
+        await obs
+        .Do((kv) =>
         {
-            dict[day].Add(anime);
+            dict[kv.Key].Add(kv.Value);
+        })
+        .Buffer(10)
+        .Do((buffer) =>
+        {
             StateHasChanged();
-        }
+        })
+        .Finally(() =>
+        {
+            StateHasChanged();
+        });
 
         if (!_disposed)
         {

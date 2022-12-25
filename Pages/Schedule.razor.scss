@@ -1,0 +1,93 @@
+﻿@import '../Styles/_variables.scss';
+
+.schedule-day {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--aniwari-bg-alt);
+    border-radius: 4px;
+    box-shadow: var(--aniwari-boxshadow);
+    min-height: 50px;
+}
+
+.schedule-day.noanime {
+    flex-direction: row;
+}
+
+.schedule-day__body {
+    padding-bottom: 10px;
+}
+
+.schedule {
+    padding: 25px 25px 25px 25px;
+    gap: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-header {
+    display: flex;
+    height: 40px;
+    align-items: end;
+}
+
+.schedule-header__title {
+    font-size: 1.8rem;
+    line-height: 1.8rem;
+    min-width: 200px;
+}
+
+.schedule-header__noanime {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+.schedule-hr {
+    height: 1px;
+    margin: 10px;
+}
+
+.schedule-date {
+    width: 100px;
+    text-align: center;
+    position: relative;
+}
+
+.schedule-date__relative-name {
+    text-transform: uppercase;
+    font-size: 0.6rem;
+    position: absolute;
+    top: -10px;
+    width: 100px;
+}
+
+.schedule-date__date {
+    text-transform: uppercase;
+}
+
+@media(min-width: $media-lg) {
+    .schedule {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0px 5%;
+    }
+
+    .schedule-day {
+        flex-grow: 1;
+        flex-basis: 25%;
+        min-width: 25rem;
+    }
+
+    .schedule-day.noanime {
+        flex-direction: column;
+    }
+
+    .schedule-header {
+        flex-wrap: wrap;
+    }
+
+    .schedule-header__noanime {
+        min-width: 100%;
+    }
+}

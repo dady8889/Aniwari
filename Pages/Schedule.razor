@@ -16,7 +16,7 @@
     {
         bool hasAnime = dict[day].Count > 0;
 
-        <div class="schedule-day @(day.ToString().ToLower())">
+        <div class="schedule-day @(day.ToString().ToLower()) @(hasAnime ? "" : "noanime")">
 
             <div class="schedule-header">
                 <div class="schedule-date">
@@ -30,12 +30,6 @@
                 <div class="schedule-header__title">
                     @day.ToString()
                 </div>
-                @if (!hasAnime)
-                {
-                    <div class="schedule-header__noanime">
-                        No anime airs on this day
-                    </div>
-                }
             </div>
 
             @if (hasAnime)
@@ -44,8 +38,14 @@
 
                 <div class="schedule-day__body">
                     <Virtualize Context="anime" Items="@dict[day].OrderBy(x => x.AirTime).ToList()">
-                        <AnimeRow Anime="@anime"/>
+                        <AnimeRow Anime="@anime" />
                     </Virtualize>
+                </div>
+            }
+            else
+            {
+                <div class="schedule-header__noanime">
+                    No anime airs on this day
                 </div>
             }
         </div>
@@ -88,7 +88,7 @@
             }
         }
 
-        await foreach(var list in ScheduleService.GetSchedule(CancellationTokenSource.Token))
+        await foreach (var list in ScheduleService.GetSchedule(CancellationTokenSource.Token))
         {
             foreach (var (day, anime) in list)
             {

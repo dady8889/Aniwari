@@ -48,7 +48,7 @@
                     Synopsis
                 </div>
                 <div class="schedule-item-detail__text">
-                    @Anime.Synopsis
+                    @(string.IsNullOrEmpty(Anime.Synopsis) ? "No synopsis is written" : Anime.Synopsis)
                 </div>
             </div>
         </div>

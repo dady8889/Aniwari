@@ -4,6 +4,7 @@
     min-height: 30px;
     align-items: center;
     opacity: 0;
+    padding-right: 30px;
 }
 
     .schedule-item.watching {
@@ -34,6 +35,7 @@
 .schedule-item-detail {
     background-color: var(--aniwari-li-hover);
     display: flex;
+    flex-wrap: wrap;
     padding-left: 100px;
     padding-right: 25px;
     padding-bottom: 10px;
@@ -66,8 +68,9 @@
 .schedule-item-detail__info {
     display: flex;
     flex-direction: column;
+    flex-basis: 23rem;
+    flex-grow: 1;
     gap: 15px;
-    max-width: 45rem;
 }
 
 .schedule-item-detail__label {

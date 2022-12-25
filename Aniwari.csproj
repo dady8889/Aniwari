@@ -92,14 +92,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Remove="libman.json" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Include="libman.json" />
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="LibSassBuilder" Version="3.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
         <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.9.4">
           <PrivateAssets>all</PrivateAssets>
@@ -114,5 +111,4 @@
     <ItemGroup>
       <ProjectReference Include="Aniwari.BL\Aniwari.BL.csproj" />
     </ItemGroup>
-
 </Project>

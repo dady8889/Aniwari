@@ -6,14 +6,18 @@
     opacity: 0;
 }
 
-    .schedule-item.expanded {
-        background-color: var(--aniwari-bg);
-    }
-
     .schedule-item.watching {
         background-color: var(--aniwari-ok);
     }
-    
+
+        .schedule-item.watching:hover {
+            background-color: var(--aniwari-ok-alt);
+        }
+
+    .schedule-item.expanded:not(.watching) {
+        background-color: var(--aniwari-bg);
+    }
+
     .schedule-item:hover {
         background-color: var(--aniwari-li-hover);
         cursor: pointer;
@@ -40,6 +44,11 @@
     clip-path: inset(0);
     transition: clip-path 0.5s ease-in-out;
 }
+
+    .schedule-item-detail.watching {
+        background-color: var(--aniwari-ok);
+        border-bottom: 5px solid var(--aniwari-ok);
+    }
 
     .schedule-item-detail.expanding {
         clip-path: inset(0 0 100% 0);

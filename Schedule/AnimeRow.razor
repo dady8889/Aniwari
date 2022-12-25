@@ -4,7 +4,7 @@
 
 @if (Anime == null) return;
 
-<div class="schedule-item @(expanded ? "expanded" : "") @(watching ? "watching" : "")" @onclick="OnRowClicked">
+<div class="schedule-item @(watching ? "watching" : "") @(expanded ? "expanded" : "")" @onclick="OnRowClicked">
     <div class="schedule-item__time" title="@Anime.RawAirTime">
         @(Anime.AirTime == null ? "??:??" : Anime.AirTime.Value.ToString("HH:mm"))
     </div>
@@ -18,7 +18,7 @@
 
 @if (expanded || expanding)
 {
-    <div class="schedule-item-detail @(expandingClass)">
+    <div class="schedule-item-detail @(expandingClass) @(watching ? "watching" : "")">
         <img class="schedule-item-detail__img" src="@Anime.Image" />
         <div class="schedule-item-detail__info">
 

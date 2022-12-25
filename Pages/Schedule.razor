@@ -37,10 +37,9 @@
                 <hr class="schedule-hr" />
 
                 <div class="schedule-day__body">
-                    @foreach (var anime in dict[day].OrderBy(x => x.AirTime))
-                    {
-                        <AnimeRow Anime="anime"/>
-                    }
+                    <Virtualize Context="anime" Items="@dict[day].OrderBy(x => x.AirTime).ToList()">
+                        <AnimeRow Anime="@anime"/>
+                    </Virtualize>
                 </div>
             }
         </div>

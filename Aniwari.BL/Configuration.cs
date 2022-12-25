@@ -33,6 +33,8 @@ public static class AniwariServicesConfiguration
         });
 
         services.AddSingleton<IScheduleService, ScheduleService>();
+        services.AddSingleton<IStoreService, StoreService>();
+        services.AddSingleton<ISettingsService, SettingsService>();
 
         return services;
     }

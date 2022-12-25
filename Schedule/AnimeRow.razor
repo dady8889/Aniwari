@@ -1,5 +1,4 @@
-﻿@if (Anime == null)
-    return;
+﻿@if (Anime == null) return;
 
 <div class="schedule-item @(expanded ? "expanded" : "")" @onclick="OnRowClicked">
     <div class="schedule-item__time" title="@Anime.RawAirTime">

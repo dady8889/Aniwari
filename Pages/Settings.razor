@@ -1,5 +1,38 @@
 ﻿@page "/settings"
 
-@code {
+@inject ISettingsService SettingsService
 
+@if (Store == null) return;
+
+<div class="settings">
+    @foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
+    {
+        <div class="settings-item">
+            <div class="settings-item__description">
+                @setting.Description
+            </div>
+            <div class="settings-item__control">
+                @if (setting.Type == typeof(bool))
+                {
+                    <input type="checkbox" value="@(Store.Get<bool>(propertyName))" @onchange="async (e) => {
+                        Store.Set<bool>(propertyName, (bool?)e.Value ?? false);
+                        await SettingsService.SaveAsync();
+                    }" />
+                }
+            </div>
+        </div>
+    }
+</div>
+
+
+
+@code {
+    private SettingsStore? Store;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Store = SettingsService.GetStore();
+    }
 }

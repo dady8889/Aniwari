@@ -1,2 +1,15 @@
 ﻿.btn-watch {
+    appearance: none;
+    font-display: block;
+    font-family: bootstrap-icons;
 }
+
+    .btn-watch::before {
+        content: "\F26B";
+        cursor: pointer;
+        color: var(--aniwari-text);
+    }
+
+    .btn-watch:checked::before {
+        content: "\F26A";
+    }

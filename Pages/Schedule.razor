@@ -1,7 +1,9 @@
-﻿@using Aniwari.Schedule;
+﻿@using Aniwari.BL.Queries;
+@using Aniwari.Schedule;
 
 @page "/schedule"
-@inject IScheduleService ScheduleService;
+@inject ISettingsService SettingsService
+@inject IScheduleService ScheduleService
 @inject IJSRuntime JS
 @implements IDisposable
 
@@ -60,9 +62,13 @@
 
     private ScheduleDay GetToday() => Enum.Parse<ScheduleDay>(DateTime.Now.DayOfWeek.ToString());
 
+    private SettingsStore? Store;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        Store = SettingsService.GetStore();
 
         var today = GetToday();
 
@@ -86,7 +92,11 @@
         {
             foreach (var (day, anime) in list)
             {
+                // add to the dictionary per day
                 dict[day].Add(anime);
+
+                // update the local store
+                Store.AddAnime(anime);
             }
 
             StateHasChanged();

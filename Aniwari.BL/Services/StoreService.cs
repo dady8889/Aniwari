@@ -169,7 +169,25 @@ public class SettingsStore
 
     public bool EnableDarkMode { get; set; }
 
-    #endregion
-}
+    public List<Anime> Animes { get; set; } = new();
 
-public record Setting(Type Type, string Description, object DefaultValue);
+    #endregion
+
+    public record Setting(Type Type, string Description, object DefaultValue);
+
+    public class Anime
+    {
+        public Anime()
+        {
+        }
+            
+        public Anime(int id, bool watching)
+        {
+            Id = id;
+            Watching = watching;
+        }
+
+        public int Id { get; set; }
+        public bool Watching { get; set; }
+    }
+}

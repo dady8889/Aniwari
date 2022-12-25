@@ -22,6 +22,7 @@
       ) - 128
     ) * -1000);
     --aniwari-text: rgb(var(--accessible-color), var(--accessible-color), var(--accessible-color));
+    --aniwari-ok: hsl(calc(var(--aniwari-primary-h) + 76), 71%, 75%);
 }
 
 html, body {

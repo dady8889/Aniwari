@@ -14,7 +14,7 @@
             <div class="settings-item__control">
                 @if (setting.Type == typeof(bool))
                 {
-                    <input type="checkbox" value="@(Store.Get<bool>(propertyName))" @onchange="async (e) => {
+                    <input type="checkbox" checked="@(Store.Get<bool>(propertyName))" @onchange="async (e) => {
                         Store.Set<bool>(propertyName, (bool?)e.Value ?? false);
                         await SettingsService.SaveAsync();
                     }" />

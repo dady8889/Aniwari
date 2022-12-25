@@ -97,7 +97,7 @@ public class ScheduleService : IScheduleService
                     continue;
                 }
 
-                animeSchedule.MalId = anime.MalId?.ToString() ?? "";
+                animeSchedule.MalId = Convert.ToInt32(anime.MalId);
                 animeSchedule.Url = anime.Url;
                 animeSchedule.ScheduleDay = day;
                 animeSchedule.RawAirTime = anime.Broadcast.String;
@@ -164,7 +164,7 @@ public class ScheduleService : IScheduleService
 
 public class AnimeSchedule
 {
-    public string MalId { get; set; } = string.Empty;
+    public int MalId { get; set; }
     public string Url { get; set; } = string.Empty;
     public string Image { get; set; } = string.Empty;
     public string Synopsis { get; set; } = string.Empty;

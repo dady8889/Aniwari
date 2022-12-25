@@ -10,6 +10,10 @@
         background-color: var(--aniwari-bg);
     }
 
+    .schedule-item.watching {
+        background-color: var(--aniwari-ok);
+    }
+    
     .schedule-item:hover {
         background-color: var(--aniwari-li-hover);
         cursor: pointer;
@@ -68,4 +72,9 @@
     100% {
         opacity: 1;
     }
+}
+
+.schedule-item__watch {
+    padding-top: 1px;
+    margin-right: 10px;
 }

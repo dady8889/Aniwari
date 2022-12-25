@@ -1,6 +1,7 @@
-﻿@using Aniwari.BL.Queries;
+﻿@using Aniwari.BL.Repositories;
 
 @inject ISettingsService SettingsService
+@inject IAnimeRepository AnimeRepository
 
 <input type="checkbox" class="btn-watch" checked="@watching" @onclick:stopPropagation="true" @onchange="(e) => OnValueChanged((bool?)e.Value ?? false)" />
 
@@ -19,7 +20,7 @@
 
         if (Anime != null)
         {
-            watching = Store.GetAnimeWatching(Anime);
+            watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
         }
     }
 
@@ -27,7 +28,7 @@
     {
         if (Anime != null)
         {
-            Store!.SetAnimeWatching(Anime, value);
+            AnimeRepository.SetAnimeWatching(Anime.MalId, value);
             await SettingsService.SaveAsync();
         }
     }

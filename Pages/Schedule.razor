@@ -1,9 +1,10 @@
-﻿@using Aniwari.BL.Queries;
-@using Aniwari.Schedule;
+﻿@using Aniwari.Schedule;
+@using Aniwari.BL.Repositories;
 
 @page "/schedule"
 @inject ISettingsService SettingsService
 @inject IScheduleService ScheduleService
+@inject IAnimeRepository AnimeRepository
 @inject IJSRuntime JS
 @implements IDisposable
 
@@ -96,7 +97,7 @@
                 dict[day].Add(anime);
 
                 // update the local store
-                Store.AddAnime(anime);
+                AnimeRepository.AddAnime(anime.MalId);
             }
 
             StateHasChanged();

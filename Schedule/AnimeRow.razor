@@ -1,6 +1,9 @@
-﻿@using Aniwari.BL.Queries;
+﻿@using Aniwari.BL.Repositories;
 
-@inject ISettingsService SettingsService
+@implements IDisposable
+
+@inject IMessageBusService MessageBusService
+@inject IAnimeRepository AnimeRepository
 
 @if (Anime == null) return;
 
@@ -55,22 +58,34 @@
 @code {
     [Parameter] public AnimeSchedule? Anime { get; set; }
 
+    private bool _disposed = false;
+
     private bool watching = false;
     private bool expanded = false;
     private bool expanding = false;
     private string expandingClass = "expanding";
 
-    private SettingsStore? Store;
+    List<ISubscription> subscriptions = new();
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        Store = SettingsService.GetStore();
-
         if (Anime != null)
         {
-            watching = Store.GetAnimeWatching(Anime);
+            watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
+        }
+
+        if (!_disposed)
+        {
+            subscriptions.Add(MessageBusService.Subscribe<AnimeWatchingChanged>(x =>
+            {
+                if (Anime == null || x.Anime.Id != Anime.MalId)
+                    return;
+
+                watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
+                StateHasChanged();
+            }));
         }
     }
 
@@ -101,5 +116,15 @@
         expanding = false;
         StateHasChanged();
         expandingClass = "";
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+
+        foreach (var subscription in subscriptions)
+        {
+            MessageBusService.Unsubscribe(subscription);
+        }
     }
 }

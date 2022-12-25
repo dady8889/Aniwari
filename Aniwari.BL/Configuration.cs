@@ -1,4 +1,5 @@
-﻿using Aniwari.BL.Services;
+﻿using Aniwari.BL.Repositories;
+using Aniwari.BL.Services;
 using JikanDotNet;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.RateLimiting;
@@ -35,6 +36,9 @@ public static class AniwariServicesConfiguration
         services.AddSingleton<IScheduleService, ScheduleService>();
         services.AddSingleton<IStoreService, StoreService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IMessageBusService, MessageBusService>();
+
+        services.AddTransient<IAnimeRepository, AnimeRepository>();
 
         return services;
     }

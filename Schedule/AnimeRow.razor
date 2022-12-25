@@ -1,9 +1,8 @@
 ﻿@using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
 
-@implements IDisposable
+@inherits ReactiveComponentBase
 
-@inject IMessageBusService MessageBusService
 @inject IAnimeRepository AnimeRepository
 
 @if (Anime == null) return;
@@ -59,14 +58,10 @@
 @code {
     [Parameter] public AnimeSchedule? Anime { get; set; }
 
-    private bool _disposed = false;
-
     private bool watching = false;
     private bool expanded = false;
     private bool expanding = false;
     private string expandingClass = "expanding";
-
-    List<ISubscription> subscriptions = new();
 
     protected override void OnInitialized()
     {
@@ -77,16 +72,16 @@
             watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
         }
 
-        if (!_disposed)
+        if (!Disposed)
         {
-            subscriptions.Add(MessageBusService.Subscribe<AnimeWatchingChanged>(x =>
+            ReactTo<AnimeWatchingChanged>(x =>
             {
                 if (Anime == null || x.Anime.Id != Anime.MalId)
                     return;
 
                 watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
                 StateHasChanged();
-            }));
+            });
         }
     }
 
@@ -117,15 +112,5 @@
         expanding = false;
         StateHasChanged();
         expandingClass = "";
-    }
-
-    public void Dispose()
-    {
-        _disposed = true;
-
-        foreach (var subscription in subscriptions)
-        {
-            MessageBusService.Unsubscribe(subscription);
-        }
     }
 }

@@ -4,11 +4,12 @@
 
 @page "/schedule"
 
+@inherits DisposableComponentBase
+
 @inject ISettingsService SettingsService
 @inject IScheduleService ScheduleService
 @inject IAnimeRepository AnimeRepository
 @inject IJSRuntime JS
-@implements IDisposable
 
 <div class="schedule">
     @foreach (ScheduleDay day in Enum.GetValues<ScheduleDay>())
@@ -53,11 +54,7 @@
 </div>
 
 @code {
-    private bool _disposed = false;
-
     private IJSObjectReference? module;
-
-    private CancellationTokenSource cts = new();
 
     private Dictionary<ScheduleDay, List<AnimeSchedule>> dict = new();
 
@@ -91,7 +88,7 @@
             }
         }
 
-        await foreach(var list in ScheduleService.GetSchedule(cts.Token))
+        await foreach(var list in ScheduleService.GetSchedule(CancellationTokenSource.Token))
         {
             foreach (var (day, anime) in list)
             {
@@ -105,18 +102,11 @@
             StateHasChanged();
         }
 
-        if (!_disposed)
+        if (!Disposed)
         {
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Schedule.razor.js");
             await module.InvokeVoidAsync("scrollToDay", GetToday().ToString());
         }
-    }
-
-    public void Dispose()
-    {
-        _disposed = true;
-        cts.Cancel();
-        cts.Dispose();
     }
 
     private record WeekdayDate(string RelativeName = "", DateOnly Date = default);

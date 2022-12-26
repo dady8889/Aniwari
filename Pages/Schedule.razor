@@ -16,7 +16,7 @@
     {
         bool hasAnime = dict[day].Count > 0;
 
-        <div class="schedule-day @(day.ToString().ToLower()) @(hasAnime ? "" : "noanime")">
+        <div class="aniwari-card schedule-day @(day.ToString().ToLower()) @(hasAnime ? "" : "noanime")">
 
             <div class="schedule-header">
                 <div class="schedule-date">
@@ -34,7 +34,7 @@
 
             @if (hasAnime)
             {
-                <hr class="schedule-hr" />
+                <hr>
 
                 <div class="schedule-day__body">
                     <Virtualize Context="anime" Items="@dict[day].OrderBy(x => x.AirTime).ToList()">
@@ -96,7 +96,7 @@
                 dict[day].Add(anime);
 
                 // update the local store
-                AnimeRepository.AddAnime(anime.MalId);
+                AnimeRepository.AddAnime(anime.MalId, anime.GetDefaultTitle());
             }
 
             StateHasChanged();
@@ -105,7 +105,7 @@
         if (!Disposed)
         {
             module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Schedule.razor.js");
-            await module.InvokeVoidAsync("scrollToDay", GetToday().ToString());
+            await module.InvokeVoidAsync("scrollToDay", CancellationTokenSource.Token, GetToday().ToString());
         }
     }
 

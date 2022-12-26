@@ -181,13 +181,15 @@ public class SettingsStore
         {
         }
             
-        public Anime(int id, bool watching)
+        public Anime(int id, bool watching, string title)
         {
             Id = id;
             Watching = watching;
+            Title = title;
         }
 
         public int Id { get; set; }
         public bool Watching { get; set; }
+        public string Title { get; set; } = string.Empty;
     }
 }

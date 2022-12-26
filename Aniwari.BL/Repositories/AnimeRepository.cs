@@ -14,7 +14,7 @@ public interface IAnimeRepository
 {
     void SetAnimeWatching(int id, bool watching);
     bool GetAnimeWatching(int id);
-    void AddAnime(int id);
+    void AddAnime(int id, string title);
 }
 
 public class AnimeRepository : IAnimeRepository
@@ -52,12 +52,12 @@ public class AnimeRepository : IAnimeRepository
         return _store.Animes.FirstOrDefault(x => x.Id == id)?.Watching ?? false;
     }
 
-    public void AddAnime(int id)
+    public void AddAnime(int id, string title)
     {
         // if the anime is already in DB, ignore
         if (_store.Animes.Any(x => x.Id == id))
             return;
 
-        _store.Animes.Add(new SettingsStore.Anime(id, false));
+        _store.Animes.Add(new SettingsStore.Anime(id, false, title));
     }
 }

@@ -1,5 +1,47 @@
-﻿@page "/watchlist"
+﻿@using Aniwari.BL.Repositories;
+@using Aniwari.BL.Services;
+
+@page "/watchlist"
+
+@inject ISettingsService SettingsService
+@inject IAnimeRepository AnimeRepository
+
+@if (Store == null) return;
+
+<div class="watchlist">
+    <div class="aniwari-card">
+        @{
+            var watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
+            var lastAnime = watchingAnime.LastOrDefault();
+        }
+
+        @if (lastAnime == null)
+        {
+            <div class="watchlist-item noanime">You are not watching any anime</div>
+        }
+        else
+        {
+            <Virtualize Context="anime" Items="watchingAnime">
+                <div @key="anime.Id" class="watchlist-item">
+                    @anime.Title
+                </div>
+
+                @if (anime != lastAnime)
+                {
+                    <hr>
+                }
+            </Virtualize>
+        }
+    </div>
+</div>
 
 @code {
+    private SettingsStore? Store;
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Store = SettingsService.GetStore();
+    }
 }

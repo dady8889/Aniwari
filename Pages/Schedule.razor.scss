@@ -1,11 +1,13 @@
 ﻿@import '../Styles/_variables.scss';
 
-.schedule-day {
+.schedule {
+    padding: 1.5rem;
+    gap: 20px;
     display: flex;
     flex-direction: column;
-    background-color: var(--aniwari-bg-alt);
-    border-radius: 4px;
-    box-shadow: var(--aniwari-boxshadow);
+}
+
+.schedule-day {
     min-height: 50px;
 }
 
@@ -17,13 +19,6 @@
     padding-bottom: 10px;
 }
 
-.schedule {
-    padding: 25px 25px 25px 25px;
-    gap: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
 .schedule-header {
     display: flex;
     height: 40px;
@@ -33,18 +28,12 @@
 .schedule-header__title {
     font-size: 1.8rem;
     line-height: 1.8rem;
-    min-width: 200px;
 }
 
 .schedule-header__noanime {
     display: flex;
     justify-content: center;
     margin: auto;
-}
-
-.schedule-hr {
-    height: 1px;
-    margin: 10px;
 }
 
 .schedule-date {
@@ -77,6 +66,7 @@
         flex-grow: 1;
         flex-basis: 25%;
         min-width: 25rem;
+        min-height: 10rem;
     }
 
     .schedule-day.noanime {

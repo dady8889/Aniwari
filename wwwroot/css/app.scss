@@ -122,3 +122,16 @@ h1:focus {
     ::-webkit-scrollbar-thumb:hover {
         background: #555;
     }
+
+.aniwari-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--aniwari-bg-alt);
+    border-radius: 4px;
+    box-shadow: var(--aniwari-boxshadow);
+}
+
+.aniwari-card hr {
+    height: 1px;
+    margin: 10px;
+}

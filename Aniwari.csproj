@@ -95,11 +95,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AndroidResource Remove="Aniwari.BL\**" />
       <Compile Remove="Aniwari.BL\**" />
       <Content Remove="Aniwari.BL\**" />
       <EmbeddedResource Remove="Aniwari.BL\**" />
       <MauiXaml Remove="Aniwari.BL\**" />
       <None Remove="Aniwari.BL\**" />
+      <SassFile Remove="Aniwari.BL\**" />
       <TypeScriptCompile Remove="Aniwari.BL\**" />
     </ItemGroup>
 
@@ -114,10 +116,6 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PRIResource Remove="Aniwari.BL\**" />
     </ItemGroup>
 
     <ItemGroup>

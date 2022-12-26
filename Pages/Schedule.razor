@@ -38,7 +38,7 @@
 
                 <div class="schedule-day__body">
                     <Virtualize Context="anime" Items="@dict[day].OrderBy(x => x.AirTime).ToList()">
-                        <AnimeRow Anime="@anime" />
+                        <AnimeRow @key="@anime.MalId" Anime="@anime" />
                     </Virtualize>
                 </div>
             }

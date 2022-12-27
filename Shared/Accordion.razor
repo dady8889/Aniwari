@@ -1,0 +1,42 @@
+﻿@inject IJSRuntime JS
+
+<div class="aniwari-accordion">
+    <div class="aniwari-accordion__header" @onclick="OnHeaderClicked">
+        @if (AccordionHeader != null)
+        {
+            @AccordionHeader(this)
+        }
+    </div>
+
+    <div @ref="bodyReference" class="aniwari-accordion__body @(expandedClass)">
+        @if (AccordionBody != null)
+        {
+            @AccordionBody(this)
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment<Accordion>? AccordionHeader { get; set; }
+    [Parameter] public RenderFragment<Accordion>? AccordionBody { get; set; }
+
+    private ElementReference bodyReference;
+    private IJSObjectReference? module;
+    private string expandedClass => Expanded ? "expanded" : "";
+
+    public bool Expanded { get; private set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Shared/Accordion.razor.js");
+    }
+
+    private async Task OnHeaderClicked()
+    {
+        Expanded = !Expanded;
+
+        if (module != null)
+            await module.InvokeVoidAsync("toggleDetails", bodyReference, Expanded);
+    }
+}

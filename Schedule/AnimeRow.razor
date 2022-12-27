@@ -7,110 +7,83 @@
 
 @if (Anime == null) return;
 
-<div class="schedule-item @(watching ? "watching" : "") @(expanded ? "expanded" : "")" @onclick="OnRowClicked">
-    <div class="schedule-item__time" title="@Anime.RawAirTime">
-        @(Anime.AirTime == null ? "??:??" : Anime.AirTime.Value.ToString("HH:mm"))
-    </div>
-    <div class="schedule-item__watch">
-        <WatchButton Anime="Anime"/>
-    </div>
-    <div class="schedule-item__title">
-        @Anime.GetDefaultTitle()
-    </div>
-</div>
-
-@if (expanded || expanding)
-{
-    <div class="schedule-item-detail @(expandingClass) @(watching ? "watching" : "")">
-        <img class="schedule-item-detail__img" src="@Anime.Image" />
-        <div class="schedule-item-detail__info">
-
-            <div class="schedule-item-detail__group">
-                <div class="schedule-item-detail__label">
-                    Known as
-                </div>
-                <div class="schedule-item-detail__text">
-                    @string.Join("; ", Anime.Titles.SelectMany(x => x.Value).ToArray())
-                </div>
+<Accordion>
+    <AccordionHeader>
+        <div class="schedule-item @(watching ? "watching" : "") @(context.Expanded ? "expanded" : "")">
+            <div class="schedule-item__time" title="@Anime.RawAirTime">
+                @(Anime.AirTime == null ? "??:??" : Anime.AirTime.Value.ToString("HH:mm"))
             </div>
-
-            <div class="schedule-item-detail__group">
-                <div class="schedule-item-detail__label">
-                    Link to MAL
-                </div>
-                <div class="schedule-item-detail__text text-break">
-                    <a href="@Anime.Url">@Anime.Url</a>
-                </div>
+            <div class="schedule-item__watch">
+                <WatchButton Anime="Anime" />
             </div>
+            <div class="schedule-item__title">
+                @Anime.GetDefaultTitle()
+            </div>
+        </div>
+    </AccordionHeader>
+    <AccordionBody>
+        <div class="schedule-item-detail @(watching ? "watching" : "")">
+            <img class="schedule-item-detail__img" src="@Anime.Image" />
+            <div class="schedule-item-detail__info">
 
-            <div class="schedule-item-detail__group">
-                <div class="schedule-item-detail__label">
-                    Synopsis
+                <div class="schedule-item-detail__group">
+                    <div class="schedule-item-detail__label">
+                        Known as
+                    </div>
+                    <div class="schedule-item-detail__text">
+                        @string.Join("; ", Anime.Titles.SelectMany(x => x.Value).ToArray())
+                    </div>
                 </div>
-                <div class="schedule-item-detail__text">
-                    @(string.IsNullOrEmpty(Anime.Synopsis) ? "No synopsis is written" : Anime.Synopsis)
+
+                <div class="schedule-item-detail__group">
+                    <div class="schedule-item-detail__label">
+                        Link to MAL
+                    </div>
+                    <div class="schedule-item-detail__text text-break">
+                        <a href="@Anime.Url">@Anime.Url</a>
+                    </div>
+                </div>
+
+                <div class="schedule-item-detail__group">
+                    <div class="schedule-item-detail__label">
+                        Synopsis
+                    </div>
+                    <div class="schedule-item-detail__text">
+                        @(string.IsNullOrEmpty(Anime.Synopsis) ? "No synopsis is written" : Anime.Synopsis)
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+    </AccordionBody>
+</Accordion>
 
 @code {
     [Parameter] public AnimeSchedule? Anime { get; set; }
 
     private bool watching = false;
-    private bool expanded = false;
-    private bool expanding = false;
-    private string expandingClass = "expanding";
 
-    protected override void OnInitialized()
+    protected override void OnAfterRender(bool firstRender)
     {
-        base.OnInitialized();
+        base.OnAfterRender(firstRender);
 
-        if (Anime != null)
+        if (firstRender)
         {
-            watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
-        }
-
-        if (!Disposed)
-        {
-            ReactTo<AnimeWatchingChanged>(x =>
+            if (Anime != null)
             {
-                if (Anime == null || x.Anime.Id != Anime.MalId)
-                    return;
-
                 watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
-                StateHasChanged();
-            });
+            }
+
+            if (!Disposed)
+            {
+                ReactTo<AnimeWatchingChanged>(x =>
+                {
+                    if (Anime == null || x.Anime.Id != Anime.MalId)
+                        return;
+
+                    watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
+                    StateHasChanged();
+                });
+            }
         }
-    }
-
-    private async Task OnRowClicked()
-    {
-        if (expanding)
-            return;
-
-        expanding = true;
-
-        if (!expanded)
-        {
-            expanded = true;
-            expandingClass = "expanding";
-            await Task.Delay(100);
-            StateHasChanged();
-            expandingClass = "";
-            StateHasChanged();
-            await Task.Delay(450);
-        }
-        else
-        {
-            expandingClass = "expanding";
-            await Task.Delay(450);
-            expanded = false;
-        }
-
-        expanding = false;
-        StateHasChanged();
-        expandingClass = "";
     }
 }

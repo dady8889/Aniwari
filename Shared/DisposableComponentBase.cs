@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 
 namespace Aniwari.Shared;
 
 public class DisposableComponentBase : ComponentBase, IDisposable
 {
     protected bool Disposed { get; private set; }
-    protected CancellationTokenSource CancellationTokenSource { get; init; }
+
+    [Parameter]
+    public CancellationTokenSource CancellationTokenSource { get; set; } = new();
 
     public DisposableComponentBase() 
     {
-        CancellationTokenSource = new();
         Disposed = false;
     }
 
@@ -17,6 +19,6 @@ public class DisposableComponentBase : ComponentBase, IDisposable
     {
         Disposed = true;
         CancellationTokenSource.Cancel();
-        // CancellationTokenSource.Dispose();
+        CancellationTokenSource.Dispose();
     }
 }

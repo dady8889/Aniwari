@@ -25,12 +25,19 @@
     private IJSObjectReference? module;
     private ElementReference navReference;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Shared/NavMenu.razor.js");
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
 
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Shared/NavMenu.razor.js");
-        await module.InvokeVoidAsync("animateActiveNav", navReference);
+        if (module != null)
+            await module.InvokeVoidAsync("animateActiveNav", navReference);
     }
 
     private void OnNavLinkClicked()

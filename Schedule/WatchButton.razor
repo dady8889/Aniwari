@@ -18,10 +18,18 @@
         base.OnInitialized();
 
         Store = SettingsService.GetStore();
+    }
 
-        if (Anime != null)
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        if (firstRender)
         {
-            watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
+            if (Anime != null)
+            {
+                watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
+            }
         }
     }
 

@@ -14,6 +14,9 @@
 <div class="schedule">
     @foreach (ScheduleDay day in Enum.GetValues<ScheduleDay>())
     {
+        if (!dict.ContainsKey(day))
+            continue;
+
         bool hasAnime = dict[day].Count > 0;
 
         <div class="aniwari-card schedule-day @(day.ToString().ToLower()) @(hasAnime ? "" : "noanime")">
@@ -54,15 +57,12 @@
 </div>
 
 @code {
+    private SettingsStore? Store;
     private IJSObjectReference? module;
-
     private Dictionary<ScheduleDay, List<AnimeSchedule>> dict = new();
-
     private Dictionary<ScheduleDay, WeekdayDate> dateMap = new();
 
     private ScheduleDay GetToday() => Enum.Parse<ScheduleDay>(DateTime.Now.DayOfWeek.ToString());
-
-    private SettingsStore? Store;
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,27 +88,35 @@
             }
         }
 
-        await foreach (var list in ScheduleService.GetSchedule(CancellationTokenSource.Token))
-        {
-            foreach (var (day, anime) in list)
-            {
-                // add to the dictionary per day
-                dict[day].Add(anime);
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Schedule.razor.js");
+    }
 
-                // update the local store
-                AnimeRepository.AddAnime(anime.MalId, anime.GetDefaultTitle(), anime.Episodes);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await foreach (var list in ScheduleService.GetSchedule(CancellationTokenSource.Token))
+            {
+                foreach (var (day, anime) in list)
+                {
+                    // add to the dictionary per day
+                    dict[day].Add(anime);
+
+                    // update the local store
+                    AnimeRepository.AddAnime(anime.MalId, anime.GetDefaultTitle(), anime.Episodes);
+                }
+
+                StateHasChanged();
             }
 
-            StateHasChanged();
-        }
+            if (module != null && !Disposed)
+                await module.InvokeVoidAsync("scrollToDay", CancellationTokenSource.Token, GetToday().ToString());
 
-        // if the store needed updates, save to disk
-        await SettingsService.SaveAsync();
+            // if the store needed updates, save to disk
+            await SettingsService.SaveAsync();
 
-        if (!Disposed)
-        {
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Schedule.razor.js");
-            await module.InvokeVoidAsync("scrollToDay", CancellationTokenSource.Token, GetToday().ToString());
         }
     }
 

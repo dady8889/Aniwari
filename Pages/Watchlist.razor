@@ -23,7 +23,20 @@
         {
             <Virtualize Context="anime" Items="watchingAnime">
                 <div @key="anime.Id" class="watchlist-item">
-                    @anime.Title
+                    <div class="watchlist-item__title">
+                        @anime.Title
+                    </div>
+                    <div class="watchlist-item__episodes">
+                        <div>
+                            @anime.GetWatchedEpisodes().Count()
+                        </div>
+                        <div>
+                            /
+                        </div>
+                        <div>
+                            @(anime.EpisodesCount?.ToString() ?? "?")
+                        </div>
+                    </div>
                 </div>
 
                 @if (anime != lastAnime)

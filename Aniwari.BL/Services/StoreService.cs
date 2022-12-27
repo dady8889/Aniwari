@@ -181,15 +181,28 @@ public class SettingsStore
         {
         }
             
-        public Anime(int id, bool watching, string title)
+        public Anime(int id, bool watching, string title, int? episodesCount)
         {
             Id = id;
             Watching = watching;
             Title = title;
+            EpisodesCount = episodesCount;
         }
 
         public int Id { get; set; }
         public bool Watching { get; set; }
         public string Title { get; set; } = string.Empty;
+        public int? EpisodesCount { get; set; }
+        public int Watched { get; set; } = 0;
+
+        public List<Episode> Episodes { get; set; } = new();
+
+        public IEnumerable<Episode> GetWatchedEpisodes() => Episodes.Where(x => x.Watched);
+    }
+
+    public class Episode
+    {
+        public int Id { get; set; }
+        public bool Watched { get; set; }
     }
 }

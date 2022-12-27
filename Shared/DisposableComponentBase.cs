@@ -17,6 +17,6 @@ public class DisposableComponentBase : ComponentBase, IDisposable
     {
         Disposed = true;
         CancellationTokenSource.Cancel();
-        CancellationTokenSource.Dispose();
+        // CancellationTokenSource.Dispose();
     }
 }

@@ -103,6 +103,7 @@ public class ScheduleService : IScheduleService
                 animeSchedule.RawAirTime = anime.Broadcast.String;
                 animeSchedule.Image = anime.Images.WebP.ImageUrl;
                 animeSchedule.Synopsis = anime.Synopsis;
+                animeSchedule.Episodes = anime.Episodes;
 
                 animeSchedule.Titles = new Dictionary<TitleType, List<string>>();
 
@@ -175,6 +176,7 @@ public class AnimeSchedule
     public TimeOnly? ConvertedAirTime { get; set; }
     public string? Timezone { get; set; }
     public string RawAirTime { get; set; } = string.Empty;
+    public int? Episodes { get; set; }
 
     public string GetDefaultTitle()
     {

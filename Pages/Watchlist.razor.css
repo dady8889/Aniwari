@@ -10,7 +10,7 @@
     justify-content: space-between;
 }
 
-    .watchlist-item:nth-child(2) {
+    .watchlist-item:nth-child(2), .watchlist-item:first-child {
         padding-top: 10px;
     }
 
@@ -21,3 +21,12 @@
     .watchlist-item.noanime {
         justify-content: center;
     }
+
+.watchlist-item__title {
+
+}
+
+.watchlist-item__episodes {
+    display: flex;
+    gap: 3px;
+}

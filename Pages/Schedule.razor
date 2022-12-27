@@ -96,11 +96,14 @@
                 dict[day].Add(anime);
 
                 // update the local store
-                AnimeRepository.AddAnime(anime.MalId, anime.GetDefaultTitle());
+                AnimeRepository.AddAnime(anime.MalId, anime.GetDefaultTitle(), anime.Episodes);
             }
 
             StateHasChanged();
         }
+
+        // if the store needed updates, save to disk
+        await SettingsService.SaveAsync();
 
         if (!Disposed)
         {

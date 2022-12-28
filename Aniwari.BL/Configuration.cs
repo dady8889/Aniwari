@@ -37,6 +37,7 @@ public static class AniwariServicesConfiguration
         services.AddSingleton<IStoreService, StoreService>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IMessageBusService, MessageBusService>();
+        services.AddSingleton<INyaaService, NyaaService>();
 
         services.AddTransient<IAnimeRepository, AnimeRepository>();
 

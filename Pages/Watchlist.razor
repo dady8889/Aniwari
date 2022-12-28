@@ -1,43 +1,61 @@
 ﻿@using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
+@using Aniwari.Watchlist;
 
 @page "/watchlist"
 
+@inject INyaaService NyaaService
 @inject ISettingsService SettingsService
 @inject IAnimeRepository AnimeRepository
 
 @if (Store == null) return;
 
-<div class="watchlist">
+<div class="aniwari-content watchlist">
+    <TorrentPicker Torrents="selectedTorrents" />
     <div class="aniwari-card">
         @{
-            var watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
             var lastAnime = watchingAnime.LastOrDefault();
         }
 
         @if (lastAnime == null)
         {
-            <div class="watchlist-item noanime">You are not watching any anime</div>
+            <div class="aniwari-list-item watchlist-item noanime">You are not watching any anime</div>
         }
         else
         {
             <Virtualize Context="anime" Items="watchingAnime">
-                <div @key="anime.Id" class="watchlist-item">
-                    <div class="watchlist-item__title">
-                        @anime.Title
-                    </div>
-                    <div class="watchlist-item__episodes">
-                        <div>
-                            @anime.GetWatchedEpisodes().Count()
+                <Accordion @key="anime.Id">
+                    <AccordionHeader>
+                        <div class="aniwari-list-item watchlist-item">
+                            <div class="watchlist-item__title">
+                                @anime.Title
+                            </div>
+                            <div class="watchlist-item__episodes">
+                                <div>
+                                    @anime.GetWatchedEpisodes().Count()
+                                </div>
+                                <div>
+                                    /
+                                </div>
+                                <div>
+                                    @(anime.EpisodesCount?.ToString() ?? "?")
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            /
-                        </div>
-                        <div>
-                            @(anime.EpisodesCount?.ToString() ?? "?")
-                        </div>
-                    </div>
-                </div>
+                    </AccordionHeader>
+                    <AccordionBody>
+                        @if (anime.EpisodesCount != null)
+                        {
+                            @foreach (int ep in Enumerable.Range(1, anime.EpisodesCount.Value))
+                            {
+                                <div class="aniwari-list-item episode">
+                                    <div class="episode__title">Episode @ep</div>
+                                    <input class="episode__button" type="button" value="Search" @onclick="() => SearchAnime(anime, ep)" />
+                                </div>
+                            }
+                        }
+                    </AccordionBody>
+                </Accordion>
 
                 @if (anime != lastAnime)
                 {
@@ -50,11 +68,19 @@
 
 @code {
     private SettingsStore? Store;
+    private List<SettingsStore.Anime> watchingAnime = new();
+    private List<NyaaAnime>? selectedTorrents = null;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
 
         Store = SettingsService.GetStore();
+        watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
+    }
+
+    private async Task SearchAnime(SettingsStore.Anime anime, int episode)
+    {
+        selectedTorrents = await NyaaService.GetAnime(anime.Title, episode);
     }
 }

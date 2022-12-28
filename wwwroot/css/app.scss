@@ -123,6 +123,13 @@ h1:focus {
         background: #555;
     }
 
+.aniwari-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 1.5rem;
+}
+
 .aniwari-card {
     display: flex;
     flex-direction: column;
@@ -134,4 +141,16 @@ h1:focus {
 .aniwari-card hr {
     height: 1px;
     margin: 10px;
+}
+
+.aniwari-list-item {
+    display: flex;
+    min-height: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+}
+
+.aniwari-list-item:hover {
+    background-color: var(--aniwari-li-hover);
 }

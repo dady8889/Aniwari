@@ -6,7 +6,7 @@
 
 @if (Store == null) return;
 
-<div class="settings">
+<div class="aniwari-content settings">
     <div class="aniwari-card">
         @foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
         {

@@ -1,0 +1,26 @@
+﻿@using Aniwari.BL.Services;
+
+@if (Torrents == null) return;
+
+<div class="aniwari-card torrent-picker">
+    @foreach (var torrent in Torrents)
+    {
+        <div class="aniwari-list-item torrent-picker-item">
+
+            <div class="torrent-picker-item__name">
+                @torrent.Name
+            </div>
+
+            <input type="button" class="torrent-picker-item__select" value="Select" @onclick="OnSelectClicked" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<NyaaAnime>? Torrents { get; set; } = null;
+
+    private void OnSelectClicked()
+    {
+        Torrents = null;
+    }
+}

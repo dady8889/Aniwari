@@ -1,10 +1,8 @@
 ﻿.schedule-item {
     animation: show 0.2s 0.1s ease forwards;
-    display: flex;
-    min-height: 30px;
-    align-items: center;
     opacity: 0;
-    padding-right: 30px;
+    justify-content: start;
+    padding-left: 0;
 }
 
     .schedule-item.watching {
@@ -19,10 +17,6 @@
         background-color: var(--aniwari-bg);
     }
 
-    .schedule-item:hover {
-        background-color: var(--aniwari-li-hover);
-        cursor: pointer;
-    }
 
 .schedule-item__time {
     min-width: 100px;
@@ -43,17 +37,11 @@
     gap: 15px;
     border-bottom: 5px solid var(--aniwari-bg);
     border-radius: 0 0 10px 10px;
-    clip-path: inset(0);
-    transition: clip-path 0.5s ease-in-out;
 }
 
     .schedule-item-detail.watching {
         background-color: var(--aniwari-ok);
         border-bottom: 5px solid var(--aniwari-ok);
-    }
-
-    .schedule-item-detail.expanding {
-        clip-path: inset(0 0 100% 0);
     }
 
 .schedule-item-detail__group {

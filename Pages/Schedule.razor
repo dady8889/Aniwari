@@ -11,7 +11,7 @@
 @inject IAnimeRepository AnimeRepository
 @inject IJSRuntime JS
 
-<div class="schedule">
+<div class="aniwari-content schedule">
     @foreach (ScheduleDay day in Enum.GetValues<ScheduleDay>())
     {
         if (!dict.ContainsKey(day))

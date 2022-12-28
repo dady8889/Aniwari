@@ -9,7 +9,7 @@
 
 <Accordion>
     <AccordionHeader>
-        <div class="schedule-item @(watching ? "watching" : "") @(context.Expanded ? "expanded" : "")">
+        <div class="aniwari-list-item schedule-item @(watching ? "watching" : "") @(context.Expanded ? "expanded" : "")">
             <div class="schedule-item__time" title="@Anime.RawAirTime">
                 @(Anime.AirTime == null ? "??:??" : Anime.AirTime.Value.ToString("HH:mm"))
             </div>
@@ -62,28 +62,30 @@
 
     private bool watching = false;
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (!Disposed)
+        {
+            ReactTo<AnimeWatchingChanged>(x =>
+            {
+                if (Anime == null || x.Anime.Id != Anime.MalId)
+                    return;
+
+                watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
+                StateHasChanged();
+            });
+        }
+
+        if (Anime != null)
+        {
+            watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
+        }
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
-
-        if (firstRender)
-        {
-            if (Anime != null)
-            {
-                watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
-            }
-
-            if (!Disposed)
-            {
-                ReactTo<AnimeWatchingChanged>(x =>
-                {
-                    if (Anime == null || x.Anime.Id != Anime.MalId)
-                        return;
-
-                    watching = AnimeRepository.GetAnimeWatching(Anime.MalId);
-                    StateHasChanged();
-                });
-            }
-        }
     }
 }

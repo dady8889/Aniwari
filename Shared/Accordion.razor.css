@@ -6,3 +6,7 @@
 
 .aniwari-accordion__body.expanded {
 }
+
+.aniwari-accordion__header {
+    cursor: pointer;
+}

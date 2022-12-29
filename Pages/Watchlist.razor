@@ -26,7 +26,7 @@
             <Virtualize Context="anime" Items="watchingAnime">
                 <Accordion @key="anime.Id">
                     <AccordionHeader>
-                        <div class="aniwari-list-item watchlist-item">
+                        <div class="aniwari-list-item watchlist-item @(context.Expanded ? "expanded" : "")">
                             <div class="watchlist-item__title">
                                 @anime.Title
                             </div>
@@ -44,16 +44,18 @@
                         </div>
                     </AccordionHeader>
                     <AccordionBody>
-                        @if (anime.EpisodesCount != null)
-                        {
-                            @foreach (int ep in Enumerable.Range(1, anime.EpisodesCount.Value))
+                        <div class="aniwari-list-detail">
+                            @if (anime.EpisodesCount != null)
                             {
-                                <div class="aniwari-list-item episode">
-                                    <div class="episode__title">Episode @ep</div>
-                                    <input class="episode__button" type="button" value="Search" @onclick="() => SearchAnime(anime, ep)" />
-                                </div>
+                                @foreach (int ep in Enumerable.Range(1, anime.EpisodesCount.Value))
+                                {
+                                    <div class="aniwari-list-item episode">
+                                        <div class="episode__title">Episode @ep</div>
+                                        <input class="episode__button" type="button" value="Search" @onclick="() => SearchAnime(anime, ep)" />
+                                    </div>
+                                }
                             }
-                        }
+                        </div>
                     </AccordionBody>
                 </Accordion>
 

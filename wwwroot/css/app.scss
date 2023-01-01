@@ -10,13 +10,14 @@
     --aniwari-primary: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), var(--aniwari-primary-l));
     --aniwari-bg: var(--aniwari-primary);
     --aniwari-bg-alt: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), calc(var(--aniwari-primary-l) + 20%));
-    --aniwari-li-hover: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), var(--aniwari-primary-l));
+    --aniwari-li-bg: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), calc(var(--aniwari-primary-l) + 3%));
+    --aniwari-li-hover: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), calc(var(--aniwari-primary-l) + 0%));
     --aniwari-li-hover-alt: hsl(var(--aniwari-primary-h), var(--aniwari-primary-s), calc(var(--aniwari-primary-l) - 5%));
     --aniwari-boxshadow: 4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), -4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), 4px 4px 10px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
     --accessible-color: calc(( ( ( (var(--aniwari-primary-r) * 299) + (var(--aniwari-primary-g) * 587) + (var(--aniwari-primary-b) * 114) ) / 1000 ) - 128 ) * -1000);
     --aniwari-text: rgb(var(--accessible-color), var(--accessible-color), var(--accessible-color));
     --aniwari-ok: hsl(calc(var(--aniwari-primary-h) + 76), 71%, 75%);
-    --aniwari-ok-alt: hsl(calc(var(--aniwari-primary-h) + 76), 71%, 95%);
+    --aniwari-ok-alt: hsl(calc(var(--aniwari-primary-h) + 76), 71%, 65%);
 }
 
 html, body {
@@ -146,18 +147,14 @@ h1:focus {
 }
 
 .aniwari-list-item.expanded {
-    background-color: var(--aniwari-bg);
-}
-
-.aniwari-list-item.expanded:hover {
-    background-color: var(--aniwari-li-hover-alt);
+    background-color: var(--aniwari-li-bg);
 }
 
 .aniwari-list-item:hover {
-    background-color: var(--aniwari-li-hover);
+    background-color: var(--aniwari-li-hover-alt);
 }
 
 .aniwari-list-detail {
     display: flex;
-    background-color: var(--aniwari-li-hover);
+    background-color: var(--aniwari-li-bg);
 }

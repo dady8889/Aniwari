@@ -59,7 +59,7 @@ public class ScheduleService : IScheduleService
         {
             try
             {
-                info = await _jikan.GetScheduleAsync(page);
+                info = await _jikan.GetScheduleAsync(page, cancellationToken);
             }
             catch (HttpRequestException httpException)
             {

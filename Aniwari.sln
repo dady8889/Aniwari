@@ -8,6 +8,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aniwari", "Aniwari.csproj",
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aniwari.BL", "Aniwari.BL\Aniwari.BL.csproj", "{EECD2DBC-41C4-4E84-9AFA-38D4E657DB87}"
+	ProjectSection(ProjectDependencies) = postProject
+		{46D3EC06-AB55-4D0C-85A3-0811EC37D993} = {46D3EC06-AB55-4D0C-85A3-0811EC37D993}
+		{BCDAA289-2A38-47AB-BDC6-450B52B0B447} = {BCDAA289-2A38-47AB-BDC6-450B52B0B447}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NyaaWrapper", "NyaaWrapper\NyaaWrapper\NyaaWrapper.csproj", "{46D3EC06-AB55-4D0C-85A3-0811EC37D993}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JikanDotNet", "jikan.net\JikanDotNet\JikanDotNet.csproj", "{BCDAA289-2A38-47AB-BDC6-450B52B0B447}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,12 +33,20 @@ Global
 		{EECD2DBC-41C4-4E84-9AFA-38D4E657DB87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EECD2DBC-41C4-4E84-9AFA-38D4E657DB87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EECD2DBC-41C4-4E84-9AFA-38D4E657DB87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46D3EC06-AB55-4D0C-85A3-0811EC37D993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46D3EC06-AB55-4D0C-85A3-0811EC37D993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46D3EC06-AB55-4D0C-85A3-0811EC37D993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46D3EC06-AB55-4D0C-85A3-0811EC37D993}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCDAA289-2A38-47AB-BDC6-450B52B0B447}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCDAA289-2A38-47AB-BDC6-450B52B0B447}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCDAA289-2A38-47AB-BDC6-450B52B0B447}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCDAA289-2A38-47AB-BDC6-450B52B0B447}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {1CBDB978-9810-4F96-AE1B-C09A059B6C21}
 		        SolutionGuid = {61F7FB11-1E47-470C-91E2-47F8143E1572}
+		SolutionGuid = {1CBDB978-9810-4F96-AE1B-C09A059B6C21}
 	EndGlobalSection
 EndGlobal

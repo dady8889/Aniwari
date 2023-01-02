@@ -1,0 +1,6 @@
+[submodule "NyaaWrapper"]
+	path = NyaaWrapper
+	url = git@github.com:dady8889/NyaaWrapper.git
+[submodule "jikan.net"]
+	path = jikan.net
+	url = git@github.com:dady8889/jikan.net.git

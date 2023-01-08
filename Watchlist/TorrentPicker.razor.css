@@ -28,5 +28,5 @@
 }
 
 .seeders {
-    color: hsl(calc(var(--aniwari-primary-h) + 106), 71%, 35%);
+    color: hsl(127, 71%, 35%);
 }

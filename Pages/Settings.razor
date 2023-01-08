@@ -2,6 +2,7 @@
 
 @page "/settings"
 
+@inject IJSRuntime JS
 @inject ISettingsService SettingsService
 
 @if (Store == null) return;
@@ -15,13 +16,26 @@
                     @setting.Description
                 </div>
                 <div class="settings-item__control">
-                    @if (setting.Type == typeof(bool))
+                    @if (propertyName == nameof(SettingsStore.ThemeColor))
+                    {
+                        <div class="settings-item__color">
+                            <input type="color" value="@(Store.Get<string>(propertyName))"
+                                @oninput="(e) => OnThemeColorChanged(e, propertyName, setting, false)"
+                                @onchange="(e) => OnThemeColorChanged(e, propertyName, setting, true)" />
+
+                            <input type="button" @onclick="async () => {
+                                await OnThemeColorChanged(new ChangeEventArgs(), propertyName, setting, true);
+                            }" value="Reset" />
+                        </div>
+                    }
+                    else if (setting.Type == typeof(bool))
                     {
                         <input type="checkbox" checked="@(Store.Get<bool>(propertyName))" @onchange="async (e) => {
                             Store.Set<bool>(propertyName, (bool?)e.Value ?? false);
                             await SettingsService.SaveAsync();
                         }" />
                     }
+
                 </div>
             </div>
 
@@ -47,10 +61,28 @@
 @code {
     private SettingsStore? Store;
 
+    private IJSObjectReference? module;
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
         Store = SettingsService.GetStore();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Settings.razor.js");
+    }
+
+    private async Task OnThemeColorChanged(ChangeEventArgs args, string propertyName, SettingsStore.Setting setting, bool save)
+    {
+        string color = (string?)args.Value ?? (string)setting.DefaultValue;
+        Store!.Set(propertyName, color);
+        if (save)
+            await SettingsService.SaveAsync();
+        await JS.InvokeVoidAsync("setThemeColors", color);
     }
 }

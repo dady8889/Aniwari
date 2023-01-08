@@ -74,6 +74,10 @@ public class StoreService : IStoreService
 
             return json;
         }
+        catch(JsonException)
+        {
+            return new SettingsStore();
+        }
         catch(Exception ex)
         {
             _logger.LogError("Could not load the settings file. Exception: {}", ex.ToString());
@@ -109,6 +113,7 @@ public class SettingsStore
     public SettingsStore()
     {
         _settings.Add(nameof(EnableDarkMode), new Setting(typeof(bool), "Enable dark mode", false));
+        _settings.Add(nameof(ThemeColor), new Setting(typeof(string), "Theme color", "#efefef"));
     }
 
     public ReadOnlyDictionary<string, Setting> GetSettings() => new(_settings);
@@ -168,6 +173,8 @@ public class SettingsStore
     #region Properties
 
     public bool EnableDarkMode { get; set; }
+
+    public string ThemeColor { get; set; } = string.Empty;
 
     public List<Anime> Animes { get; set; } = new();
 

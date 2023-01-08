@@ -1,4 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using Aniwari.BL.Services;
+
+@inherits LayoutComponentBase
+
+@inject ISettingsService SettingsService
+@inject IJSRuntime JS
 
 <div class="page">
     <main>
@@ -8,3 +13,16 @@
         <NavMenu />
     </div>
 </div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            var color = SettingsService.GetStore().ThemeColor;
+            await JS.InvokeVoidAsync("setThemeColors", color);
+        }
+    }
+}

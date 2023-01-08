@@ -24,3 +24,9 @@
     width: 10rem;
     text-align: center;
 }
+
+.settings-item__color {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}

@@ -14,9 +14,9 @@
                     <div class="title" title="@Anime.SearchString">
                         @Anime.Title
                     </div>
-                    <span class="edit-button" @onclick:stopPropagation="true" @onclick="OnTitleClicked">
+                    <button class="title-button" @onclick:stopPropagation="true" @onclick="OnTitleClicked">
                         Edit
-                    </span>
+                    </button>
                 </div>
             }
             else
@@ -25,9 +25,9 @@
                     <span @ref="searchStringFieldReference" class="searchstring-field" @onclick:stopPropagation="true" contenteditable="true">
                         @Anime.SearchString
                     </span>
-                    <span class="edit-button" @onclick:stopPropagation="true" @onclick="OnEditEnded">
+                    <button class="title-button" @onclick:stopPropagation="true" @onclick="OnEditEnded">
                         Save
-                    </span>
+                    </button>
                 </div>
             }
             <div class="episodes-counter">
@@ -51,7 +51,9 @@
                 {
                     <div class="aniwari-list-item episode">
                         <div class="episode__title">Episode @ep</div>
-                        <input class="episode__button" type="button" value="Search" @onclick="() => OnSearchClicked(ep)" />
+                        <button class="episode__button" @onclick="() => OnSearchClicked(ep)">
+                            Search
+                        </button>
                     </div>
                 }
             }

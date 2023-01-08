@@ -158,3 +158,25 @@ h1:focus {
     display: flex;
     background-color: var(--aniwari-li-bg);
 }
+
+button {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    box-shadow: 4px -4px 2px #{'hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%)'},
+        -2px -1px 4px #{'hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%)'},
+        1px 2px 3px #{'hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%)'};
+    background-color: var(--aniwari-bg-alt);
+    border-radius: 4px;
+    outline: 0;
+    border: 0;
+    color: var(--aniwari-text);
+}
+
+button:hover {
+    box-shadow:
+        inset 4px -4px 8px #{'hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%)'},
+        inset -4px -4px 8px #{'hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%)'},
+        inset 4px 4px 10px #{'hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%)'};
+    outline: 0;
+    border: 0;
+}

@@ -30,3 +30,7 @@
 .seeders {
     color: hsl(127, 71%, 35%);
 }
+
+.return-button {
+    padding: 1rem 2rem;
+}

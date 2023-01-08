@@ -20,12 +20,14 @@
                     {
                         <div class="settings-item__color">
                             <input type="color" value="@(Store.Get<string>(propertyName))"
-                                @oninput="(e) => OnThemeColorChanged(e, propertyName, setting, false)"
-                                @onchange="(e) => OnThemeColorChanged(e, propertyName, setting, true)" />
+                           @oninput="(e) => OnThemeColorChanged(e, propertyName, setting, false)"
+                           @onchange="(e) => OnThemeColorChanged(e, propertyName, setting, true)" />
 
-                            <input type="button" @onclick="async () => {
+                            <button @onclick="async () => {
                                 await OnThemeColorChanged(new ChangeEventArgs(), propertyName, setting, true);
-                            }" value="Reset" />
+                            }">
+                                Reset
+                            </button>
                         </div>
                     }
                     else if (setting.Type == typeof(bool))
@@ -47,10 +49,12 @@
                 Delete watchlist
             </div>
             <div class="settings-item__control">
-                <input type="button" @onclick="async () => {
+                <button @onclick="async () => {
                     SettingsService.GetStore().Animes.Clear();
                     await SettingsService.SaveAsync();
-                }" value="Delete" />
+                }">
+                    Delete
+                </button>
             </div>
         </div>
     </div>

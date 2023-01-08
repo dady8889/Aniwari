@@ -2,7 +2,9 @@
 
 @if (Torrents == null) return;
 
-<input type="button" class="return-button" value="Return" @onclick="OnSelectClicked" />
+<button class="return-button" @onclick="OnSelectClicked">
+    Return
+</button>
 
 <div class="aniwari-card">
 
@@ -33,7 +35,9 @@
                         @torrent.Seeders
                     </div>
 
-                    <input type="button" class="torrent-picker-item__select" value="Select" @onclick="OnSelectClicked" />
+                    <button class="torrent-picker-item__select" @onclick="OnSelectClicked">
+                        Select
+                    </button>
                 </div>
 
             </div>

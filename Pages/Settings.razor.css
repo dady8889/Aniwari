@@ -21,12 +21,20 @@
 }
 
 .settings-item__control {
-    width: 10rem;
     text-align: center;
 }
 
-.settings-item__color {
+.themecolor-wrapper {
     display: flex;
     flex-direction: row;
     gap: 1rem;
+}
+
+.archivepath-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.archivepath__path {
 }

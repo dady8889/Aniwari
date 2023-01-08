@@ -1,9 +1,11 @@
 ﻿@using Aniwari.BL.Services;
+@using Aniwari.Platforms;
 
 @page "/settings"
 
 @inject IJSRuntime JS
 @inject ISettingsService SettingsService
+@inject IFolderPicker FolderPicker
 
 @if (Store == null) return;
 
@@ -18,7 +20,7 @@
                 <div class="settings-item__control">
                     @if (propertyName == nameof(SettingsStore.ThemeColor))
                     {
-                        <div class="settings-item__color">
+                        <div class="themecolor-wrapper">
                             <input type="color" value="@(Store.Get<string>(propertyName))"
                            @oninput="(e) => OnThemeColorChanged(e, propertyName, setting, false)"
                            @onchange="(e) => OnThemeColorChanged(e, propertyName, setting, true)" />
@@ -26,6 +28,27 @@
                             <button @onclick="async () => {
                                 await OnThemeColorChanged(new ChangeEventArgs(), propertyName, setting, true);
                             }">
+                                Reset
+                            </button>
+                        </div>
+                    }
+                    else if (propertyName == nameof(SettingsStore.ArchivePath))
+                    {
+                        <div class="archivepath-wrapper">
+
+                            <div class="archivepath__path">
+                                @(EllipsePath(Store.Get<string>(propertyName) ?? ""))
+                            </div>
+
+
+                            <button @onclick="OnArchivePathBrowse">
+                                Browse
+                            </button>
+
+                            <button @onclick="async () => {
+                                        Store!.Set(setting.Type, propertyName, setting.DefaultValue);
+                                        await SettingsService.SaveAsync();
+                                    }">
                                 Reset
                             </button>
                         </div>
@@ -41,7 +64,7 @@
                 </div>
             </div>
 
-            <hr>
+            <hr />
         }
 
         <div class="settings-item">
@@ -54,6 +77,29 @@
                     await SettingsService.SaveAsync();
                 }">
                     Delete
+                </button>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="settings-item">
+            <div class="settings-item__description">
+                Set default settings
+            </div>
+            <div class="settings-item__control">
+                <button @onclick="@(async () => {
+                    foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
+                    {
+                        Store!.Set(setting.Type, propertyName, setting.DefaultValue);
+                        if (propertyName == nameof(SettingsStore.ThemeColor)) {
+                            await JS.InvokeVoidAsync("setThemeColors", setting.DefaultValue);
+                        }
+                    }
+
+                    await SettingsService.SaveAsync();
+                })">
+                    Restore
                 </button>
             </div>
         </div>
@@ -88,5 +134,38 @@
         if (save)
             await SettingsService.SaveAsync();
         await JS.InvokeVoidAsync("setThemeColors", color);
+    }
+
+    private async Task OnArchivePathBrowse()
+    {
+        var folder = await FolderPicker.PickFolder();
+        if (folder != null)
+        {
+            Store!.Set(nameof(SettingsStore.ArchivePath), folder);
+            await SettingsService.SaveAsync();
+        }
+    }
+
+    private string EllipsePath(string path)
+    {
+        const int maxSize = 50;
+
+        if (path.Length > maxSize)
+        {
+            List<string> split = path.Split('\\').ToList();
+            string str = path;
+
+            while (str.Length > maxSize && split.Count > 2)
+            {
+                int mid = split.Count / 2;
+                split.RemoveRange(mid, 2);
+                split.Insert(mid, "...");
+                str = string.Join("\\", split);
+            }
+
+            return str;
+        }
+
+        return path;
     }
 }

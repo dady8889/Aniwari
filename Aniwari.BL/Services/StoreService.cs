@@ -114,6 +114,7 @@ public class SettingsStore
     {
         _settings.Add(nameof(EnableDarkMode), new Setting(typeof(bool), "Enable dark mode", false));
         _settings.Add(nameof(ThemeColor), new Setting(typeof(string), "Theme color", "#efefef"));
+        _settings.Add(nameof(ArchivePath), new Setting(typeof(string), "Archive location", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos)));
     }
 
     public ReadOnlyDictionary<string, Setting> GetSettings() => new(_settings);
@@ -175,6 +176,8 @@ public class SettingsStore
     public bool EnableDarkMode { get; set; }
 
     public string ThemeColor { get; set; } = string.Empty;
+
+    public string ArchivePath { get; set; } = string.Empty;
 
     public List<Anime> Animes { get; set; } = new();
 

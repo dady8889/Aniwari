@@ -6,6 +6,7 @@ using Microsoft.Maui.Platform;
 using Microsoft.UI.Windowing;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.UI.Xaml.Controls;
+using Aniwari.Platforms;
 
 namespace Aniwari;
 
@@ -77,6 +78,10 @@ public static class MauiProgram
 #endif
 
         builder.Services.AddAniwari();
+
+#if WINDOWS
+        builder.Services.AddTransient<IFolderPicker, Platforms.Windows.FolderPicker>();
+#endif
 
         return builder.Build();
     }

@@ -23,13 +23,15 @@
 
 .schedule-header__title {
     font-size: 1.8rem;
+    min-width: 13rem;
     line-height: 1.8rem;
 }
 
 .schedule-header__noanime {
     display: flex;
-    justify-content: center;
+    align-items: center;
     margin: auto;
+    padding-right: 2rem;
 }
 
 .schedule-date {
@@ -74,6 +76,6 @@
     }
 
     .schedule-header__noanime {
-        min-width: 100%;
+        padding-right: 0;
     }
 }

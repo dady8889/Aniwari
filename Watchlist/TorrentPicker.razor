@@ -2,25 +2,49 @@
 
 @if (Torrents == null) return;
 
-<div class="aniwari-card torrent-picker">
-    @foreach (var torrent in Torrents)
+<input type="button" class="return-button" value="Return" @onclick="OnSelectClicked" />
+
+<div class="aniwari-card">
+
+    @{
+        var lastTorrent = Torrents.LastOrDefault();
+    }
+
+    @if (lastTorrent == null)
     {
-        <div class="aniwari-list-item torrent-picker-item">
-
+        <div class="aniwari-list-item">
             <div class="torrent-picker-item__name">
-                @torrent.Name
+                No results found
             </div>
-
-            <input type="button" class="torrent-picker-item__select" value="Select" @onclick="OnSelectClicked" />
         </div>
+    }
+    else
+    {
+        @foreach (var torrent in Torrents)
+        {
+            <div class="aniwari-list-item">
+
+                <div class="torrent-picker-item__name">
+                    @torrent.Name
+                </div>
+
+                <input type="button" class="torrent-picker-item__select" value="Select" @onclick="OnSelectClicked" />
+            </div>
+        }
     }
 </div>
 
 @code {
-    [Parameter] public List<NyaaAnime>? Torrents { get; set; } = null;
+    public record TorrentSelectedEventArgs();
 
-    private void OnSelectClicked()
+    [Parameter] public List<NyaaAnime>? Torrents { get; set; } = null;
+    [Parameter] public EventCallback<TorrentSelectedEventArgs> OnTorrentSelected { get; set; }
+
+    private async Task OnSelectClicked()
     {
+        if (OnTorrentSelected.HasDelegate)
+            await OnTorrentSelected.InvokeAsync(new TorrentSelectedEventArgs());
+
         Torrents = null;
     }
 }

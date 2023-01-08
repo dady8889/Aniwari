@@ -4,15 +4,21 @@
 
 @page "/watchlist"
 
+@inject IJSRuntime JSRuntime
+
 @inject INyaaService NyaaService
 @inject ISettingsService SettingsService
 @inject IAnimeRepository AnimeRepository
 
+@inherits ReactiveComponentBase
+
 @if (Store == null) return;
 
 <div class="aniwari-content watchlist">
-    <TorrentPicker Torrents="selectedTorrents" />
-    <div class="aniwari-card">
+
+    <TorrentPicker Torrents="selectedTorrents" OnTorrentSelected="OnTorrentSelected" />
+
+    <div class="aniwari-card @(torrentPickerShown)">
         @{
             var lastAnime = watchingAnime.LastOrDefault();
         }
@@ -72,6 +78,9 @@
     private SettingsStore? Store;
     private List<SettingsStore.Anime> watchingAnime = new();
     private List<NyaaAnime>? selectedTorrents = null;
+    private int savedScroll = 0;
+
+    private string torrentPickerShown => selectedTorrents != null ? "hidden" : "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -83,6 +92,16 @@
 
     private async Task SearchAnime(SettingsStore.Anime anime, int episode)
     {
+        savedScroll = await JSRuntime.InvokeAsync<int>("getDocumentScrollTop");
         selectedTorrents = await NyaaService.GetAnime(anime.Title, episode);
+    }
+
+    private async Task OnTorrentSelected(TorrentPicker.TorrentSelectedEventArgs args)
+    {
+        selectedTorrents = null;
+        StateHasChanged();
+        await Task.Delay(150);
+        await JSRuntime.InvokeVoidAsync("setDocumentScrollTop", savedScroll, true);
+        savedScroll = 0;
     }
 }

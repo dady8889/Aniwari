@@ -181,17 +181,19 @@ public class SettingsStore
         {
         }
             
-        public Anime(int id, bool watching, string title, int? episodesCount)
+        public Anime(int id, bool watching, string title, int? episodesCount, string searchString)
         {
             Id = id;
             Watching = watching;
             Title = title;
             EpisodesCount = episodesCount;
+            SearchString = searchString;
         }
 
         public int Id { get; set; }
         public bool Watching { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string SearchString { get; set; } = string.Empty;
         public int? EpisodesCount { get; set; }
         public int Watched { get; set; } = 0;
 

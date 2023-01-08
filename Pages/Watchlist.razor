@@ -30,41 +30,9 @@
         else
         {
             <Virtualize Context="anime" Items="watchingAnime">
-                <Accordion @key="anime.Id">
-                    <AccordionHeader>
-                        <div class="aniwari-list-item watchlist-item @(context.Expanded ? "expanded" : "")">
-                            <div class="watchlist-item__title">
-                                @anime.Title
-                            </div>
-                            <div class="watchlist-item__episodes">
-                                <div>
-                                    @anime.GetWatchedEpisodes().Count()
-                                </div>
-                                <div>
-                                    /
-                                </div>
-                                <div>
-                                    @(anime.EpisodesCount?.ToString() ?? "?")
-                                </div>
-                            </div>
-                        </div>
-                    </AccordionHeader>
-                    <AccordionBody>
-                        <div class="aniwari-list-detail">
-                            @if (anime.EpisodesCount != null)
-                            {
-                                @foreach (int ep in Enumerable.Range(1, anime.EpisodesCount.Value))
-                                {
-                                    <div class="aniwari-list-item episode">
-                                        <div class="episode__title">Episode @ep</div>
-                                        <input class="episode__button" type="button" value="Search" @onclick="() => SearchAnime(anime, ep)" />
-                                    </div>
-                                }
-                            }
-                        </div>
-                    </AccordionBody>
-                </Accordion>
 
+                <WatchlistItem Anime="anime" OnSearch="SearchAnime" />
+                
                 @if (anime != lastAnime)
                 {
                     <hr>
@@ -90,10 +58,15 @@
         watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
     }
 
-    private async Task SearchAnime(SettingsStore.Anime anime, int episode)
+    private async Task SearchAnime(WatchlistItem.SearchEventArgs args)
     {
         savedScroll = await JSRuntime.InvokeAsync<int>("getDocumentScrollTop");
-        selectedTorrents = await NyaaService.GetAnime(anime.Title, episode);
+
+        string searchString = args.Anime.SearchString
+        .Replace("@ep", $"{args.Episode:D2}")
+        .Replace("@EP", $"{args.Episode}");
+
+        selectedTorrents = await NyaaService.GetAnime(searchString);
     }
 
     private async Task OnTorrentSelected(TorrentPicker.TorrentSelectedEventArgs args)

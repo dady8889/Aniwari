@@ -28,7 +28,14 @@
                     @torrent.Name
                 </div>
 
-                <input type="button" class="torrent-picker-item__select" value="Select" @onclick="OnSelectClicked" />
+                <div class="torrent-info-wrapper">
+                    <div class="seeders">
+                        @torrent.Seeders
+                    </div>
+
+                    <input type="button" class="torrent-picker-item__select" value="Select" @onclick="OnSelectClicked" />
+                </div>
+
             </div>
         }
     }

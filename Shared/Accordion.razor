@@ -19,6 +19,7 @@
 @code {
     [Parameter] public RenderFragment<Accordion>? AccordionHeader { get; set; }
     [Parameter] public RenderFragment<Accordion>? AccordionBody { get; set; }
+    [Parameter] public bool PreventExpanding { get; set; } = false;
 
     private ElementReference bodyReference;
     private IJSObjectReference? module;
@@ -34,6 +35,9 @@
 
     private async Task OnHeaderClicked()
     {
+        if (PreventExpanding)
+            return;
+
         Expanded = !Expanded;
 
         if (module != null)

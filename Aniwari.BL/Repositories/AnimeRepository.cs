@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Aniwari.BL.Services.SettingsStore;
 
 namespace Aniwari.BL.Repositories;
 
@@ -64,10 +65,9 @@ public class AnimeRepository : IAnimeRepository
 
             if (anime.EpisodesCount != episodes)
                 anime.EpisodesCount = episodes;
-
             return;
         }
 
-        _store.Animes.Add(new SettingsStore.Anime(id, false, title, episodes));
+        _store.Animes.Add(new SettingsStore.Anime(id, false, title, episodes, $"{title} @ep"));
     }
 }

@@ -1,0 +1,98 @@
+﻿@using Aniwari.BL.Services;
+
+@inject IJSRuntime JS
+@inject ISettingsService SettingsService
+
+@if (Anime == null) return;
+
+<Accordion @key="Anime.Id" PreventExpanding="editSearchString">
+    <AccordionHeader>
+        <div class="aniwari-list-item watchlist-item @(context.Expanded ? "expanded" : "")">
+            @if (!editSearchString)
+            {
+                <div class="title-wrapper">
+                    <div class="title" title="@Anime.SearchString">
+                        @Anime.Title
+                    </div>
+                    <span class="edit-button" @onclick:stopPropagation="true" @onclick="OnTitleClicked">
+                        Edit
+                    </span>
+                </div>
+            }
+            else
+            {
+                <div class="title-wrapper">
+                    <span @ref="searchStringFieldReference" class="searchstring-field" @onclick:stopPropagation="true" contenteditable="true">
+                        @Anime.SearchString
+                    </span>
+                    <span class="edit-button" @onclick:stopPropagation="true" @onclick="OnEditEnded">
+                        Save
+                    </span>
+                </div>
+            }
+            <div class="episodes-counter">
+                <div>
+                    @Anime.GetWatchedEpisodes().Count()
+                </div>
+                <div>
+                    /
+                </div>
+                <div>
+                    @(Anime.EpisodesCount?.ToString() ?? "?")
+                </div>
+            </div>
+        </div>
+    </AccordionHeader>
+    <AccordionBody>
+        <div class="aniwari-list-detail">
+            @if (Anime.EpisodesCount != null)
+            {
+                @foreach (int ep in Enumerable.Range(1, Anime.EpisodesCount.Value))
+                {
+                    <div class="aniwari-list-item episode">
+                        <div class="episode__title">Episode @ep</div>
+                        <input class="episode__button" type="button" value="Search" @onclick="() => OnSearchClicked(ep)" />
+                    </div>
+                }
+            }
+        </div>
+    </AccordionBody>
+</Accordion>
+
+@code {
+    public record SearchEventArgs(SettingsStore.Anime Anime, int Episode);
+
+    [Parameter] public SettingsStore.Anime? Anime { get; set; }
+    [Parameter] public EventCallback<SearchEventArgs> OnSearch { get; set; }
+
+    private IJSObjectReference? module;
+    private ElementReference searchStringFieldReference;
+    private bool editSearchString = false;
+    private int searchStringFieldWidth = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Watchlist/WatchlistItem.razor.js");
+    }
+
+    private async Task OnSearchClicked(int episode)
+    {
+        if (OnSearch.HasDelegate && Anime != null)
+            await OnSearch.InvokeAsync(new SearchEventArgs(Anime, episode));
+    }
+
+    private void OnTitleClicked()
+    {
+        searchStringFieldWidth = Anime!.SearchString.Length * 8;
+        editSearchString = true;
+    }
+
+    private async Task OnEditEnded()
+    {
+        Anime!.SearchString = await JS.InvokeAsync<string>("getElementInnerText", searchStringFieldReference);
+        await SettingsService.SaveAsync();
+        editSearchString = false;
+    }
+}

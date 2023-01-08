@@ -5,7 +5,7 @@ namespace Aniwari.BL.Services;
 
 public interface INyaaService
 {
-    Task<List<NyaaAnime>> GetAnime(string title, int episode);
+    Task<List<NyaaAnime>> GetAnime(string title);
 }
 
 public class NyaaService : INyaaService
@@ -17,20 +17,18 @@ public class NyaaService : INyaaService
         _logger = logger;
     }
 
-    public async Task<List<NyaaAnime>> GetAnime(string title, int episode)
+    public async Task<List<NyaaAnime>> GetAnime(string title)
     {
         var result = new List<NyaaAnime>();
 
         try
         {
-            string searchString = $"{title} {episode:D2}";
-
             Wrapper nyaaWrapper = new();
 
             var entries = await nyaaWrapper.GetNyaaEntries(new QueryOptions()
             {
                 Category = NyaaWrapper.Enumerators.Categories.AnimeEnglishTranslated,
-                Search = searchString
+                Search = title
             });
 
             result = entries.Select(x => new NyaaAnime()
@@ -48,7 +46,7 @@ public class NyaaService : INyaaService
                 CompletedDownloads = x.CompletedDownloads,
             }).ToList();
 
-            _logger.LogDebug("Found {} results for query {}", result.Count, searchString);
+            _logger.LogDebug("Found {} results for query {}", result.Count, title);
         }
         catch (Exception ex)
         {

@@ -9,13 +9,16 @@ using static Aniwari.BL.Services.SettingsStore;
 
 namespace Aniwari.BL.Repositories;
 
-public record AnimeWatchingChanged(SettingsStore.Anime Anime, bool Watching) : IMessage;
+public record AnimeWatchingChanged(Anime Anime, bool Watching) : IMessage;
+public record AnimeEpisodeChanged(Anime Anime, Episode? OldEpisode, Episode? NewEpisode) : IMessage;
 
 public interface IAnimeRepository
 {
     void SetAnimeWatching(int id, bool watching);
     bool GetAnimeWatching(int id);
     void AddAnime(int id, string title, int? episodes);
+    void AddEpisode(Anime anime, Episode episode);
+    void RemoveEpisode(Anime anime, Episode episode);
 }
 
 public class AnimeRepository : IAnimeRepository
@@ -51,6 +54,26 @@ public class AnimeRepository : IAnimeRepository
     public bool GetAnimeWatching(int id)
     {
         return _store.Animes.FirstOrDefault(x => x.Id == id)?.Watching ?? false;
+    }
+
+    public void AddEpisode(Anime anime, Episode episode)
+    {
+        if (anime.Episodes.Any(ep => ep.Id == episode.Id))
+            return;
+
+        anime.Episodes.Add(episode);
+
+        _messageBusService.Publish(new AnimeEpisodeChanged(anime, null, episode));
+    }
+
+    public void RemoveEpisode(Anime anime, Episode episode)
+    {
+        if (!anime.Episodes.Any(ep => ep.Id == episode.Id))
+            return;
+
+        anime.Episodes.Remove(episode);
+
+        _messageBusService.Publish(new AnimeEpisodeChanged(anime, episode, null));
     }
 
     public void AddAnime(int id, string title, int? episodes)

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace Aniwari.BL.Services;
 
@@ -216,5 +217,11 @@ public class SettingsStore
     {
         public int Id { get; set; }
         public bool Watched { get; set; }
+        public bool Downloaded { get; set; }
+        public bool Downloading { get; set; }
+        public int Progress { get; set; }
+        public string TorrentTitle { get; set; } = string.Empty;
+        public string TorrentMagnet { get; set; } = string.Empty;
+        public string VideoFilePath { get; set; } = string.Empty;
     }
 }

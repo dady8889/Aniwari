@@ -4,9 +4,8 @@
 
 @page "/watchlist"
 
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JS
 
-@inject INyaaService NyaaService
 @inject ISettingsService SettingsService
 @inject IAnimeRepository AnimeRepository
 
@@ -16,7 +15,7 @@
 
 <div class="aniwari-content watchlist">
 
-    <TorrentPicker Torrents="selectedTorrents" OnTorrentSelected="OnTorrentSelected" />
+    <TorrentPicker Anime="selectedAnime" Episode="selectedEpisode" OnTorrentSelected="OnTorrentSelected" />
 
     <div class="aniwari-card @(torrentPickerShown)">
         @{
@@ -32,7 +31,7 @@
             <Virtualize Context="anime" Items="watchingAnime">
 
                 <WatchlistItem Anime="anime" OnSearch="SearchAnime" />
-                
+
                 @if (anime != lastAnime)
                 {
                     <hr>
@@ -43,12 +42,14 @@
 </div>
 
 @code {
+
     private SettingsStore? Store;
     private List<SettingsStore.Anime> watchingAnime = new();
-    private List<NyaaAnime>? selectedTorrents = null;
     private int savedScroll = 0;
+    private SettingsStore.Anime? selectedAnime = null;
+    private int? selectedEpisode = null;
 
-    private string torrentPickerShown => selectedTorrents != null ? "hidden" : "";
+    private string torrentPickerShown => selectedAnime != null ? "hidden" : "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,21 +61,28 @@
 
     private async Task SearchAnime(WatchlistItem.SearchEventArgs args)
     {
-        savedScroll = await JSRuntime.InvokeAsync<int>("getDocumentScrollTop");
-
-        string searchString = args.Anime.SearchString
-        .Replace("@ep", $"{args.Episode:D2}")
-        .Replace("@EP", $"{args.Episode}");
-
-        selectedTorrents = await NyaaService.GetAnime(searchString);
+        savedScroll = await JS.InvokeAsync<int>("getDocumentScrollTop");
+        selectedAnime = args.Anime;
+        selectedEpisode = args.Episode;
     }
 
     private async Task OnTorrentSelected(TorrentPicker.TorrentSelectedEventArgs args)
     {
-        selectedTorrents = null;
+        selectedAnime = null;
+        selectedEpisode = null;
         StateHasChanged();
         await Task.Delay(150);
-        await JSRuntime.InvokeVoidAsync("setDocumentScrollTop", savedScroll, true);
+        await JS.InvokeVoidAsync("setDocumentScrollTop", savedScroll, true);
         savedScroll = 0;
+
+        if (!args.Canceled)
+        {
+            AnimeRepository.AddEpisode(args.Anime, new SettingsStore.Episode()
+                {
+                    Id = args.Episode,
+                    TorrentMagnet = args.Magnet,
+                    TorrentTitle = args.Title,
+                });
+        }
     }
 }

@@ -1,8 +1,10 @@
 ﻿@using Aniwari.BL.Services;
 
+@inject INyaaService NyaaService
+
 @if (Torrents == null) return;
 
-<button class="return-button" @onclick="OnSelectClicked">
+<button class="return-button" @onclick="() => OnSelectClicked(null)">
     Return
 </button>
 
@@ -35,7 +37,7 @@
                         @torrent.Seeders
                     </div>
 
-                    <button class="torrent-picker-item__select" @onclick="OnSelectClicked">
+                    <button class="torrent-picker-item__select" @onclick="() => OnSelectClicked(torrent)">
                         Select
                     </button>
                 </div>
@@ -46,16 +48,46 @@
 </div>
 
 @code {
-    public record TorrentSelectedEventArgs();
+    public record TorrentSelectedEventArgs(SettingsStore.Anime Anime, int Episode, bool Canceled, string Title, string Magnet);
 
-    [Parameter] public List<NyaaAnime>? Torrents { get; set; } = null;
+    [Parameter] public SettingsStore.Anime? Anime { get; set; }
+    [Parameter] public int? Episode { get; set; }
     [Parameter] public EventCallback<TorrentSelectedEventArgs> OnTorrentSelected { get; set; }
 
-    private async Task OnSelectClicked()
+    public List<NyaaAnime>? Torrents { get; private set; } = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        if (Anime == null || Episode == null)
+            return;
+
+        string searchString = Anime.SearchString
+        .Replace("@ep", $"{Episode:D2}")
+        .Replace("@EP", $"{Episode}");
+
+        Torrents = await NyaaService.GetAnime(searchString);
+    }
+
+    private async Task OnSelectClicked(NyaaAnime? torrent)
     {
         if (OnTorrentSelected.HasDelegate)
-            await OnTorrentSelected.InvokeAsync(new TorrentSelectedEventArgs());
+        {
+            TorrentSelectedEventArgs args;
 
+            if (torrent != null)
+            {
+                args = new TorrentSelectedEventArgs(Anime!, Episode!.Value, false, torrent.Name, torrent.Magnet);
+            }
+            else
+            {
+                args = new TorrentSelectedEventArgs(Anime!, Episode!.Value, true, "", "");
+            }
+            
+            await OnTorrentSelected.InvokeAsync(args);
+        }
+        
         Torrents = null;
     }
 }

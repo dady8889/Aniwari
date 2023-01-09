@@ -1,7 +1,13 @@
-﻿@using Aniwari.BL.Services;
+﻿@using Aniwari.BL.Repositories;
+@using Aniwari.BL.Services;
+@using System.Diagnostics;
+
+@inherits ReactiveComponentBase
 
 @inject IJSRuntime JS
 @inject ISettingsService SettingsService
+@inject ITorrentService TorrentService
+@inject IAnimeRepository AnimeRepository
 
 @if (Anime == null) return;
 
@@ -47,13 +53,51 @@
         <div class="aniwari-list-detail">
             @if (Anime.EpisodesCount != null)
             {
-                @foreach (int ep in Enumerable.Range(1, Anime.EpisodesCount.Value))
+                @foreach (int epId in Enumerable.Range(1, Anime.EpisodesCount.Value))
                 {
                     <div class="aniwari-list-item episode">
-                        <div class="episode__title">Episode @ep</div>
-                        <button class="episode__button" @onclick="() => OnSearchClicked(ep)">
-                            Search
-                        </button>
+                        <div class="episode__title">Episode @epId</div>
+
+                        @{
+                            var ep = Anime.Episodes.FirstOrDefault(x => x.Id == epId);
+                        }
+
+                        @if (ep != null)
+                        {
+                            @if (!ep.Downloaded)
+                            {
+                                @if (!ep.Downloading)
+                                {
+                                    <button class="episode__button" @onclick="() => OnDownloadClicked(ep)">
+                                        Download
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="episode__progress">
+                                        @ep.Progress
+                                        %
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div>
+                                    <button class="episode__button" @onclick="() => OnWatchClicked(ep)">
+                                        Watch
+                                    </button>
+                                    <button class="episode__button" @onclick="() => OnDeleteClicked(ep)">
+                                        Delete
+                                    </button>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <button class="episode__button" @onclick="() => OnSearchClicked(epId)">
+                                Search
+                            </button>
+                        }
                     </div>
                 }
             }
@@ -70,7 +114,6 @@
     private IJSObjectReference? module;
     private ElementReference searchStringFieldReference;
     private bool editSearchString = false;
-    private int searchStringFieldWidth = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,7 +130,6 @@
 
     private void OnTitleClicked()
     {
-        searchStringFieldWidth = Anime!.SearchString.Length * 8;
         editSearchString = true;
     }
 
@@ -96,5 +138,69 @@
         Anime!.SearchString = await JS.InvokeAsync<string>("getElementInnerText", searchStringFieldReference);
         await SettingsService.SaveAsync();
         editSearchString = false;
+    }
+
+    private async Task OnDownloadClicked(SettingsStore.Episode episode)
+    {
+        string archivePath = SettingsService.GetStore().ArchivePath;
+
+        episode.Downloading = true;
+
+        await TorrentService.DownloadMagnet(episode.TorrentMagnet, archivePath,
+            (progress) =>
+            {
+                if (episode.Progress != (int)progress)
+                {
+                    episode.Progress = (int)progress;
+                    InvokeAsync(StateHasChanged);
+                }
+            },
+            async (file) =>
+            {
+                episode.Downloading = false;
+                episode.Downloaded = true;
+                episode.VideoFilePath = file;
+                await SettingsService.SaveAsync();
+                await InvokeAsync(StateHasChanged);
+            });
+    }
+
+    private void OnWatchClicked(SettingsStore.Episode episode)
+    {
+        var archivePath = SettingsService.GetStore().ArchivePath;
+        var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
+
+        if (File.Exists(videoPath))
+        {
+            using Process process = new()
+                {
+                    StartInfo = new(videoPath)
+                    {
+                        UseShellExecute = true
+                    }
+                };
+
+            process.Start();
+        }
+    }
+
+    private async Task OnDeleteClicked(SettingsStore.Episode episode)
+    {
+        try
+        {
+            var archivePath = SettingsService.GetStore().ArchivePath;
+            var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
+
+            if (File.Exists(videoPath))
+            {
+                File.Delete(videoPath);
+                AnimeRepository.RemoveEpisode(Anime!, episode);
+                await SettingsService.SaveAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 }

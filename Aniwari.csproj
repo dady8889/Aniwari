@@ -137,4 +137,8 @@
     <ItemGroup>
       <ProjectReference Include="Aniwari.BL\Aniwari.BL.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\" />
+    </ItemGroup>
 </Project>

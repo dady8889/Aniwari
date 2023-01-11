@@ -16,7 +16,7 @@ public interface IAnimeRepository
 {
     void SetAnimeWatching(int id, bool watching);
     bool GetAnimeWatching(int id);
-    void AddAnime(int id, string title, int? episodes);
+    Anime AddAnime(AnimeSchedule scheduledAnime);
     void AddEpisode(Anime anime, Episode episode);
     void RemoveEpisode(Anime anime, Episode episode);
 }
@@ -76,9 +76,11 @@ public class AnimeRepository : IAnimeRepository
         _messageBusService.Publish(new AnimeEpisodeChanged(anime, episode, null));
     }
 
-    public void AddAnime(int id, string title, int? episodes)
+    public Anime AddAnime(AnimeSchedule scheduledAnime)
     {
-        var anime = _store.Animes.FirstOrDefault(x => x.Id == id);
+        var anime = _store.Animes.FirstOrDefault(x => x.Id == scheduledAnime.MalId);
+
+        var title = scheduledAnime.GetDefaultTitle();
 
         // if the anime is already in DB, check if it needs some updates
         if (anime != null)
@@ -86,11 +88,25 @@ public class AnimeRepository : IAnimeRepository
             if (anime.Title != title)
                 anime.Title = title;
 
-            if (anime.EpisodesCount != episodes)
-                anime.EpisodesCount = episodes;
-            return;
+            if (anime.EpisodesCount != scheduledAnime.Episodes)
+                anime.EpisodesCount = scheduledAnime.Episodes;
+
+            if (anime.AiredDate != scheduledAnime.AiredDate)
+                anime.AiredDate = scheduledAnime.AiredDate;
+
+            if (anime.ScheduleDay != scheduledAnime.ScheduleDay.ToString())
+                anime.ScheduleDay = scheduledAnime.ScheduleDay.ToString();
+
+            if (anime.ScheduleTime != scheduledAnime.AirTime)
+                anime.ScheduleTime = scheduledAnime.AirTime;
+
+            return anime;
         }
 
-        _store.Animes.Add(new SettingsStore.Anime(id, false, title, episodes, $"{title} @ep"));
+        var newAnime = new SettingsStore.Anime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.AiredDate, scheduledAnime.ScheduleDay.ToString(), scheduledAnime.AirTime);
+
+        _store.Animes.Add(newAnime);
+
+        return newAnime;
     }
 }

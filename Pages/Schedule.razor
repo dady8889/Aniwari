@@ -39,10 +39,14 @@
             {
                 <hr>
 
+                var animes = dict[day].OrderBy(x => x.AirTime).ToList();
+
+
                 <div class="schedule-day__body">
-                    <Virtualize Context="anime" Items="@dict[day].OrderBy(x => x.AirTime).ToList()">
+                    @foreach (var anime in animes)
+                    {
                         <AnimeRow @key="@anime.MalId" Anime="@anime" />
-                    </Virtualize>
+                    }
                 </div>
             }
             else
@@ -105,7 +109,7 @@
                     dict[day].Add(anime);
 
                     // update the local store
-                    AnimeRepository.AddAnime(anime.MalId, anime.GetDefaultTitle(), anime.Episodes);
+                    AnimeRepository.AddAnime(anime);
                 }
 
                 StateHasChanged();

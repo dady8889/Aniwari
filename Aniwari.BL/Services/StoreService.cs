@@ -192,13 +192,15 @@ public class SettingsStore
         {
         }
             
-        public Anime(int id, bool watching, string title, int? episodesCount, string searchString)
+        public Anime(int id, string title, int? episodesCount, string searchString, DateTime? airedDate, string? scheduleDay, TimeOnly? scheduleTime)
         {
             Id = id;
-            Watching = watching;
             Title = title;
             EpisodesCount = episodesCount;
             SearchString = searchString;
+            AiredDate = airedDate;
+            ScheduleDay = scheduleDay;
+            ScheduleTime = scheduleTime;
         }
 
         public int Id { get; set; }
@@ -207,6 +209,9 @@ public class SettingsStore
         public string SearchString { get; set; } = string.Empty;
         public int? EpisodesCount { get; set; }
         public int Watched { get; set; } = 0;
+        public DateTime? AiredDate { get; set; }
+        public string? ScheduleDay { get; set; }
+        public TimeOnly? ScheduleTime { get; set; }
 
         public List<Episode> Episodes { get; set; } = new();
 

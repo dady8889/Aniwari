@@ -11,6 +11,16 @@
             border-bottom-right-radius: 4px;
         }
 
+.episode__header {
+    display: flex;
+    gap: 1rem;
+}
+
+.episode__header {
+}
+
+.episode__reminder {
+}
 
 .aniwari-list-detail {
     flex-direction: column;

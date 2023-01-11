@@ -28,15 +28,15 @@
         }
         else
         {
-            <Virtualize Context="anime" Items="watchingAnime">
-
+            foreach (var anime in watchingAnime)
+            {
                 <WatchlistItem Anime="anime" OnSearch="SearchAnime" />
 
-                @if (anime != lastAnime)
+                if (anime != lastAnime)
                 {
                     <hr>
                 }
-            </Virtualize>
+            }
         }
     </div>
 </div>

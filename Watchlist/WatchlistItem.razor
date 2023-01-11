@@ -28,11 +28,14 @@
             else
             {
                 <div class="title-wrapper">
-                    <span @ref="searchStringFieldReference" class="searchstring-field" @onclick:stopPropagation="true" contenteditable="true">
+                    <div @ref="searchStringFieldReference" class="searchstring-field" @onclick:stopPropagation="false" contenteditable="true">
                         @Anime.SearchString
-                    </span>
+                    </div>
                     <button class="title-button" @onclick:stopPropagation="true" @onclick="OnEditEnded">
                         Save
+                    </button>
+                    <button class="title-button" @onclick:stopPropagation="true" @onclick="OnResetClicked">
+                        Reset
                     </button>
                 </div>
             }
@@ -53,10 +56,45 @@
         <div class="aniwari-list-detail">
             @if (Anime.EpisodesCount != null)
             {
-                @foreach (int epId in Enumerable.Range(1, Anime.EpisodesCount.Value))
+                var maxEpId = Anime.EpisodesCount.Value;
+
+                if (Anime.AiredDate != null)
+                {
+                    var betweenAiredToNow = DateTime.Today - Anime.AiredDate.Value.Date;
+                    var daysBetween = betweenAiredToNow.TotalDays + 1;
+
+                    maxEpId = (int)Math.Floor(daysBetween / 7) + 1;
+
+                    if (maxEpId <= 1)
+                    {
+                        maxEpId = 2;
+                    }
+
+                    if (maxEpId > Anime.EpisodesCount.Value)
+                    {
+                        maxEpId = Anime.EpisodesCount.Value;
+                    }
+                }
+
+                foreach (int epId in Enumerable.Range(1, maxEpId))
                 {
                     <div class="aniwari-list-item episode">
-                        <div class="episode__title">Episode @epId</div>
+                        <div class="episode__header">
+                            <div class="episode__title">Episode @epId</div>
+                            @if (Anime.ScheduleTime != null && Anime.ScheduleDay != null && epId == maxEpId)
+                            {
+                                string day = Anime.ScheduleDay;
+
+                                if (Anime.ScheduleDay == DateTime.Now.DayOfWeek.ToString())
+                                {
+                                    day = "Today";
+                                }
+
+                                <div class="episode__reminder">
+                                    @day at @(Anime.ScheduleTime.Value.ToString("HH:mm"))
+                                </div>
+                            }
+                        </div>
 
                         @{
                             var ep = Anime.Episodes.FirstOrDefault(x => x.Id == epId);
@@ -202,5 +240,10 @@
         {
 
         }
+    }
+
+    private void OnResetClicked()
+    {
+        Anime!.SearchString = $"{Anime!.Title} @ep";
     }
 }

@@ -1,24 +1,26 @@
 ﻿@using Aniwari.BL.Services;
+@using Aniwari.Managers;
 
 @inherits LayoutComponentBase
 
 @inject ISettingsService SettingsService
+@inject IThemeManager Theme
 @inject IJSRuntime JS
 
 <div class="page">
     <main>
-        <Animate @ref="animateMainBody">
+        <Animate @ref="animator">
             @Body
         </Animate>
     </main>
 
     <div class="menu">
-        <NavMenu Animator="animateMainBody" />
+        <NavMenu Animator="animator" />
     </div>
 </div>
 
 @code {
-    private Animate? animateMainBody;
+    private Animate? animator;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -26,8 +28,7 @@
 
         if (firstRender)
         {
-            var color = SettingsService.GetStore().ThemeColor;
-            await JS.InvokeVoidAsync("setThemeColors", color);
+            await Theme.SetThemeColor(JS);
         }
     }
 }

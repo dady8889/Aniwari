@@ -38,3 +38,15 @@
 
 .archivepath__path {
 }
+
+.switch-wrapper {
+    min-width: 3.5rem;
+}
+
+.accent-preview {
+
+    background-color: var(--aniwari-ok);
+    height: 1.5rem;
+    width: 1.5rem;
+    border: 1px solid var(--aniwari-bg);
+}

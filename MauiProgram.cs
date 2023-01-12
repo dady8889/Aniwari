@@ -7,6 +7,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.UI.Xaml.Controls;
 using Aniwari.Platforms;
+using Aniwari.Managers;
 
 namespace Aniwari;
 
@@ -23,6 +24,8 @@ public static class MauiProgram
             })
             .ConfigureLifecycleEvents(events =>
             {
+
+                // Fix WebView bug with popups
 #if WINDOWS
                 events.AddWindows(windows => windows
                        .OnPlatformMessage((window, args) =>
@@ -71,14 +74,20 @@ public static class MauiProgram
 
         builder.Services.AddMauiBlazorWebView();
 
+        // Debug services
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.SetMinimumLevel(LogLevel.Trace);
         builder.Logging.AddDebug();
 #endif
 
+        // Internal services
+        builder.Services.AddSingleton<IThemeManager, ThemeManager>();
+
+        // BL services
         builder.Services.AddAniwari();
 
+        // Windows specific services
 #if WINDOWS
         builder.Services.AddTransient<IFolderPicker, Platforms.Windows.FolderPicker>();
 #endif

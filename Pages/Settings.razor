@@ -1,4 +1,5 @@
 ﻿@using Aniwari.BL.Services;
+@using Aniwari.Managers;
 @using Aniwari.Platforms;
 
 @page "/settings"
@@ -6,6 +7,7 @@
 @inject IJSRuntime JS
 @inject ISettingsService SettingsService
 @inject IFolderPicker FolderPicker
+@inject IThemeManager Theme
 
 @if (Store == null) return;
 
@@ -21,15 +23,21 @@
                     @if (propertyName == nameof(SettingsStore.ThemeColor))
                     {
                         <div class="themecolor-wrapper">
+                            <div class="accent-preview" title="Accent color">
+                            </div>
                             <input type="color" value="@(Store.Get<string>(propertyName))"
                            @oninput="(e) => OnThemeColorChanged(e, propertyName, setting, false)"
                            @onchange="(e) => OnThemeColorChanged(e, propertyName, setting, true)" />
 
-                            <button @onclick="async () => {
-                                await OnThemeColorChanged(new ChangeEventArgs(), propertyName, setting, true);
-                            }">
+                            <button @onclick="OnThemeResetClicked">
                                 Reset
                             </button>
+                        </div>
+                    }
+                    else if (propertyName == nameof(SettingsStore.EnableDarkMode))
+                    {
+                        <div class="switch-wrapper">
+                            <input type="checkbox" role="switch" checked="@(Store.EnableDarkMode)" @onchange="OnDarkModeChanged" />
                         </div>
                     }
                     else if (propertyName == nameof(SettingsStore.ArchivePath))
@@ -55,10 +63,12 @@
                     }
                     else if (setting.Type == typeof(bool))
                     {
-                        <input type="checkbox" checked="@(Store.Get<bool>(propertyName))" @onchange="async (e) => {
-                            Store.Set<bool>(propertyName, (bool?)e.Value ?? false);
-                            await SettingsService.SaveAsync();
-                        }" />
+                        <div class="switch-wrapper">
+                            <input type="checkbox" role="switch" checked="@(Store.Get<bool>(propertyName))" @onchange="async (e) => {
+                                Store.Set<bool>(propertyName, (bool?)e.Value ?? false);
+                                await SettingsService.SaveAsync();
+                            }" />
+                        </div>
                     }
 
                 </div>
@@ -72,10 +82,7 @@
                 Delete watchlist
             </div>
             <div class="settings-item__control">
-                <button @onclick="async () => {
-                    SettingsService.GetStore().Animes.Clear();
-                    await SettingsService.SaveAsync();
-                }">
+                <button @onclick="OnDeleteWatchlistClicked">
                     Delete
                 </button>
             </div>
@@ -88,17 +95,7 @@
                 Set default settings
             </div>
             <div class="settings-item__control">
-                <button @onclick="@(async () => {
-                    foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
-                    {
-                        Store!.Set(setting.Type, propertyName, setting.DefaultValue);
-                        if (propertyName == nameof(SettingsStore.ThemeColor)) {
-                            await JS.InvokeVoidAsync("setThemeColors", setting.DefaultValue);
-                        }
-                    }
-
-                    await SettingsService.SaveAsync();
-                })">
+                <button @onclick="OnRestoreClicked">
                     Restore
                 </button>
             </div>
@@ -131,9 +128,25 @@
     {
         string color = (string?)args.Value ?? (string)setting.DefaultValue;
         Store!.Set(propertyName, color);
+        await Theme.SetThemeColor(JS);
+
         if (save)
             await SettingsService.SaveAsync();
-        await JS.InvokeVoidAsync("setThemeColors", color);
+    }
+
+    private async Task OnThemeResetClicked()
+    {
+        Store!.ThemeColor = ThemeColors.LightColor;
+        await Theme.SetThemeColor(JS);
+    }
+
+    private async Task OnDarkModeChanged(ChangeEventArgs args)
+    {
+        bool darkMode = (bool?)args.Value ?? false;
+        Store!.EnableDarkMode = darkMode;
+
+        await Theme.SetThemeColor(JS);
+        await SettingsService.SaveAsync();
     }
 
     private async Task OnArchivePathBrowse()
@@ -167,5 +180,25 @@
         }
 
         return path;
+    }
+
+    private async Task OnRestoreClicked()
+    {
+        foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
+        {
+            Store!.Set(setting.Type, propertyName, setting.DefaultValue);
+            if (propertyName == nameof(SettingsStore.ThemeColor))
+            {
+                await JS.InvokeVoidAsync("setThemeColors", setting.DefaultValue);
+            }
+        }
+
+        await SettingsService.SaveAsync();
+    }
+
+    private async Task OnDeleteWatchlistClicked()
+    {
+        SettingsService.GetStore().Animes.Clear();
+        await SettingsService.SaveAsync();
     }
 }

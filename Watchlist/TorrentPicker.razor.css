@@ -1,4 +1,10 @@
-﻿.aniwari-card {
+﻿.torrent-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.aniwari-card {
     padding: 1rem 0;
     gap: 5px;
 }

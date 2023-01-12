@@ -2,49 +2,45 @@
 
 @inject INyaaService NyaaService
 
-@if (Torrents == null) return;
+<div class="torrent-picker">
+    <button class="return-button" @onclick="() => OnSelectClicked(null)">
+        Return
+    </button>
 
-<button class="return-button" @onclick="() => OnSelectClicked(null)">
-    Return
-</button>
+    <div class="aniwari-card">
 
-<div class="aniwari-card">
-
-    @{
-        var lastTorrent = Torrents.LastOrDefault();
-    }
-
-    @if (lastTorrent == null)
-    {
-        <div class="aniwari-list-item">
-            <div class="torrent-picker-item__name">
-                No results found
-            </div>
-        </div>
-    }
-    else
-    {
-        @foreach (var torrent in Torrents)
+        @if (foundTorrents == null || foundTorrents.Count == 0)
         {
             <div class="aniwari-list-item">
-
                 <div class="torrent-picker-item__name">
-                    @torrent.Name
+                    No results found
                 </div>
-
-                <div class="torrent-info-wrapper">
-                    <div class="seeders">
-                        @torrent.Seeders
-                    </div>
-
-                    <button class="torrent-picker-item__select" @onclick="() => OnSelectClicked(torrent)">
-                        Select
-                    </button>
-                </div>
-
             </div>
         }
-    }
+        else
+        {
+            @foreach (var torrent in foundTorrents)
+            {
+                <div class="aniwari-list-item">
+
+                    <div class="torrent-picker-item__name">
+                        @torrent.Name
+                    </div>
+
+                    <div class="torrent-info-wrapper">
+                        <div class="seeders">
+                            @torrent.Seeders
+                        </div>
+
+                        <button class="torrent-picker-item__select" @onclick="() => OnSelectClicked(torrent)">
+                            Select
+                        </button>
+                    </div>
+
+                </div>
+            }
+        }
+    </div>
 </div>
 
 @code {
@@ -54,20 +50,24 @@
     [Parameter] public int? Episode { get; set; }
     [Parameter] public EventCallback<TorrentSelectedEventArgs> OnTorrentSelected { get; set; }
 
-    public List<NyaaAnime>? Torrents { get; private set; } = null;
+    private List<NyaaAnime>? foundTorrents = null;
 
-    protected override async Task OnParametersSetAsync()
+    public override async Task SetParametersAsync(ParameterView parameters)
     {
-        await base.OnParametersSetAsync();
+        var prevAnime = Anime;
+        var prevEpisode = Episode;
 
-        if (Anime == null || Episode == null)
+        await base.SetParametersAsync(parameters);
+
+        if (Anime == null || Episode == null || (Anime == prevAnime && Episode == prevEpisode))
             return;
 
         string searchString = Anime.SearchString
         .Replace("@ep", $"{Episode:D2}")
         .Replace("@EP", $"{Episode}");
 
-        Torrents = await NyaaService.GetAnime(searchString);
+        foundTorrents = await NyaaService.GetAnime(searchString);
+        StateHasChanged();
     }
 
     private async Task OnSelectClicked(NyaaAnime? torrent)
@@ -84,10 +84,10 @@
             {
                 args = new TorrentSelectedEventArgs(Anime!, Episode!.Value, true, "", "");
             }
-            
+
             await OnTorrentSelected.InvokeAsync(args);
         }
-        
-        Torrents = null;
+
+        foundTorrents = null;
     }
 }

@@ -1,0 +1,45 @@
+﻿
+<div class="animate-fade @(hiddenClass) @(animateClass)">
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool IsVisible { get; set; } = true;
+
+    private bool hidden = true;
+    private bool animate = true;
+    private string animateClass => animate ? "animate" : "";
+    private string hiddenClass => hidden ? "hidden" : "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender && IsVisible)
+        {
+            await Show();
+        }
+    }
+
+    public async Task Hide()
+    {
+        animate = true;
+        StateHasChanged();
+        await Task.Delay(300);
+        hidden = true;
+        StateHasChanged();
+    }
+
+    public async Task Show()
+    {
+        hidden = false;
+        await Task.Delay(100);
+        StateHasChanged();
+        animate = true;
+        await Task.Delay(100);
+        animate = false;
+        StateHasChanged();
+    }
+}

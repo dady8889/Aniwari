@@ -1,26 +1,29 @@
 ﻿@inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <nav @ref="navReference">
     <div class="nav-item-wrapper">
         <div class="nav-item">
-            <NavLink href="schedule" @onclick="OnNavLinkClicked">
+            <CustomNavLink href="schedule" @onclick="@(() => OnNavLinkClicked("schedule"))">
                 <i class="nav-item__icon bi bi-calendar3"></i> Schedule
-            </NavLink>
+            </CustomNavLink>
         </div>
         <div class="nav-item">
-            <NavLink href="watchlist" @onclick="OnNavLinkClicked">
+            <CustomNavLink href="watchlist" @onclick="@(() => OnNavLinkClicked("watchlist"))">
                 <i class="nav-item__icon bi bi-list-ul"></i> Watchlist
-            </NavLink>
+            </CustomNavLink>
         </div>
         <div class="nav-item">
-            <NavLink href="settings" @onclick="OnNavLinkClicked">
+            <CustomNavLink href="settings" @onclick="@(() => OnNavLinkClicked("settings"))">
                 <i class="nav-item__icon bi bi-gear-fill"></i> Settings
-            </NavLink>
+            </CustomNavLink>
         </div>
     </div>
 </nav>
 
 @code {
+
+    [Parameter] public Animate? Animator { get; set; }
 
     private IJSObjectReference? module;
     private ElementReference navReference;
@@ -40,8 +43,15 @@
             await module.InvokeVoidAsync("animateActiveNav", navReference);
     }
 
-    private void OnNavLinkClicked()
+    private async Task OnNavLinkClicked(string page)
     {
-        // implicit call to StateHasChanged
+        if (Animator != null)
+        {
+            await Animator.Hide();
+            Navigation.NavigateTo(page);
+            await Animator.Show();
+        }
+        else
+            Navigation.NavigateTo(page);
     }
 }

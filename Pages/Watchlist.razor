@@ -15,41 +15,45 @@
 
 <div class="aniwari-content watchlist">
 
-    <TorrentPicker Anime="selectedAnime" Episode="selectedEpisode" OnTorrentSelected="OnTorrentSelected" />
+    <Animate IsVisible="false" @ref="animateTorrentPicker">
+        <TorrentPicker Anime="selectedAnime" Episode="selectedEpisode" OnTorrentSelected="OnTorrentSelected" />
+    </Animate>
 
-    <div class="aniwari-card @(torrentPickerShown)">
-        @{
-            var lastAnime = watchingAnime.LastOrDefault();
-        }
+    <Animate @ref="animateWatchlist">
+        <div class="aniwari-card animate-fade">
+            @{
+                var lastAnime = watchingAnime.LastOrDefault();
+            }
 
-        @if (lastAnime == null)
-        {
-            <div class="aniwari-list-item watchlist-item noanime">You are not watching any anime</div>
-        }
-        else
-        {
-            foreach (var anime in watchingAnime)
+            @if (lastAnime == null)
             {
-                <WatchlistItem Anime="anime" OnSearch="SearchAnime" />
-
-                if (anime != lastAnime)
+                <div class="aniwari-list-item watchlist-item noanime">You are not watching any anime</div>
+            }
+            else
+            {
+                foreach (var anime in watchingAnime)
                 {
-                    <hr>
+                    <WatchlistItem Anime="anime" OnSearch="SearchAnime" />
+
+                    if (anime != lastAnime)
+                    {
+                        <hr>
+                    }
                 }
             }
-        }
-    </div>
+        </div>
+    </Animate>
 </div>
 
 @code {
+    private Animate? animateWatchlist;
+    private Animate? animateTorrentPicker;
 
     private SettingsStore? Store;
     private List<SettingsStore.Anime> watchingAnime = new();
     private int savedScroll = 0;
-    private SettingsStore.Anime? selectedAnime = null;
-    private int? selectedEpisode = null;
-
-    private string torrentPickerShown => selectedAnime != null ? "hidden" : "";
+    private SettingsStore.Anime? selectedAnime;
+    private int? selectedEpisode;
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,16 +66,19 @@
     private async Task SearchAnime(WatchlistItem.SearchEventArgs args)
     {
         savedScroll = await JS.InvokeAsync<int>("getDocumentScrollTop");
+
+        await animateWatchlist!.Hide();
+        await animateTorrentPicker!.Show();
+
         selectedAnime = args.Anime;
         selectedEpisode = args.Episode;
     }
 
     private async Task OnTorrentSelected(TorrentPicker.TorrentSelectedEventArgs args)
     {
-        selectedAnime = null;
-        selectedEpisode = null;
-        StateHasChanged();
-        await Task.Delay(150);
+        await animateTorrentPicker!.Hide();
+        await animateWatchlist!.Show();
+
         await JS.InvokeVoidAsync("setDocumentScrollTop", savedScroll, true);
         savedScroll = 0;
 
@@ -84,5 +91,8 @@
                     TorrentTitle = args.Title,
                 });
         }
+
+        selectedAnime = null;
+        selectedEpisode = null;
     }
 }

@@ -7,14 +7,19 @@
 
 <div class="page">
     <main>
-        @Body
+        <Animate @ref="animateMainBody">
+            @Body
+        </Animate>
     </main>
+
     <div class="menu">
-        <NavMenu />
+        <NavMenu Animator="animateMainBody" />
     </div>
 </div>
 
 @code {
+    private Animate? animateMainBody;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);

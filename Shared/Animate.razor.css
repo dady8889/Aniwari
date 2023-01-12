@@ -1,0 +1,15 @@
+﻿.animate-fade {
+    opacity: 1;
+    transform: translateY(0);
+    transition: transform 300ms ease-in, opacity 300ms ease-in, visibility 300ms ease-in;
+}
+
+    .animate-fade.animate {
+        opacity: 0;
+        transform: translateY(1rem);
+        overflow: hidden;
+    }
+
+.hidden {
+    display: none;
+}

@@ -10,6 +10,7 @@ public interface ITorrentService
 {
     Task DownloadAnime(int animeId, int episodeId, string magnet, string path);
     Task<string?> CancelDownload(int animeId, int episodeId);
+    Task CancelSeed(int animeId, int episodeId);
     Task SaveAndExit();
     Task Restore();
 }
@@ -20,6 +21,7 @@ public record TorrentErrored(int AnimeId, int EpisodeId, string ErrorMessage) : 
 
 public class TorrentService : ITorrentService
 {
+    private readonly System.Threading.Timer _monitorTimer;
     private readonly ISettingsService _settingsService;
     private readonly IMessageBusService _messageBusService;
     private readonly ILogger<TorrentService> _logger;
@@ -38,21 +40,21 @@ public class TorrentService : ITorrentService
         EngineSettingsBuilder builder = new(new EngineSettings());
         builder.CacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aniwari\\", "cache\\");
         _clientEngine = new ClientEngine(builder.ToSettings());
+
+        _monitorTimer = new Timer(_ => MonitorTick(), null, 0, 30000);
     }
 
-    private async Task<TorrentManager?> DownloadMagnet(string magnet, string path, Action<double>? onUpdate = null, Action<string>? onFinish = null, Action<string>? onError = null)
+    private async Task<TorrentManager?> GetTorrent(string magnet, string path, Action<PieceHashedEventArgs>? onUpdate = null, Action<TorrentStateChangedEventArgs>? onFinish = null, Action<string>? onError = null)
     {
         try
         {
             MagnetLink magnetLink = MagnetLink.Parse(magnet);
-            var torrent = await _clientEngine.AddAsync(magnetLink, path);
+            var torrent = await _clientEngine.AddAsync(magnetLink, path).ConfigureAwait(false);
             if (torrent != null)
             {
-                await torrent.StartAsync();
-
                 torrent.PieceHashed += (sender, args) =>
                 {
-                    onUpdate?.Invoke(torrent.Progress);
+                    onUpdate?.Invoke(args);
                 };
 
                 torrent.TorrentStateChanged += async (sender, args) =>
@@ -61,10 +63,7 @@ public class TorrentService : ITorrentService
 
                     if (args.NewState == TorrentState.Seeding)
                     {
-                        await torrent.StopAsync();
-                        await _clientEngine.RemoveAsync(torrent);
-
-                        onFinish?.Invoke(torrent.Files[0].Path);
+                        onFinish?.Invoke(args);
                     }
                     else if (args.NewState == TorrentState.Error)
                     {
@@ -94,41 +93,57 @@ public class TorrentService : ITorrentService
     public async Task DownloadAnime(int animeId, int episodeId, string magnet, string path)
     {
         var key = (animeId, episodeId);
-        var episode = _settingsService.GetStore().Animes.FirstOrDefault(x => x.Id == animeId)?.Episodes.FirstOrDefault(x => x.Id == episodeId);
+        var episode = GetEpisode(animeId, episodeId);
 
-        if (episode == null)
-        {
-            _logger.LogError("Episode {} for anime {} was not found.", episodeId, animeId);
-            throw new NullReferenceException($"Episode {episodeId} for anime {animeId} was not found.");
-        }
+        var torrentHandle = await GetTorrent(magnet, path,
+           onUpdate: (e) =>
+           {
+               var progress = (int)e.TorrentManager.Progress;
+               var prevProgress = episode.Progress;
+               episode.Progress = progress;
 
-        var torrentHandle = await DownloadMagnet(magnet, path, (progress) =>
-        {
-            var prevProgress = episode.Progress;
-            episode.Progress = (int)progress;
+               if (prevProgress != progress)
+                   _messageBusService.Publish(new TorrentUpdated(animeId, episodeId, progress));
+           },
+           onFinish: async (e) =>
+           {
+               if (e.TorrentManager == null || e.TorrentManager.Files == null || e.TorrentManager.Files.Count == 0)
+               {
+                   episode.Downloading = false;
+                   episode.Downloaded = false;
+                   episode.VideoFilePath = string.Empty;
+                   await _settingsService.SaveAsync();
 
-            if (prevProgress != (int)progress)
-                _messageBusService.Publish(new TorrentUpdated(animeId, episodeId, progress));
-        }, async (filePath) =>
-        {
-            episode.Downloading = false;
-            episode.Downloaded = true;
-            episode.VideoFilePath = filePath;
-            await _settingsService.SaveAsync();
+                   _torrentQueue.Remove(key);
+                   _messageBusService.Publish(new TorrentErrored(animeId, episodeId, "Torrent has no files."));
 
-            _torrentQueue.Remove(key);
-            _messageBusService.Publish(new TorrentFinished(animeId, episodeId, filePath));
+                   return;
+               }
 
-        }, async (errorMessage) =>
-        {
-            episode.Downloading = false;
-            episode.Downloaded = false;
-            episode.VideoFilePath = string.Empty;
-            await _settingsService.SaveAsync();
+               var filePath = e.TorrentManager.Files[0].Path;
 
-            _torrentQueue.Remove(key);
-            _messageBusService.Publish(new TorrentErrored(animeId, episodeId, errorMessage));
-        });
+               UpdateStats(e.TorrentManager, animeId, episodeId, false);
+
+               episode.Seeding = true;
+               episode.Downloading = false;
+               episode.Downloaded = true;
+               episode.VideoFilePath = filePath;
+
+               await _settingsService.SaveAsync();
+
+               _messageBusService.Publish(new TorrentFinished(animeId, episodeId, filePath));
+           },
+           onError: async (errorMessage) =>
+           {
+               episode.Downloading = false;
+               episode.Downloaded = false;
+               episode.VideoFilePath = string.Empty;
+               await _settingsService.SaveAsync();
+
+               _torrentQueue.Remove(key);
+               _messageBusService.Publish(new TorrentErrored(animeId, episodeId, errorMessage));
+           }
+        ).ConfigureAwait(false);
 
         if (torrentHandle == null)
         {
@@ -149,6 +164,8 @@ public class TorrentService : ITorrentService
         }
 
         _torrentQueue.Add((animeId, episodeId), torrentHandle);
+
+        await torrentHandle.StartAsync().ConfigureAwait(false);
     }
 
     public async Task<string?> CancelDownload(int animeId, int episodeId)
@@ -171,6 +188,21 @@ public class TorrentService : ITorrentService
         return torrent.Files[0].Path;
     }
 
+    public async Task CancelSeed(int animeId, int episodeId)
+    {
+        var key = (animeId, episodeId);
+        if (!_torrentQueue.TryGetValue(key, out TorrentManager? torrent))
+        {
+            _logger.LogError("Torrent for ({}, {}) has not been queued.", animeId, episodeId);
+            throw new Exception($"Torrent for ({animeId}, {episodeId}) has not been queued.");
+        }
+
+        await torrent.StopAsync();
+        await _clientEngine.RemoveAsync(torrent);
+
+        _torrentQueue.Remove(key);
+    }
+
     public async Task SaveAndExit()
     {
         await _clientEngine.StopAllAsync().ConfigureAwait(false);
@@ -183,5 +215,62 @@ public class TorrentService : ITorrentService
             return;
 
         await ClientEngine.RestoreStateAsync(_stateFilePath).ConfigureAwait(false);
+
+        var pausedEpisodes = _settingsService.GetStore().Animes.SelectMany(x => x.Episodes).Where(x => x.Downloading || x.Seeding).ToList();
+
+        foreach (var ep in pausedEpisodes)
+        {
+            string archivePath = _settingsService.GetStore().ArchivePath;
+            await DownloadAnime(ep.AnimeId, ep.Id, ep.TorrentMagnet, archivePath).ConfigureAwait(false);
+        }
+    }
+
+    private Episode GetEpisode(int animeId, int episodeId)
+    {
+        var episode = _settingsService.GetStore().Animes.FirstOrDefault(x => x.Id == animeId)?.Episodes.FirstOrDefault(x => x.Id == episodeId);
+
+        if (episode == null)
+        {
+            _logger.LogError("Episode {} for anime {} was not found.", episodeId, animeId);
+            throw new NullReferenceException($"Episode {episodeId} for anime {animeId} was not found.");
+        }
+
+        return episode;
+    }
+
+    private void UpdateStats(TorrentManager torrent, int animeId, int episodeId, bool notify)
+    {
+        var episode = GetEpisode(animeId, episodeId);
+
+        // update bytes received for seed ratio
+        var mbytesReceived = (int)(torrent.Monitor.DataBytesDownloaded / (double)1024000);
+        var mbytesSent = (int)(torrent.Monitor.DataBytesUploaded / (double)1024000);
+        var receivedDiff = Math.Abs(episode.LastAddedBytesReceived - mbytesReceived);
+        var sentDiff = Math.Abs(episode.LastAddedBytesSent - mbytesSent);
+
+        episode.LastAddedBytesReceived += receivedDiff;
+        episode.LastAddedBytesSent += sentDiff;
+        episode.BytesReceived += receivedDiff;
+        episode.BytesSent += sentDiff;
+
+        if (notify)
+        {
+            _messageBusService.Publish(new TorrentUpdated(animeId, episodeId, torrent.Progress));
+        }
+    }
+
+    private async void MonitorTick()
+    {
+        foreach (var (key, torrent) in _torrentQueue)
+        {
+            if (torrent.State == TorrentState.Seeding)
+            {
+                // get more peers for seeding
+                await torrent.DhtAnnounceAsync();
+                await torrent.LocalPeerAnnounceAsync();
+
+                UpdateStats(torrent, key.Item1, key.Item2, true);
+            }
+        }
     }
 }

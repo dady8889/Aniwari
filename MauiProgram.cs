@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.UI.Xaml.Controls;
 using Aniwari.Platforms;
 using Aniwari.Managers;
+using Aniwari.BL.Services;
 
 namespace Aniwari;
 
@@ -63,8 +64,20 @@ public static class MauiProgram
                                    windowsWindow.Resize(new Windows.Graphics.SizeInt32(size.Width + 1, size.Height));
                                    windowsWindow.Resize(new Windows.Graphics.SizeInt32(size.Width, size.Height));
                                }
-                               
+
                                // System.Diagnostics.Debug.WriteLine($"WM_EXITSIZEMOVE");
+                           }
+                       })
+                       .OnClosed((window, args) =>
+                       {
+                           var mauiWindow = window.GetWindow();
+                           if (mauiWindow != null && mauiWindow.Handler != null)
+                           {
+                               var torrents = mauiWindow.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
+                               torrents.SaveAndExit().Wait();
+
+                               var settings = mauiWindow.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
+                               settings.SaveAsync().Wait();
                            }
                        })
                 );

@@ -70,3 +70,8 @@
         border: 0;
         outline: 0;
     }
+
+.button-wrapper {
+    display: flex;
+    gap: 5px;
+}

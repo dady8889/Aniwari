@@ -31,7 +31,9 @@
                         <div class="seeders">
                             @torrent.Seeders
                         </div>
-
+                        <div class="leechers">
+                            @torrent.Leechers
+                        </div>
                         <button class="torrent-picker-item__select" @onclick="() => OnSelectClicked(torrent)">
                             Select
                         </button>

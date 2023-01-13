@@ -31,12 +31,14 @@
                     <div @ref="searchStringFieldReference" class="searchstring-field" @onclick:stopPropagation="false" contenteditable="true">
                         @Anime.SearchString
                     </div>
-                    <button class="title-button" @onclick:stopPropagation="true" @onclick="OnEditEnded">
-                        Save
-                    </button>
-                    <button class="title-button" @onclick:stopPropagation="true" @onclick="OnResetClicked">
-                        Reset
-                    </button>
+                    <div class="button-wrapper">
+                        <button class="title-button" @onclick:stopPropagation="true" @onclick="OnEditEnded">
+                            Save
+                        </button>
+                        <button class="title-button" @onclick:stopPropagation="true" @onclick="OnResetClicked">
+                            Reset
+                        </button>
+                    </div>
                 </div>
             }
             <div class="episodes-counter">
@@ -106,7 +108,7 @@
                             {
                                 @if (!ep.Downloading)
                                 {
-                                    <div>
+                                    <div class="button-wrapper">
                                         <button class="episode__button" @onclick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
                                             Download
                                         </button>
@@ -117,7 +119,7 @@
                                 }
                                 else
                                 {
-                                    <div class="episode__progress">
+                                    <div>
                                         @ep.Progress
                                         %
                                     </div>
@@ -128,7 +130,27 @@
                             }
                             else
                             {
-                                <div>
+                                if (ep.Seeding)
+                                {
+                                    <div>
+                                        @(ep.SeedRatio.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture))
+                                    </div>
+                                }
+
+                                <div class="button-wrapper">
+                                    @if (ep.Seeding)
+                                    {
+                                        <button class="episode__button" @onclick="() => OnCancelSeedClicked(ep)">
+                                            Stop seeding
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="episode__button" @onclick="() => OnSeedClicked(ep)">
+                                            Seed
+                                        </button>
+                                    }
+
                                     <button class="episode__button" @onclick="() => OnWatchClicked(ep)">
                                         Watch
                                     </button>
@@ -253,21 +275,20 @@
 
     private async Task OnDeleteClicked(SettingsStore.Episode episode)
     {
-        try
+        if (episode.Seeding)
         {
-            var archivePath = SettingsService.GetStore().ArchivePath;
-            var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
-
-            if (File.Exists(videoPath))
-                File.Delete(videoPath);
-
-            AnimeRepository.RemoveEpisode(Anime!, episode);
-            await SettingsService.SaveAsync();
+            await TorrentService.CancelSeed(Anime!.Id, episode.Id);
+            episode.Seeding = false;
         }
-        catch (Exception ex)
-        {
 
-        }
+        var archivePath = SettingsService.GetStore().ArchivePath;
+        var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
+
+        if (File.Exists(videoPath))
+            File.Delete(videoPath);
+
+        AnimeRepository.RemoveEpisode(Anime!, episode);
+        await SettingsService.SaveAsync();
     }
 
     private void OnResetClicked()
@@ -295,5 +316,20 @@
         StateHasChanged();
 
         await SettingsService.SaveAsync();
+    }
+
+    private async Task OnCancelSeedClicked(SettingsStore.Episode episode)
+    {
+        await TorrentService.CancelSeed(Anime!.Id, episode.Id);
+        episode.Seeding = false;
+
+        StateHasChanged();
+
+        await SettingsService.SaveAsync();
+    }
+
+    private async Task OnSeedClicked(SettingsStore.Episode episode)
+    {
+        await OnDownloadClicked(episode);
     }
 }

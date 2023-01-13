@@ -48,10 +48,6 @@ public partial class App : Application
 
     private void OnExit(object? sender, EventArgs args)
     {
-        var torrents = this.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
-        torrents.SaveAndExit().Wait();
-
-        var settings = this.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
-        settings.SaveAsync().Wait();
+        
     }
 }

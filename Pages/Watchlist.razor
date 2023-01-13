@@ -87,6 +87,7 @@
             AnimeRepository.AddEpisode(args.Anime, new SettingsStore.Episode()
                 {
                     Id = args.Episode,
+                    AnimeId = args.Anime.Id,
                     TorrentMagnet = args.Magnet,
                     TorrentTitle = args.Title,
                 });

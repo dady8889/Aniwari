@@ -100,7 +100,8 @@ public class StoreService : IStoreService
 
             _logger.LogDebug("Saving settings to file {}", settingsFilePath);
 
-        } catch(Exception ex)
+        }
+        catch(Exception ex)
         {
             _logger.LogError("Could not save the settings file. Exception: {}", ex.ToString());
             throw;
@@ -221,13 +222,21 @@ public class SettingsStore
 
     public class Episode
     {
+        [JsonIgnore] public int LastAddedBytesSent { get; set; }
+        [JsonIgnore] public int LastAddedBytesReceived { get; set; }
+        [JsonIgnore] public int Progress { get; set; }
         public int Id { get; set; }
+        public int AnimeId { get; set; }
         public bool Watched { get; set; }
         public bool Downloaded { get; set; }
-        [JsonIgnore] public bool Downloading { get; set; }
-        [JsonIgnore] public int Progress { get; set; }
+        public bool Downloading { get; set; }
+        public bool Seeding { get; set; }
+        public int BytesSent { get; set; }
+        public int BytesReceived { get; set; }
         public string TorrentTitle { get; set; } = string.Empty;
         public string TorrentMagnet { get; set; } = string.Empty;
         public string VideoFilePath { get; set; } = string.Empty;
+
+        [JsonIgnore] public double SeedRatio => BytesReceived <= 0 ? 0 : BytesSent / (double)BytesReceived;
     }
 }

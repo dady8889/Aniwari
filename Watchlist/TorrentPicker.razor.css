@@ -37,6 +37,10 @@
     color: hsl(127, 71%, 35%);
 }
 
+.leechers {
+    color: hsl(0, 100%, 46%);
+}
+
 .return-button {
     padding: 1rem 2rem;
 }

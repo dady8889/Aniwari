@@ -1,26 +1,36 @@
 ﻿using Microsoft.Extensions.Logging;
 using MonoTorrent;
 using MonoTorrent.Client;
+using System;
+using static Aniwari.BL.Services.SettingsStore;
 
 namespace Aniwari.BL.Services;
 
 public interface ITorrentService
 {
-    Task DownloadAnime(int animeId, int episodeId, string magnet, string path, Action<double>? onUpdate = null, Action<string>? onFinish = null, Action<string>? onError = null);
-    Task<string> CancelDownload(int animeId, int episodeId);
+    Task DownloadAnime(int animeId, int episodeId, string magnet, string path);
+    Task<string?> CancelDownload(int animeId, int episodeId);
     Task SaveAndExit();
     Task Restore();
 }
 
+public record TorrentUpdated(int AnimeId, int EpisodeId, double Progress) : IMessage;
+public record TorrentFinished(int AnimeId, int EpisodeId, string FilePath) : IMessage;
+public record TorrentErrored(int AnimeId, int EpisodeId, string ErrorMessage) : IMessage;
+
 public class TorrentService : ITorrentService
 {
+    private readonly ISettingsService _settingsService;
+    private readonly IMessageBusService _messageBusService;
     private readonly ILogger<TorrentService> _logger;
     private readonly ClientEngine _clientEngine;
     private readonly Dictionary<ValueTuple<int, int>, TorrentManager> _torrentQueue = new();
     private readonly string _stateFilePath;
 
-    public TorrentService(ILogger<TorrentService> logger)
+    public TorrentService(ILogger<TorrentService> logger, IMessageBusService messageBusService, ISettingsService settingsService)
     {
+        _settingsService = settingsService;
+        _messageBusService = messageBusService;
         _logger = logger;
 
         _stateFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aniwari\\", "state.dat");
@@ -81,10 +91,44 @@ public class TorrentService : ITorrentService
         return null;
     }
 
-    public async Task DownloadAnime(int animeId, int episodeId, string magnet, string path, Action<double>? onUpdate = null, Action<string>? onFinish = null, Action<string>? onError = null)
+    public async Task DownloadAnime(int animeId, int episodeId, string magnet, string path)
     {
         var key = (animeId, episodeId);
-        var torrentHandle = await DownloadMagnet(magnet, path, onUpdate, onFinish, onError);
+        var episode = _settingsService.GetStore().Animes.FirstOrDefault(x => x.Id == animeId)?.Episodes.FirstOrDefault(x => x.Id == episodeId);
+
+        if (episode == null)
+        {
+            _logger.LogError("Episode {} for anime {} was not found.", episodeId, animeId);
+            throw new NullReferenceException($"Episode {episodeId} for anime {animeId} was not found.");
+        }
+
+        var torrentHandle = await DownloadMagnet(magnet, path, (progress) =>
+        {
+            var prevProgress = episode.Progress;
+            episode.Progress = (int)progress;
+
+            if (prevProgress != (int)progress)
+                _messageBusService.Publish(new TorrentUpdated(animeId, episodeId, progress));
+        }, async (filePath) =>
+        {
+            episode.Downloading = false;
+            episode.Downloaded = true;
+            episode.VideoFilePath = filePath;
+            await _settingsService.SaveAsync();
+
+            _torrentQueue.Remove(key);
+            _messageBusService.Publish(new TorrentFinished(animeId, episodeId, filePath));
+
+        }, async (errorMessage) =>
+        {
+            episode.Downloading = false;
+            episode.Downloaded = false;
+            episode.VideoFilePath = string.Empty;
+            await _settingsService.SaveAsync();
+
+            _torrentQueue.Remove(key);
+            _messageBusService.Publish(new TorrentErrored(animeId, episodeId, errorMessage));
+        });
 
         if (torrentHandle == null)
         {
@@ -107,7 +151,7 @@ public class TorrentService : ITorrentService
         _torrentQueue.Add((animeId, episodeId), torrentHandle);
     }
 
-    public async Task<string> CancelDownload(int animeId, int episodeId)
+    public async Task<string?> CancelDownload(int animeId, int episodeId)
     {
         var key = (animeId, episodeId);
         if (!_torrentQueue.TryGetValue(key, out TorrentManager? torrent))
@@ -120,6 +164,9 @@ public class TorrentService : ITorrentService
         await _clientEngine.RemoveAsync(torrent);
 
         _torrentQueue.Remove(key);
+
+        if (torrent == null || torrent.Files == null || torrent.Files.Count == 0)
+            return null;
 
         return torrent.Files[0].Path;
     }

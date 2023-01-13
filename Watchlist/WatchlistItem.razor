@@ -166,6 +166,43 @@
         await base.OnInitializedAsync();
 
         module = await JS.InvokeAsync<IJSObjectReference>("import", "./Watchlist/WatchlistItem.razor.js");
+
+        ReactTo<TorrentUpdated>(async (e) =>
+        {
+            if (e.AnimeId == Anime?.Id)
+            {
+                var episode = Anime.Episodes.FirstOrDefault(x => x.Id == e.EpisodeId);
+                if (episode != null)
+                {
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        });
+
+        ReactTo<TorrentFinished>(async (e) =>
+        {
+            if (e.AnimeId == Anime?.Id)
+            {
+                var episode = Anime.Episodes.FirstOrDefault(x => x.Id == e.EpisodeId);
+                if (episode != null)
+                {
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        });
+
+        ReactTo<TorrentErrored>(async (e) =>
+        {
+            if (e.AnimeId == Anime?.Id)
+            {
+                var episode = Anime.Episodes.FirstOrDefault(x => x.Id == e.EpisodeId);
+                if (episode != null)
+                {
+                    await InvokeAsync(StateHasChanged);
+                    // todo: show error
+                }
+            }
+        });
     }
 
     private async Task OnSearchClicked(int episode)
@@ -192,32 +229,7 @@
 
         episode.Downloading = true;
 
-        await TorrentService.DownloadAnime(Anime!.Id, episode.Id, episode.TorrentMagnet, archivePath,
-           onUpdate: async (progress) =>
-            {
-                if (episode.Progress != (int)progress)
-                {
-                    episode.Progress = (int)progress;
-                    await InvokeAsync(StateHasChanged);
-                }
-            },
-          onFinish: async (file) =>
-            {
-                episode.Downloading = false;
-                episode.Downloaded = true;
-                episode.VideoFilePath = file;
-                await SettingsService.SaveAsync();
-                await InvokeAsync(StateHasChanged);
-            },
-          onError: async (msg) =>
-            {
-                episode.Downloading = false;
-                episode.Downloaded = false;
-                episode.VideoFilePath = string.Empty;
-                await InvokeAsync(StateHasChanged);
-                // todo: show error
-            }
-        );
+        await TorrentService.DownloadAnime(Anime!.Id, episode.Id, episode.TorrentMagnet, archivePath);
     }
 
     private void OnWatchClicked(SettingsStore.Episode episode)
@@ -266,11 +278,14 @@
     private async Task OnCancelDownloadClicked(SettingsStore.Episode episode)
     {
         var file = await TorrentService.CancelDownload(Anime!.Id, episode.Id);
-        var archivePath = SettingsService.GetStore().ArchivePath;
-        var videoPath = Path.Combine(archivePath, file);
+        if (file != null)
+        {
+            var archivePath = SettingsService.GetStore().ArchivePath;
+            var videoPath = Path.Combine(archivePath, file);
 
-        if (File.Exists(videoPath))
-            File.Delete(videoPath);
+            if (File.Exists(videoPath))
+                File.Delete(videoPath);
+        }
 
         episode.Progress = 0;
         episode.Downloading = false;

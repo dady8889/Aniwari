@@ -1,21 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Threading.RateLimiting;
-using System.Xml.Linq;
+using Aniwari.BL.Interfaces;
+using Aniwari.DAL.Schedule;
 using JikanDotNet;
 using Microsoft.Extensions.Logging;
 
 namespace Aniwari.BL.Services;
-
-public interface IScheduleService
-{
-    /// <summary>
-    /// Loads the anime schedule into a list of key-value pairs, where key is the airing weekday and value is the <see cref="AnimeSchedule"/> object. 
-    /// </summary>
-    IAsyncEnumerable<IList<KeyValuePair<ScheduleDay, AnimeSchedule>>> GetSchedule(CancellationToken cancellationToken = default);
-}
 
 public class ScheduleService : IScheduleService
 {
@@ -162,45 +152,4 @@ public class ScheduleService : IScheduleService
 
         } while (next);
     }
-}
-
-public class AnimeSchedule
-{
-    public int MalId { get; set; }
-    public string Url { get; set; } = string.Empty;
-    public string Image { get; set; } = string.Empty;
-    public string Synopsis { get; set; } = string.Empty;
-    public ScheduleDay ScheduleDay { get; set; } = ScheduleDay.Monday;
-    public ScheduleDay ConvertedScheduleDay { get; set; } = ScheduleDay.Monday;
-    public Dictionary<TitleType, List<string>> Titles { get; set; } = new();
-    public TimeOnly? AirTime { get; set; }
-    public TimeOnly? ConvertedAirTime { get; set; }
-    public string? Timezone { get; set; }
-    public string RawAirTime { get; set; } = string.Empty;
-    public int? Episodes { get; set; }
-    public DateTime? AiredDate { get; set; }
-
-    public string GetDefaultTitle()
-    {
-        return Titles[TitleType.Default][0];
-    }
-}
-
-public enum ScheduleDay
-{
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday
-}
-
-public enum TitleType
-{
-    Default,
-    English,
-    Japanese,
-    Synonym
 }

@@ -1,4 +1,7 @@
-﻿@using Aniwari.BL.Services;
+﻿@using Aniwari.BL.Interfaces;
+@using Aniwari.BL.Services;
+@using Aniwari.DAL.Nyaa;
+@using Aniwari.DAL.Storage;
 
 @inject INyaaService NyaaService
 
@@ -46,9 +49,9 @@
 </div>
 
 @code {
-    public record TorrentSelectedEventArgs(SettingsStore.Anime Anime, int Episode, bool Canceled, string Title, string Magnet);
+    public record TorrentSelectedEventArgs(Anime Anime, int Episode, bool Canceled, string Title, string Magnet);
 
-    [Parameter] public SettingsStore.Anime? Anime { get; set; }
+    [Parameter] public Anime? Anime { get; set; }
     [Parameter] public int? Episode { get; set; }
     [Parameter] public EventCallback<TorrentSelectedEventArgs> OnTorrentSelected { get; set; }
 

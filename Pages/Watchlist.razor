@@ -1,5 +1,7 @@
-﻿@using Aniwari.BL.Repositories;
+﻿@using Aniwari.BL.Interfaces;
+@using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
+@using Aniwari.DAL.Storage;
 @using Aniwari.Watchlist;
 
 @page "/watchlist"
@@ -50,9 +52,9 @@
     private Animate? animateTorrentPicker;
 
     private SettingsStore? Store;
-    private List<SettingsStore.Anime> watchingAnime = new();
+    private List<Anime> watchingAnime = new();
     private int savedScroll = 0;
-    private SettingsStore.Anime? selectedAnime;
+    private Anime? selectedAnime;
     private int? selectedEpisode;
 
     protected override async Task OnInitializedAsync()
@@ -84,7 +86,7 @@
 
         if (!args.Canceled)
         {
-            AnimeRepository.AddEpisode(args.Anime, new SettingsStore.Episode()
+            AnimeRepository.AddEpisode(args.Anime, new Episode()
                 {
                     Id = args.Episode,
                     AnimeId = args.Anime.Id,

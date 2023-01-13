@@ -1,12 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Aniwari.BL.Interfaces;
+using Aniwari.DAL.Nyaa;
+using Microsoft.Extensions.Logging;
 using NyaaWrapper;
 
 namespace Aniwari.BL.Services;
-
-public interface INyaaService
-{
-    Task<List<NyaaAnime>> GetAnime(string title);
-}
 
 public class NyaaService : INyaaService
 {
@@ -58,17 +55,3 @@ public class NyaaService : INyaaService
     }
 }
 
-public class NyaaAnime
-{
-    public int Id { get; set; }
-    public string Category { get; set; } = string.Empty;
-    public string Url { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string DownloadUrl { get; set; } = string.Empty;
-    public string Magnet { get; set; } = string.Empty;
-    public string Size { get; set; } = string.Empty;
-    public string Date { get; set; } = string.Empty;
-    public int Seeders { get; set; }
-    public int Leechers { get; set; }
-    public int CompletedDownloads { get; set; }
-}

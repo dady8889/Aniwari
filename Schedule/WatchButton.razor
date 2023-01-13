@@ -1,5 +1,8 @@
-﻿@using Aniwari.BL.Repositories;
+﻿@using Aniwari.BL.Interfaces;
+@using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
+@using Aniwari.DAL.Schedule;
+@using Aniwari.DAL.Storage;
 
 @inject ISettingsService SettingsService
 @inject IAnimeRepository AnimeRepository
@@ -11,13 +14,10 @@
 
     private bool watching = false;
 
-    private SettingsStore? Store;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-        Store = SettingsService.GetStore();
 
         if (Anime != null)
         {

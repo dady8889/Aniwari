@@ -1,5 +1,8 @@
-﻿@using Aniwari.BL.Services;
+﻿@using Aniwari.BL.Interfaces;
+@using Aniwari.BL.Services;
 @using Aniwari.BL.Repositories;
+@using Aniwari.DAL.Schedule;
+@using Aniwari.DAL.Storage;
 @using Aniwari.Schedule;
 
 @page "/schedule"
@@ -61,7 +64,6 @@
 </div>
 
 @code {
-    private SettingsStore? Store;
     private IJSObjectReference? module;
     private Dictionary<ScheduleDay, List<AnimeSchedule>> dict = new();
     private Dictionary<ScheduleDay, WeekdayDate> dateMap = new();
@@ -71,8 +73,6 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
-        Store = SettingsService.GetStore();
 
         var today = GetToday();
 

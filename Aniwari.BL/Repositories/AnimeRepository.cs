@@ -1,25 +1,11 @@
-﻿using Aniwari.BL.Services;
+﻿using Aniwari.BL.Interfaces;
+using Aniwari.BL.Messaging;
+using Aniwari.BL.Services;
+using Aniwari.DAL.Schedule;
+using Aniwari.DAL.Storage;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Aniwari.BL.Services.SettingsStore;
 
 namespace Aniwari.BL.Repositories;
-
-public record AnimeWatchingChanged(Anime Anime, bool Watching) : IMessage;
-public record AnimeEpisodeChanged(Anime Anime, Episode? OldEpisode, Episode? NewEpisode) : IMessage;
-
-public interface IAnimeRepository
-{
-    void SetAnimeWatching(int id, bool watching);
-    bool GetAnimeWatching(int id);
-    Anime AddAnime(AnimeSchedule scheduledAnime);
-    void AddEpisode(Anime anime, Episode episode);
-    void RemoveEpisode(Anime anime, Episode episode);
-}
 
 public class AnimeRepository : IAnimeRepository
 {
@@ -125,7 +111,7 @@ public class AnimeRepository : IAnimeRepository
             return anime;
         }
 
-        var newAnime = new SettingsStore.Anime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.AiredDate, scheduledAnime.ScheduleDay.ToString(), scheduledAnime.AirTime);
+        var newAnime = new Anime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.AiredDate, scheduledAnime.ScheduleDay.ToString(), scheduledAnime.AirTime);
 
         _store.Animes.Add(newAnime);
 

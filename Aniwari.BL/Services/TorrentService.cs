@@ -1,23 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Aniwari.BL.Interfaces;
+using Aniwari.BL.Messaging;
+using Aniwari.DAL.Constants;
+using Aniwari.DAL.Storage;
+using Microsoft.Extensions.Logging;
 using MonoTorrent;
 using MonoTorrent.Client;
-using System;
-using static Aniwari.BL.Services.SettingsStore;
 
 namespace Aniwari.BL.Services;
-
-public interface ITorrentService
-{
-    Task DownloadAnime(int animeId, int episodeId, string magnet, string path);
-    Task<string?> CancelDownload(int animeId, int episodeId);
-    Task CancelSeed(int animeId, int episodeId);
-    Task SaveAndExit();
-    Task Restore();
-}
-
-public record TorrentUpdated(int AnimeId, int EpisodeId, double Progress) : IMessage;
-public record TorrentFinished(int AnimeId, int EpisodeId, string FilePath) : IMessage;
-public record TorrentErrored(int AnimeId, int EpisodeId, string ErrorMessage) : IMessage;
 
 public class TorrentService : ITorrentService
 {
@@ -27,7 +16,7 @@ public class TorrentService : ITorrentService
     private readonly ILogger<TorrentService> _logger;
     private readonly ClientEngine _clientEngine;
     private readonly Dictionary<ValueTuple<int, int>, TorrentManager> _torrentQueue = new();
-    private readonly string _stateFilePath;
+    private readonly string _stateFilePath = Paths.StateFilePath;
 
     public TorrentService(ILogger<TorrentService> logger, IMessageBusService messageBusService, ISettingsService settingsService)
     {
@@ -35,10 +24,8 @@ public class TorrentService : ITorrentService
         _messageBusService = messageBusService;
         _logger = logger;
 
-        _stateFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aniwari\\", "state.dat");
-
         EngineSettingsBuilder builder = new(new EngineSettings());
-        builder.CacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aniwari\\", "cache\\");
+        builder.CacheDirectory = Paths.TorrentCacheDirPath;
         _clientEngine = new ClientEngine(builder.ToSettings());
 
         _monitorTimer = new Timer(_ => MonitorTick(), null, 0, 30000);

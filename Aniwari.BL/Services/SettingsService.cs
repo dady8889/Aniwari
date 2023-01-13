@@ -1,29 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Aniwari.BL.Interfaces;
+using Aniwari.DAL.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace Aniwari.BL.Services;
-
-public interface ISettingsService
-{
-    /// <summary>
-    /// Loads the settings file provided by <see cref="IStoreService"/> into cache.
-    /// </summary>
-    Task LoadAsync();
-
-    /// <summary>
-    /// Saves the cached settings file using <see cref="IStoreService"/>.
-    /// </summary>
-    Task SaveAsync();
-
-    /// <summary>
-    /// Gets the settings store from cache. Change the object's properties to edit the application's settings.
-    /// </summary>
-    SettingsStore GetStore();
-}
 
 public class SettingsService : ISettingsService
 {

@@ -1,47 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Aniwari.BL.Interfaces;
+using Aniwari.BL.Messaging;
+using Microsoft.Extensions.Logging;
 
 namespace Aniwari.BL.Services;
-
-public interface IMessage
-{
-}
-
-public interface ISubscription
-{
-    Type ActionType { get; }
-}
-
-public interface ISubscription<T> where T : IMessage
-{
-    Action<T> ActionHandler { get; }
-}
-
-public class Subscription<T> : ISubscription<T>, ISubscription where T : IMessage
-{
-    public Action<T> ActionHandler { get; private set; }
-
-    public Type ActionType { get; private set; }
-
-    public Subscription(Action<T> action)
-    {
-        ActionHandler = action;
-        ActionType = typeof(T);
-    }
-}
-
-public interface IMessageBusService
-{
-    void Publish<T>(T message) where T : IMessage;
-
-    ISubscription Subscribe<T>(Action<T> actionCallback) where T : IMessage;
-
-    void Unsubscribe(ISubscription subscription);
-}
 
 public class MessageBusService : IMessageBusService
 {

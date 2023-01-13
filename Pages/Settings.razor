@@ -1,4 +1,7 @@
-﻿@using Aniwari.BL.Services;
+﻿@using Aniwari.BL.Interfaces;
+@using Aniwari.BL.Services;
+@using Aniwari.DAL.Constants;
+@using Aniwari.DAL.Storage;
 @using Aniwari.Managers;
 @using Aniwari.Platforms;
 
@@ -103,8 +106,6 @@
     </div>
 </div>
 
-
-
 @code {
     private SettingsStore? Store;
 
@@ -124,7 +125,7 @@
         module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Settings.razor.js");
     }
 
-    private async Task OnThemeColorChanged(ChangeEventArgs args, string propertyName, SettingsStore.Setting setting, bool save)
+    private async Task OnThemeColorChanged(ChangeEventArgs args, string propertyName, Setting setting, bool save)
     {
         string color = (string?)args.Value ?? (string)setting.DefaultValue;
         Store!.Set(propertyName, color);
@@ -189,7 +190,7 @@
             Store!.Set(setting.Type, propertyName, setting.DefaultValue);
             if (propertyName == nameof(SettingsStore.ThemeColor))
             {
-                await JS.InvokeVoidAsync("setThemeColors", setting.DefaultValue);
+                await Theme.SetThemeColor(JS);
             }
         }
 
@@ -198,7 +199,7 @@
 
     private async Task OnDeleteWatchlistClicked()
     {
-        SettingsService.GetStore().Animes.Clear();
+        Store!.Animes.Clear();
         await SettingsService.SaveAsync();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Aniwari.BL.Services;
+﻿using Aniwari.BL.Interfaces;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
@@ -36,18 +36,5 @@ public partial class App : Application
 
         var torrents = this.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
         await torrents.Restore();
-    }
-
-    protected override Window CreateWindow(IActivationState? activationState)
-    {
-        Window window = base.CreateWindow(activationState);
-        window.Stopped += OnExit;
-
-        return window;
-    }
-
-    private void OnExit(object? sender, EventArgs args)
-    {
-        
     }
 }

@@ -1,6 +1,10 @@
-﻿@using Aniwari.BL.Repositories;
+﻿@using System.Diagnostics;
+
+@using Aniwari.BL.Interfaces;
+@using Aniwari.BL.Messaging;
+@using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
-@using System.Diagnostics;
+@using Aniwari.DAL.Storage;
 
 @inherits ReactiveComponentBase
 
@@ -174,9 +178,9 @@
 </Accordion>
 
 @code {
-    public record SearchEventArgs(SettingsStore.Anime Anime, int Episode);
+    public record SearchEventArgs(Anime Anime, int Episode);
 
-    [Parameter] public SettingsStore.Anime? Anime { get; set; }
+    [Parameter] public Anime? Anime { get; set; }
     [Parameter] public EventCallback<SearchEventArgs> OnSearch { get; set; }
 
     private IJSObjectReference? module;
@@ -245,7 +249,7 @@
         editSearchString = false;
     }
 
-    private async Task OnDownloadClicked(SettingsStore.Episode episode)
+    private async Task OnDownloadClicked(Episode episode)
     {
         string archivePath = SettingsService.GetStore().ArchivePath;
 
@@ -254,7 +258,7 @@
         await TorrentService.DownloadAnime(Anime!.Id, episode.Id, episode.TorrentMagnet, archivePath);
     }
 
-    private void OnWatchClicked(SettingsStore.Episode episode)
+    private void OnWatchClicked(Episode episode)
     {
         var archivePath = SettingsService.GetStore().ArchivePath;
         var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
@@ -273,7 +277,7 @@
         }
     }
 
-    private async Task OnDeleteClicked(SettingsStore.Episode episode)
+    private async Task OnDeleteClicked(Episode episode)
     {
         if (episode.Seeding)
         {
@@ -296,7 +300,7 @@
         Anime!.SearchString = $"{Anime!.Title} @ep";
     }
 
-    private async Task OnCancelDownloadClicked(SettingsStore.Episode episode)
+    private async Task OnCancelDownloadClicked(Episode episode)
     {
         var file = await TorrentService.CancelDownload(Anime!.Id, episode.Id);
         if (file != null)
@@ -318,7 +322,7 @@
         await SettingsService.SaveAsync();
     }
 
-    private async Task OnCancelSeedClicked(SettingsStore.Episode episode)
+    private async Task OnCancelSeedClicked(Episode episode)
     {
         await TorrentService.CancelSeed(Anime!.Id, episode.Id);
         episode.Seeding = false;
@@ -328,7 +332,7 @@
         await SettingsService.SaveAsync();
     }
 
-    private async Task OnSeedClicked(SettingsStore.Episode episode)
+    private async Task OnSeedClicked(Episode episode)
     {
         await OnDownloadClicked(episode);
     }

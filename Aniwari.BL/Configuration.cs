@@ -1,4 +1,5 @@
-﻿using Aniwari.BL.Repositories;
+﻿using Aniwari.BL.Interfaces;
+using Aniwari.BL.Repositories;
 using Aniwari.BL.Services;
 using JikanDotNet;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,14 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Aniwari.BL;
 using Microsoft.Maui.LifecycleEvents;
-using AngleSharp.Dom;
 using Microsoft.Maui.Platform;
-using Microsoft.UI.Windowing;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.UI.Xaml.Controls;
 using Aniwari.Platforms;
 using Aniwari.Managers;
-using Aniwari.BL.Services;
+using Aniwari.BL.Interfaces;
 
 namespace Aniwari;
 

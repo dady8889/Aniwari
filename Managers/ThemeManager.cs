@@ -1,11 +1,7 @@
-﻿using Aniwari.BL.Services;
+﻿using Aniwari.BL.Interfaces;
+using Aniwari.BL.Services;
+using Aniwari.DAL.Constants;
 using Microsoft.JSInterop;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Aniwari.Managers;
 
@@ -15,12 +11,6 @@ public interface IThemeManager
     /// Set colors according to the values stored in <see cref="SettingsStore"/>.
     /// </summary>
     Task SetThemeColor(IJSRuntime js);
-}
-
-public static class ThemeColors
-{
-    public readonly static string LightColor = "#EFEFEF";
-    public readonly static string DarkColor = "#1C1C1C";
 }
 
 public class ThemeManager : IThemeManager

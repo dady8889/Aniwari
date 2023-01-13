@@ -27,23 +27,31 @@ public partial class App : Application
         MainPage = new MainPage();
     }
 
+    protected override async void OnStart()
+    {
+        base.OnStart();
+
+        var settings = this.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
+        await settings.LoadAsync();
+
+        var torrents = this.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
+        await torrents.Restore();
+    }
+
     protected override Window CreateWindow(IActivationState? activationState)
     {
         Window window = base.CreateWindow(activationState);
-
-        // cross-platform window created event (entry-point)
-        window.Created += async (s, e) =>
-        {
-            var settings = this.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
-            await settings.LoadAsync();
-        };
-
-        window.Stopped += async (s, e) =>
-        {
-            var settings = this.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
-            await settings.SaveAsync();
-        };
+        window.Stopped += OnExit;
 
         return window;
+    }
+
+    private void OnExit(object? sender, EventArgs args)
+    {
+        var torrents = this.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
+        torrents.SaveAndExit().Wait();
+
+        var settings = this.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
+        settings.SaveAsync().Wait();
     }
 }

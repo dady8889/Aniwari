@@ -40,7 +40,7 @@ public class SettingsService : ISettingsService
 
     public async Task LoadAsync()
     {
-        cachedSettings = await _storeService.LoadAsync();
+        cachedSettings = await _storeService.LoadAsync().ConfigureAwait(false);
     }
 
     public async Task SaveAsync()
@@ -51,7 +51,7 @@ public class SettingsService : ISettingsService
             throw new Exception("Settings file has not yet been loaded.");
         }
 
-        await _storeService.SaveAsync(cachedSettings);
+        await _storeService.SaveAsync(cachedSettings).ConfigureAwait(false);
     }
 
     public SettingsStore GetStore()

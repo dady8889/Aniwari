@@ -106,9 +106,14 @@
                             {
                                 @if (!ep.Downloading)
                                 {
-                                    <button class="episode__button" @onclick="() => OnDownloadClicked(ep)">
-                                        Download
-                                    </button>
+                                    <div>
+                                        <button class="episode__button" @onclick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
+                                            Download
+                                        </button>
+                                        <button class="episode__button" @onclick="() => OnSearchClicked(epId)">
+                                            Search
+                                        </button>
+                                    </div>
                                 }
                                 else
                                 {
@@ -116,6 +121,9 @@
                                         @ep.Progress
                                         %
                                     </div>
+                                    <button class="episode__button" @onclick="() => OnCancelDownloadClicked(ep)">
+                                        Cancel
+                                    </button>
                                 }
                             }
                             else
@@ -184,23 +192,32 @@
 
         episode.Downloading = true;
 
-        await TorrentService.DownloadMagnet(episode.TorrentMagnet, archivePath,
-            (progress) =>
+        await TorrentService.DownloadAnime(Anime!.Id, episode.Id, episode.TorrentMagnet, archivePath,
+           onUpdate: async (progress) =>
             {
                 if (episode.Progress != (int)progress)
                 {
                     episode.Progress = (int)progress;
-                    InvokeAsync(StateHasChanged);
+                    await InvokeAsync(StateHasChanged);
                 }
             },
-            async (file) =>
+          onFinish: async (file) =>
             {
                 episode.Downloading = false;
                 episode.Downloaded = true;
                 episode.VideoFilePath = file;
                 await SettingsService.SaveAsync();
                 await InvokeAsync(StateHasChanged);
-            });
+            },
+          onError: async (msg) =>
+            {
+                episode.Downloading = false;
+                episode.Downloaded = false;
+                episode.VideoFilePath = string.Empty;
+                await InvokeAsync(StateHasChanged);
+                // todo: show error
+            }
+        );
     }
 
     private void OnWatchClicked(SettingsStore.Episode episode)
@@ -230,11 +247,10 @@
             var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
 
             if (File.Exists(videoPath))
-            {
                 File.Delete(videoPath);
-                AnimeRepository.RemoveEpisode(Anime!, episode);
-                await SettingsService.SaveAsync();
-            }
+
+            AnimeRepository.RemoveEpisode(Anime!, episode);
+            await SettingsService.SaveAsync();
         }
         catch (Exception ex)
         {
@@ -245,5 +261,24 @@
     private void OnResetClicked()
     {
         Anime!.SearchString = $"{Anime!.Title} @ep";
+    }
+
+    private async Task OnCancelDownloadClicked(SettingsStore.Episode episode)
+    {
+        var file = await TorrentService.CancelDownload(Anime!.Id, episode.Id);
+        var archivePath = SettingsService.GetStore().ArchivePath;
+        var videoPath = Path.Combine(archivePath, file);
+
+        if (File.Exists(videoPath))
+            File.Delete(videoPath);
+
+        episode.Progress = 0;
+        episode.Downloading = false;
+        episode.Downloaded = false;
+        episode.VideoFilePath = string.Empty;
+
+        StateHasChanged();
+
+        await SettingsService.SaveAsync();
     }
 }

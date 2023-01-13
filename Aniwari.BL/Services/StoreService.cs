@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
@@ -46,8 +47,8 @@ public class StoreService : IStoreService
 
             var settings = new SettingsStore();
 
-            await JsonSerializer.SerializeAsync(newFile, settings, new JsonSerializerOptions() { WriteIndented = true });
-            await newFile.DisposeAsync();
+            await JsonSerializer.SerializeAsync(newFile, settings, new JsonSerializerOptions() { WriteIndented = true }).ConfigureAwait(false);
+            await newFile.DisposeAsync().ConfigureAwait(false);
 
             _logger.LogDebug("Creating new settings file to {}", settingsFilePath);
         }
@@ -66,7 +67,7 @@ public class StoreService : IStoreService
 
             using var file = File.Open(settingsFilePath, FileMode.Open);
             var json = await JsonSerializer.DeserializeAsync<SettingsStore>(file);
-            await file.DisposeAsync();
+            await file.DisposeAsync().ConfigureAwait(false);
 
             if (json == null)
                 throw new NullReferenceException(nameof(json));
@@ -90,12 +91,12 @@ public class StoreService : IStoreService
     {
         try
         {
-            await EnsurePathAsync();
+            await EnsurePathAsync().ConfigureAwait(false);
 
             using var file = File.Open(settingsFilePath, FileMode.Truncate);
 
-            await JsonSerializer.SerializeAsync(file, store, new JsonSerializerOptions() { WriteIndented = true });
-            await file.DisposeAsync();
+            await JsonSerializer.SerializeAsync(file, store, new JsonSerializerOptions() { WriteIndented = true }).ConfigureAwait(false);
+            await file.DisposeAsync().ConfigureAwait(false);
 
             _logger.LogDebug("Saving settings to file {}", settingsFilePath);
 
@@ -223,8 +224,8 @@ public class SettingsStore
         public int Id { get; set; }
         public bool Watched { get; set; }
         public bool Downloaded { get; set; }
-        public bool Downloading { get; set; }
-        public int Progress { get; set; }
+        [JsonIgnore] public bool Downloading { get; set; }
+        [JsonIgnore] public int Progress { get; set; }
         public string TorrentTitle { get; set; } = string.Empty;
         public string TorrentMagnet { get; set; } = string.Empty;
         public string VideoFilePath { get; set; } = string.Empty;

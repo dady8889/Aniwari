@@ -90,6 +90,8 @@
                     TorrentMagnet = args.Magnet,
                     TorrentTitle = args.Title,
                 });
+
+            await SettingsService.SaveAsync();
         }
 
         selectedAnime = null;

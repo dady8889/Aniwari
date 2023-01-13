@@ -48,6 +48,12 @@ public class ThemeManager : IThemeManager
 
     private async Task SetThemeColor(IJSRuntime js, string hex)
     {
+        if (string.IsNullOrEmpty(hex))
+        {
+            await SetDefaultLight(js);
+            return;
+        }
+
         await js.InvokeVoidAsync("setThemeColors", hex);
     }
 

@@ -58,8 +58,30 @@ public class AnimeRepository : IAnimeRepository
 
     public void AddEpisode(Anime anime, Episode episode)
     {
-        if (anime.Episodes.Any(ep => ep.Id == episode.Id))
+        var ep = anime.Episodes.FirstOrDefault(ep => ep.Id == episode.Id);
+
+        // if the episode is already in DB, check if it needs some updates
+        if (ep != null)
+        {
+            bool changed = false;
+
+            if (ep.TorrentMagnet != episode.TorrentMagnet)
+            {
+                ep.TorrentMagnet = episode.TorrentMagnet;
+                changed = true;
+            }
+
+            if (ep.TorrentTitle != episode.TorrentTitle)
+            {
+                ep.TorrentTitle = episode.TorrentTitle;
+                changed = true;
+            }
+
+            if (changed)
+                _messageBusService.Publish(new AnimeEpisodeChanged(anime, null, ep));
+
             return;
+        }
 
         anime.Episodes.Add(episode);
 

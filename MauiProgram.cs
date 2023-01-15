@@ -72,7 +72,7 @@ public static class MauiProgram
                            if (mauiWindow != null && mauiWindow.Handler != null)
                            {
                                var torrents = mauiWindow.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
-                               torrents.SaveAndExit().Wait();
+                               torrents.SaveStateAndExit().Wait();
 
                                var settings = mauiWindow.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
                                settings.SaveAsync().Wait();
@@ -88,7 +88,8 @@ public static class MauiProgram
         // Debug services
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
-        builder.Logging.SetMinimumLevel(LogLevel.Trace);
+        builder.Logging.SetMinimumLevel(LogLevel.Debug);
+        builder.Logging.AddFilter("Microsoft.AspNetCore.Components.RenderTree.*", LogLevel.None);
         builder.Logging.AddDebug();
 #endif
 

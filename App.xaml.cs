@@ -35,6 +35,6 @@ public partial class App : Application
         await settings.LoadAsync();
 
         var torrents = this.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
-        await torrents.Restore();
+        await torrents.RestoreState();
     }
 }

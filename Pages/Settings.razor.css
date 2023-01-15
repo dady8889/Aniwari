@@ -24,27 +24,13 @@
     text-align: center;
 }
 
-.themecolor-wrapper {
+.button-wrapper {
     display: flex;
     flex-direction: row;
     gap: 1rem;
-}
-
-.archivepath-wrapper {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-}
-
-.archivepath__path {
-}
-
-.switch-wrapper {
-    min-width: 3.5rem;
 }
 
 .accent-preview {
-
     background-color: var(--aniwari-ok);
     height: 1.5rem;
     width: 1.5rem;

@@ -1,14 +1,15 @@
 ﻿@using Aniwari.BL.Interfaces;
-@using Aniwari.BL.Services;
 @using Aniwari.DAL.Constants;
 @using Aniwari.DAL.Storage;
 @using Aniwari.Managers;
 @using Aniwari.Platforms;
+@using Aniwari.Settings;
 
 @page "/settings"
 
 @inject IJSRuntime JS
 @inject ISettingsService SettingsService
+@inject ITorrentService TorrentService
 @inject IFolderPicker FolderPicker
 @inject IThemeManager Theme
 
@@ -25,7 +26,7 @@
                 <div class="settings-item__control">
                     @if (propertyName == nameof(SettingsStore.ThemeColor))
                     {
-                        <div class="themecolor-wrapper">
+                        <div class="button-wrapper">
                             <div class="accent-preview" title="Accent color">
                             </div>
                             <input type="color" value="@(Store.Get<string>(propertyName))"
@@ -39,18 +40,17 @@
                     }
                     else if (propertyName == nameof(SettingsStore.EnableDarkMode))
                     {
-                        <div class="switch-wrapper">
-                            <input type="checkbox" role="switch" checked="@(Store.EnableDarkMode)" @onchange="OnDarkModeChanged" />
+                        <div class="button-wrapper">
+                            <SettingCheckbox IsChecked="Store.EnableDarkMode" OnChange="OnDarkModeChanged" />
                         </div>
                     }
                     else if (propertyName == nameof(SettingsStore.ArchivePath))
                     {
-                        <div class="archivepath-wrapper">
+                        <div class="button-wrapper">
 
-                            <div class="archivepath__path">
+                            <div>
                                 @(EllipsePath(Store.Get<string>(propertyName) ?? ""))
                             </div>
-
 
                             <button @onclick="OnArchivePathBrowse">
                                 Browse
@@ -64,13 +64,72 @@
                             </button>
                         </div>
                     }
+                    else if (propertyName == nameof(SettingsStore.MaximumSeedRatio))
+                    {
+                        <div class="button-wrapper">
+                            <SettingSpinner MinValue="-1" Step="0.1m" TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
+                                var value = ClampUnlimited(e.Old, e.New);
+                                if (value == null) return;
+                                Store.Set<decimal>(propertyName, value.Value);
+                                await SettingsService.SaveAsync();
+                                e.Handled = true;
+                            }" />
+
+                            <button @onclick="async () => {
+                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
+                                        await SettingsService.SaveAsync();
+                                    }">
+                                Reset
+                            </button>
+                        </div>
+                    }
+                    else if (propertyName == nameof(SettingsStore.MaximumDownloadSpeed) || propertyName == nameof(SettingsStore.MaximumUploadSpeed))
+                    {
+                        <div class="button-wrapper">
+                            <SettingSpinner MinValue="-1" Step="1000" TValue="int" Value="@(Store.Get<int>(propertyName))" OnChange="async (e) => {
+                                var value = ClampUnlimited(e.Old, e.New);
+                                if (value == null) return;
+                                Store.Set<int>(propertyName, value.Value);
+                                await SettingsService.SaveAsync();
+                                await TorrentService.ApplySettings();
+                                e.Handled = true;
+                            }" />
+                            <label>
+                                kB/s
+                            </label>
+
+                            <button @onclick="async () => {
+                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
+                                        await SettingsService.SaveAsync();
+                                    }">
+                                Reset
+                            </button>
+                        </div>
+                    }
                     else if (setting.Type == typeof(bool))
                     {
-                        <div class="switch-wrapper">
-                            <input type="checkbox" role="switch" checked="@(Store.Get<bool>(propertyName))" @onchange="async (e) => {
-                                Store.Set<bool>(propertyName, (bool?)e.Value ?? false);
+                        <div class="button-wrapper">
+                            <SettingCheckbox IsChecked="@(Store.Get<bool>(propertyName))" OnChange="async (value) => {
+                                Store.Set<bool>(propertyName, value);
                                 await SettingsService.SaveAsync();
                             }" />
+                        </div>
+                    }
+                    else if (setting.Type == typeof(decimal))
+                    {
+                        <div class="button-wrapper">
+                            <SettingSpinner TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
+                                if (e.New == null) return;
+                                Store.Set<decimal>(propertyName, e.New.Value);
+                                await SettingsService.SaveAsync();
+                            }" />
+
+                            <button @onclick="async () => {
+                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
+                                        await SettingsService.SaveAsync();
+                                    }">
+                                Reset
+                            </button>
                         </div>
                     }
 
@@ -127,7 +186,7 @@
 
     private async Task OnThemeColorChanged(ChangeEventArgs args, string propertyName, Setting setting, bool save)
     {
-        string color = (string?)args.Value ?? (string)setting.DefaultValue;
+        string color = (string?)args.Value ?? ThemeColors.LightColor;
         Store!.Set(propertyName, color);
         await Theme.SetThemeColor(JS);
 
@@ -141,10 +200,9 @@
         await Theme.SetThemeColor(JS);
     }
 
-    private async Task OnDarkModeChanged(ChangeEventArgs args)
+    private async Task OnDarkModeChanged(bool value)
     {
-        bool darkMode = (bool?)args.Value ?? false;
-        Store!.EnableDarkMode = darkMode;
+        Store!.EnableDarkMode = value;
 
         await Theme.SetThemeColor(JS);
         await SettingsService.SaveAsync();
@@ -201,5 +259,16 @@
     {
         Store!.Animes.Clear();
         await SettingsService.SaveAsync();
+    }
+
+    private Nullable<T> ClampUnlimited<T>(Nullable<T> previous, Nullable<T> current) where T : struct, System.Numerics.INumber<T>
+    {
+        if (previous <= -T.One && current > -T.One)
+            return T.Zero;
+
+        else if (previous >= T.Zero && current < T.Zero)
+            return -T.One;
+
+        return current;
     }
 }

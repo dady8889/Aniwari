@@ -164,7 +164,6 @@ button {
     box-shadow: 4px -4px 2px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), -2px -1px 4px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), 1px 2px 3px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
     background-color: var(--aniwari-bg-alt);
     border-radius: 4px;
-    outline: 0;
     border: 0;
     color: var(--aniwari-text);
     min-width: 3.5rem;
@@ -175,6 +174,10 @@ button {
         box-shadow: inset 4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), inset -4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), inset 4px 4px 10px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
         outline: 0;
         border: 0;
+    }
+
+    button:focus-visible {
+        outline: var(--aniwari-text) solid 1px !important;
     }
 
 input[type="color"] {
@@ -221,3 +224,33 @@ input[role="switch"] {
     input[role="switch"]:checked::before {
         content: "\F26E";
     }
+
+input[role="spinner"] {
+    border: 0;
+    width: 3.5rem;
+    height: 1.5rem;
+    min-width: 3.5rem;
+    min-height: 1.5rem;
+    box-shadow: 4px -4px 2px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), -2px -1px 4px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), 1px 2px 3px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
+    background-color: var(--aniwari-bg);
+    border-radius: 4px;
+    color: var(--aniwari-text);
+    padding: 3px 5px 0 5px;
+}
+
+::-webkit-inner-spin-button {
+    opacity: 0.5;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    cursor: pointer;
+}
+
+input:focus-visible {
+    outline: var(--aniwari-text) solid 1px !important;
+}
+
+a:focus-visible {
+    outline: var(--aniwari-text) solid 1px !important;
+}

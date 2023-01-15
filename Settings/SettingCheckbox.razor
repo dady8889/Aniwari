@@ -1,0 +1,17 @@
+﻿<input @attributes="AdditionalAttributes" type="checkbox" role="switch" checked="@IsChecked" @onchange="OnChanged" />
+
+@code {
+    [Parameter] public bool IsChecked { get; set; }
+    [Parameter] public EventCallback<bool> OnChange { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private void OnChanged(ChangeEventArgs args)
+    {
+        var newValue = (bool?)args.Value;
+        if (newValue == null) return;
+        if (OnChange.HasDelegate)
+            OnChange.InvokeAsync(newValue.Value);
+    }
+}

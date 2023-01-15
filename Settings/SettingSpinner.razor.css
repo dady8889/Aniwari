@@ -1,0 +1,17 @@
+﻿.spinner-up {
+}
+
+.spinner-down {
+}
+
+.spinner-button {
+    min-width: 1.5rem;
+    width: 1.5rem;
+    font-family: bootstrap-icons;
+    color: var(--aniwari-text);
+}
+
+.spinner {
+    display: flex;
+    gap: 5px;
+}

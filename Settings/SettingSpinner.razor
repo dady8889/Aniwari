@@ -1,0 +1,154 @@
+﻿@using System.Numerics;
+@using System.Globalization;
+
+@inject IJSRuntime JS
+
+@typeparam TValue where TValue : struct, INumber<TValue>
+
+@*
+<input @attributes="AdditionalAttributes" type="text" role="spinner" inputmode="decimal" value="@(Value?.ToString(null, CultureInfo.InvariantCulture))" @onkeydown="OnKeyDown" @onchange="OnChanged" min="@(MinValue?.ToString(null, CultureInfo.InvariantCulture) ?? "")" max="@(MaxValue?.ToString(null, CultureInfo.InvariantCulture) ?? "")" step="@(Step?.ToString(null, CultureInfo.InvariantCulture) ?? "")" />
+*@
+
+<div class="spinner">
+    <button class="spinner-button spinner-up" @onclick="OnUp">&#xF4FE</button>
+    <button class="spinner-button spinner-down" @onclick="OnDown">&#xF2EA</button>
+    <input @ref="input" @attributes="AdditionalAttributes" type="text" role="spinner" inputmode="decimal" value="@InputContent" @onchange="@OnChanged" />
+</div>
+
+@code {
+
+    private IJSObjectReference? module;
+
+    private ElementReference input;
+
+    private string _inputContent = string.Empty;
+
+    private string InputContent
+    {
+        get => _inputContent;
+        set => _inputContent = value;
+    }
+
+    [Parameter] public Nullable<TValue> Value { get; set; }
+    [Parameter] public EventCallback<ValueChangedEventArgs> OnChange { get; set; }
+    [Parameter] public Nullable<TValue> MinValue { get; set; } = null;
+    [Parameter] public Nullable<TValue> MaxValue { get; set; } = null;
+    [Parameter] public Nullable<TValue> Step { get; set; } = null;
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        var prevValue = Value;
+
+        await base.SetParametersAsync(parameters);
+
+        if (Value != prevValue && Value.HasValue)
+        {
+            SetValue(Value);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./Settings/SettingSpinner.razor.js");
+            await module.InvokeVoidAsync("addKeyPressEventListener", input);
+            await module.InvokeVoidAsync("addPasteEventListener", input);
+
+            // thank you based ChatGPT
+        }
+    }
+
+    private string SetValue(TValue? number)
+    {
+        if (number == null)
+            return "";
+
+        var strNumber = number.Value.ToString(null, System.Globalization.CultureInfo.CurrentCulture);
+
+        InputContent = strNumber;
+
+        return strNumber;
+    }
+
+    private async Task<ValueChangedEventArgs?> OnChanged(ChangeEventArgs args)
+    {
+        var oldValue = Value;
+        var newValue = (string?)args.Value;
+        if (newValue == null) return null;
+
+        if (!TValue.TryParse(newValue.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture, out TValue number)) return null;
+
+        if (MaxValue != null && number > MaxValue)
+        {
+            number = MaxValue.Value;
+            var str = SetValue(number);
+            await module!.InvokeVoidAsync("setInputElementValue", input, str);
+        }
+
+        if (MinValue != null && number < MinValue)
+        {
+            number = MinValue.Value;
+            var str = SetValue(number);
+            await module!.InvokeVoidAsync("setInputElementValue", input, str);
+        }
+
+        var eventArgs = new ValueChangedEventArgs(oldValue, number, false);
+
+        if (OnChange.HasDelegate)
+            await OnChange.InvokeAsync(eventArgs);
+
+        return eventArgs;
+    }
+
+    private async Task OnUp()
+    {
+        var newValue = Value + Step;
+        if (newValue > MaxValue)
+            newValue = MaxValue;
+
+        var args = await OnChanged(new ChangeEventArgs()
+            {
+                Value = newValue.ToString()
+            });
+
+        if (args != null && !args.Handled)
+        {
+            SetValue(newValue);
+        }
+    }
+
+    private async Task OnDown()
+    {
+        var newValue = Value - Step;
+        if (newValue < MinValue)
+            newValue = MinValue;
+
+        var args = await OnChanged(new ChangeEventArgs()
+            {
+                Value = newValue.ToString()
+            });
+
+        if (args != null && !args.Handled)
+        {
+            SetValue(newValue);
+        }
+    }
+
+    public class ValueChangedEventArgs
+    {
+        public ValueChangedEventArgs(TValue? oldValue, TValue? newValue, bool handled)
+        {
+            Old = oldValue;
+            New = newValue;
+            Handled = handled;
+        }
+
+        public TValue? Old { get; set; }
+        public TValue? New { get; set; }
+        public bool Handled { get; set; }
+    }
+}

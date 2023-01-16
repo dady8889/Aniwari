@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NyaaWrapper", "NyaaWrapper\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JikanDotNet", "jikan.net\JikanDotNet\JikanDotNet.csproj", "{BCDAA289-2A38-47AB-BDC6-450B52B0B447}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aniwari.DAL", "..\Aniwari.DAL\Aniwari.DAL.csproj", "{CB9BC2D4-D2BA-4836-9519-92C50FAEE4F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aniwari.DAL", "..\Aniwari.DAL\Aniwari.DAL.csproj", "{CB9BC2D4-D2BA-4836-9519-92C50FAEE4F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,7 +52,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		        SolutionGuid = {61F7FB11-1E47-470C-91E2-47F8143E1572}
 		SolutionGuid = {1CBDB978-9810-4F96-AE1B-C09A059B6C21}
+		        SolutionGuid = {61F7FB11-1E47-470C-91E2-47F8143E1572}
 	EndGlobalSection
 EndGlobal

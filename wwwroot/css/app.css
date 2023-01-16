@@ -254,3 +254,17 @@ input:focus-visible {
 a:focus-visible {
     outline: var(--aniwari-text) solid 1px !important;
 }
+
+select {
+    border: 0;
+    width: auto;
+    height: 1.5rem;
+    min-width: 3.5rem;
+    min-height: 1.5rem;
+    box-shadow: 4px -4px 2px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), -2px -1px 4px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), 1px 2px 3px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
+    background-color: var(--aniwari-bg);
+    border-radius: 4px;
+    color: var(--aniwari-text);
+    padding: 3px 5px 0 5px;
+    cursor: pointer;
+}

@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Aniwari.BL.Interfaces;
 using Aniwari.DAL.Schedule;
+using Aniwari.DAL.Time;
 using JikanDotNet;
 using Microsoft.Extensions.Logging;
 
@@ -21,9 +22,9 @@ public class ScheduleService : IScheduleService
     /// <summary>
     /// Parse day from raw MAL broadcast string.
     /// </summary>
-    private bool TryParseScheduleDay(string raw, out ScheduleDay scheduleDay)
+    private bool TryParseScheduleDay(string raw, out DayOfWeek scheduleDay)
     {
-        scheduleDay = ScheduleDay.Monday;
+        scheduleDay = DayOfWeek.Monday;
 
         if (string.IsNullOrEmpty(raw) || raw == "Unknown")
             return false;
@@ -39,7 +40,7 @@ public class ScheduleService : IScheduleService
         return Enum.TryParse(day, out scheduleDay);
     }
 
-    public async IAsyncEnumerable<IList<KeyValuePair<ScheduleDay, AnimeSchedule>>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<IList<AnimeSchedule>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         bool next = true;
         int page = 1;
@@ -70,7 +71,7 @@ public class ScheduleService : IScheduleService
 
             next = info.Pagination.HasNextPage;
 
-            List<KeyValuePair<ScheduleDay, AnimeSchedule>> list = new();
+            List<AnimeSchedule> list = new();
 
             foreach (Anime anime in info.Data)
             {
@@ -80,7 +81,7 @@ public class ScheduleService : IScheduleService
 
                 AnimeSchedule animeSchedule = new();
 
-                ScheduleDay day;
+                DayOfWeek day;
                 if (!TryParseScheduleDay(anime.Broadcast.String, out day))
                 {
                     _logger.LogDebug("Could not parse \"{}\" for anime \"{}\"", anime.Broadcast.String, anime.MalId);
@@ -89,12 +90,12 @@ public class ScheduleService : IScheduleService
 
                 animeSchedule.MalId = Convert.ToInt32(anime.MalId);
                 animeSchedule.Url = anime.Url;
-                animeSchedule.ScheduleDay = day;
+                animeSchedule.JSTScheduleDay = day;
                 animeSchedule.RawAirTime = anime.Broadcast.String;
                 animeSchedule.Image = anime.Images.WebP.ImageUrl;
                 animeSchedule.Synopsis = anime.Synopsis;
                 animeSchedule.Episodes = anime.Episodes;
-                animeSchedule.AiredDate = anime.Aired.From;
+                animeSchedule.JSTAiredDate = anime.Aired.From;
 
                 animeSchedule.Titles = new Dictionary<TitleType, List<string>>();
 
@@ -114,36 +115,12 @@ public class ScheduleService : IScheduleService
 
                 if (anime.Broadcast.Time != null && anime.Broadcast.Timezone != null)
                 {
-                    animeSchedule.AirTime = TimeOnly.Parse(anime.Broadcast.Time, CultureInfo.InvariantCulture);
+                    animeSchedule.JSTAirTime = TimeOnly.Parse(anime.Broadcast.Time, CultureInfo.InvariantCulture);
                     animeSchedule.Timezone = anime.Broadcast.Timezone;
-
-                    // convert JST to local time
-                    var tz = TimeZoneInfo.FindSystemTimeZoneById(anime.Broadcast.Timezone);
-
-                    var sourceTime = DateTime.Today.Add(animeSchedule.AirTime.Value.ToTimeSpan());
-                    sourceTime = DateTime.SpecifyKind(sourceTime, DateTimeKind.Unspecified);
-                    var convertedTime = TimeZoneInfo.ConvertTime(sourceTime, tz, TimeZoneInfo.Local);
-
-                    animeSchedule.ConvertedAirTime = TimeOnly.FromDateTime(convertedTime);
-
-                    int currentDay = (int)animeSchedule.ScheduleDay;
-
-                    // we have to check if the converted time shifted the day
-                    if (convertedTime.Day > sourceTime.Day)
-                        currentDay++;
-                    else if (convertedTime.Day < sourceTime.Day)
-                        currentDay--;
-
-                    // fix overflow
-                    if (currentDay < 0)
-                        currentDay = 6;
-                    else if (currentDay > 6)
-                        currentDay = 0;
-
-                    animeSchedule.ConvertedScheduleDay = (ScheduleDay)currentDay;
+                    (animeSchedule as ITimeConvertible).UpdateLocalTime();
                 }
 
-                list.Add(KeyValuePair.Create(day, animeSchedule));
+                list.Add(animeSchedule);
             }
 
             yield return list;

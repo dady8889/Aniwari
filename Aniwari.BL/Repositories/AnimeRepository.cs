@@ -3,6 +3,7 @@ using Aniwari.BL.Messaging;
 using Aniwari.BL.Services;
 using Aniwari.DAL.Schedule;
 using Aniwari.DAL.Storage;
+using Aniwari.DAL.Time;
 using Microsoft.Extensions.Logging;
 
 namespace Aniwari.BL.Repositories;
@@ -99,19 +100,26 @@ public class AnimeRepository : IAnimeRepository
             if (anime.EpisodesCount != scheduledAnime.Episodes)
                 anime.EpisodesCount = scheduledAnime.Episodes;
 
-            if (anime.AiredDate != scheduledAnime.AiredDate)
-                anime.AiredDate = scheduledAnime.AiredDate;
+            if (anime.JSTAiredDate != scheduledAnime.JSTAiredDate)
+                anime.JSTAiredDate = scheduledAnime.JSTAiredDate;
 
-            if (anime.ScheduleDay != scheduledAnime.ScheduleDay.ToString())
-                anime.ScheduleDay = scheduledAnime.ScheduleDay.ToString();
+            if (anime.JSTScheduleDay != scheduledAnime.JSTScheduleDay)
+                anime.JSTScheduleDay = scheduledAnime.JSTScheduleDay;
 
-            if (anime.ScheduleTime != scheduledAnime.AirTime)
-                anime.ScheduleTime = scheduledAnime.AirTime;
+            if (anime.JSTAirTime != scheduledAnime.JSTAirTime)
+                anime.JSTAirTime = scheduledAnime.JSTAirTime;
+
+            if (anime.Timezone != scheduledAnime.Timezone)
+                anime.Timezone = scheduledAnime.Timezone;
+
+            (anime as ITimeConvertible).UpdateLocalTime();
 
             return anime;
         }
 
-        var newAnime = new Anime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.AiredDate, scheduledAnime.ScheduleDay.ToString(), scheduledAnime.AirTime);
+        var newAnime = new Anime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.JSTAiredDate, scheduledAnime.JSTScheduleDay, scheduledAnime.JSTAirTime, scheduledAnime.Timezone);
+
+        (newAnime as ITimeConvertible).UpdateLocalTime();
 
         _store.Animes.Add(newAnime);
 

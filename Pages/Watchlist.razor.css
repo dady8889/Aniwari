@@ -25,3 +25,8 @@
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
 }
+
+.noanime {
+    align-items: center;
+    justify-content: center;
+}

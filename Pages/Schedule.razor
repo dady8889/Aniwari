@@ -15,7 +15,7 @@
 @inject IJSRuntime JS
 
 <div class="aniwari-content schedule">
-    @foreach (ScheduleDay day in Enum.GetValues<ScheduleDay>())
+    @foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
     {
         if (!dict.ContainsKey(day))
             continue;
@@ -23,7 +23,6 @@
         bool hasAnime = dict[day].Count > 0;
 
         <div class="aniwari-card schedule-day @(day.ToString().ToLower()) @(hasAnime ? "" : "noanime")">
-
             <div class="schedule-header">
                 <div class="schedule-date">
                     <div class="schedule-date__relative-name">
@@ -42,8 +41,16 @@
             {
                 <hr>
 
-                var animes = dict[day].OrderBy(x => x.AirTime).ToList();
+                List<AnimeSchedule> animes = new();
 
+                if (SettingsService.GetStore().PreferredTime == PreferredTime.JST)
+                {
+                    animes = dict[day].OrderBy(x => x.JSTAirTime).ToList();
+                }
+                else if (SettingsService.GetStore().PreferredTime == PreferredTime.Local)
+                {
+                    animes = dict[day].OrderBy(x => x.LocalAirTime).ToList();
+                }
 
                 <div class="schedule-day__body">
                     @foreach (var anime in animes)
@@ -65,18 +72,16 @@
 
 @code {
     private IJSObjectReference? module;
-    private Dictionary<ScheduleDay, List<AnimeSchedule>> dict = new();
-    private Dictionary<ScheduleDay, WeekdayDate> dateMap = new();
-
-    private ScheduleDay GetToday() => Enum.Parse<ScheduleDay>(DateTime.Now.DayOfWeek.ToString());
+    private Dictionary<DayOfWeek, List<AnimeSchedule>> dict = new();
+    private Dictionary<DayOfWeek, WeekdayDate> dateMap = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        var today = GetToday();
+        var today = DateTime.Now.DayOfWeek;
 
-        foreach (ScheduleDay day in Enum.GetValues(typeof(ScheduleDay)))
+        foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
         {
             dict.Add(day, new List<AnimeSchedule>());
 
@@ -103,10 +108,18 @@
         {
             await foreach (var list in ScheduleService.GetSchedule(CancellationTokenSource.Token))
             {
-                foreach (var (day, anime) in list)
+                foreach (var anime in list)
                 {
                     // add to the dictionary per day
-                    dict[day].Add(anime);
+                    if (SettingsService.GetStore().PreferredTime == PreferredTime.JST)
+                    {
+                        dict[anime.JSTScheduleDay].Add(anime);
+                    }
+                    else if (SettingsService.GetStore().PreferredTime == PreferredTime.Local)
+                    {
+                        dict[anime.LocalScheduleDay].Add(anime);
+                    }
+                    
 
                     // update the local store
                     AnimeRepository.AddAnime(anime);
@@ -116,7 +129,9 @@
             }
 
             if (module != null && !Disposed)
-                await module.InvokeVoidAsync("scrollToDay", CancellationTokenSource.Token, GetToday().ToString());
+            {
+                await module.InvokeVoidAsync("scrollToDay", CancellationTokenSource.Token, DateTime.Now.DayOfWeek.ToString());
+            }
 
             // if the store needed updates, save to disk
             await SettingsService.SaveAsync();

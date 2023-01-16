@@ -67,7 +67,7 @@
                     else if (propertyName == nameof(SettingsStore.MaximumSeedRatio))
                     {
                         <div class="button-wrapper">
-                            <SettingSpinner MinValue="-1" Step="0.1m" TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
+                            <SettingSpinner title="-1 = Unlimited" MinValue="-1" Step="0.1m" TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
                                 var value = ClampUnlimited(e.Old, e.New);
                                 if (value == null) return;
                                 Store.Set<decimal>(propertyName, value.Value);
@@ -86,7 +86,7 @@
                     else if (propertyName == nameof(SettingsStore.MaximumDownloadSpeed) || propertyName == nameof(SettingsStore.MaximumUploadSpeed))
                     {
                         <div class="button-wrapper">
-                            <SettingSpinner MinValue="-1" Step="1000" TValue="int" Value="@(Store.Get<int>(propertyName))" OnChange="async (e) => {
+                            <SettingSpinner title="-1 = Unlimited" MinValue="-1" Step="1000" TValue="int" Value="@(Store.Get<int>(propertyName))" OnChange="async (e) => {
                                 var value = ClampUnlimited(e.Old, e.New);
                                 if (value == null) return;
                                 Store.Set<int>(propertyName, value.Value);
@@ -97,6 +97,38 @@
                             <label>
                                 kB/s
                             </label>
+
+                            <button @onclick="async () => {
+                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
+                                        await SettingsService.SaveAsync();
+                                    }">
+                                Reset
+                            </button>
+                        </div>
+                    }
+                    else if (propertyName == nameof(SettingsStore.PreferredTime))
+                    {
+                        <div class="button-wrapper">
+                            <SettingSelect TValue="PreferredTime" Value="@(Store.Get<PreferredTime>(propertyName))" OnChange="async (value) => {
+                                    Store.Set(setting.Type, propertyName, value);
+                                    await SettingsService.SaveAsync();
+                            }"/>
+
+                            <button @onclick="async () => {
+                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
+                                        await SettingsService.SaveAsync();
+                                    }">
+                                Reset
+                            </button>
+                        </div>
+                    }
+                    else if (propertyName == nameof(SettingsStore.PreferredTitleLanguage))
+                    {
+                        <div class="button-wrapper">
+                            <SettingSelect TValue="PreferredTitleLanguage" Value="@(Store.Get<PreferredTitleLanguage>(propertyName))" OnChange="async (value) => {
+                                    Store.Set(setting.Type, propertyName, value);
+                                    await SettingsService.SaveAsync();
+                            }"/>
 
                             <button @onclick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);

@@ -3,10 +3,12 @@
 @using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
 @using Aniwari.DAL.Schedule;
+@using Aniwari.DAL.Storage;
 @using Aniwari.Shared;
 
 @inherits ReactiveComponentBase
 
+@inject ISettingsService SettingsService
 @inject IAnimeRepository AnimeRepository
 
 @if (Anime == null) return;
@@ -15,7 +17,14 @@
     <AccordionHeader>
         <div class="aniwari-list-item schedule-item @(watching ? "watching" : "") @(context.Expanded ? "expanded" : "")">
             <div class="schedule-item__time" title="@Anime.RawAirTime">
-                @(Anime.AirTime == null ? "??:??" : Anime.AirTime.Value.ToString("HH:mm"))
+                @if (SettingsService.GetStore().PreferredTime == PreferredTime.JST)
+                {
+                    @(Anime.JSTAirTime == null ? "??:??" : Anime.JSTAirTime.Value.ToString("HH:mm"))
+                }
+                else if (SettingsService.GetStore().PreferredTime == PreferredTime.Local)
+                {
+                    @(Anime.LocalAirTime == null ? "??:??" : Anime.LocalAirTime.Value.ToString("HH:mm"))
+                }
             </div>
             <div class="schedule-item__watch">
                 <WatchButton Anime="Anime" />

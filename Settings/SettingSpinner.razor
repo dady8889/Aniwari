@@ -21,13 +21,7 @@
 
     private ElementReference input;
 
-    private string _inputContent = string.Empty;
-
-    private string InputContent
-    {
-        get => _inputContent;
-        set => _inputContent = value;
-    }
+    private string InputContent { get; set; } = string.Empty;
 
     [Parameter] public Nullable<TValue> Value { get; set; }
     [Parameter] public EventCallback<ValueChangedEventArgs> OnChange { get; set; }

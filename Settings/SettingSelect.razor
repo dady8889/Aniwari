@@ -1,0 +1,23 @@
+﻿@typeparam TValue where TValue : struct, System.Enum
+
+<select @attributes="AdditionalAttributes" value="@Value" @onchange="OnChanged">
+    @foreach (var enumValue in Enum.GetNames<TValue>())
+    {
+        <option value="@enumValue">@enumValue</option>
+    }
+</select>
+
+@code {
+    [Parameter] public TValue Value { get; set; }
+    [Parameter] public EventCallback<TValue> OnChange { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private async Task OnChanged(ChangeEventArgs args)
+    {
+        if (args.Value is not string str) return;
+        var enumValue = Enum.Parse<TValue>(str);
+
+        if (OnChange.HasDelegate)
+            await OnChange.InvokeAsync(enumValue);
+    }
+}

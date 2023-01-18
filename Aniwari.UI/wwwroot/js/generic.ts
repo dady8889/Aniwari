@@ -67,3 +67,48 @@ function setThemeColors(color: string) {
     css.setProperty("--aniwari-primary-s", `${hsl[1]}%`);
     css.setProperty("--aniwari-primary-l", `${hsl[2]}%`);
 }
+
+function addKeyPressEventListener(input: HTMLInputElement) {
+    input.addEventListener('keypress', (event: KeyboardEvent) => {
+        const key = event.key;
+        const isNumber = !isNaN(parseInt(key));
+        const isDecimal = key === '.' || key === ',';
+        const isMinus = key === '-';
+        const isBackspace = key === 'Backspace';
+        const isDelete = key === 'Delete';
+        const isTab = key === 'Tab';
+        if ((isDecimal && (input.value.includes('.') || input.value.includes(','))) || (isMinus && input.value.includes('-')) || !(isNumber || isDecimal || isMinus || isBackspace || isDelete || isTab)) {
+            event.preventDefault();
+        }
+    });
+}
+
+function addPasteEventListener(input: HTMLInputElement) {
+    input.addEventListener('paste', (event: ClipboardEvent) => {
+        event.preventDefault();
+        const paste = event.clipboardData.getData('text');
+        if (!/^-?\d*[.,]?\d*$/.test(paste)) {
+            return;
+        }
+        if ((paste.includes(".") || paste.includes(",")) && (input.value.includes(".") || input.value.includes(","))) {
+            return;
+        }
+        if (paste.includes("-") && input.value.includes("-")) {
+            return;
+        }
+        input.value = paste;
+    });
+}
+
+function setInputElementValue(input: HTMLInputElement, value: string) {
+    input.value = value;
+}
+
+function moveCursorToEnd(input: HTMLInputElement) {
+    var range = document.createRange();
+    var sel = window.getSelection();
+    range.setStart(input, 1);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+}

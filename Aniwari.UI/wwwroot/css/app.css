@@ -18,6 +18,7 @@
     --aniwari-text: rgb(var(--accessible-color), var(--accessible-color), var(--accessible-color));
     --aniwari-ok: hsl(calc(var(--aniwari-primary-h) + 76), max(var(--aniwari-primary-s), 71%), min(var(--aniwari-primary-l), 75%));
     --aniwari-ok-alt: hsl(calc(var(--aniwari-primary-h) + 76), max(var(--aniwari-primary-s), 71%), calc(min(var(--aniwari-primary-l), 75%) - 5%));
+    --aniwari-blue: hsl(calc(var(--aniwari-primary-h) + 200), max(var(--aniwari-primary-s), 100%), clamp(50%, var(--aniwari-primary-l), 65%));
 }
 
 html, body {

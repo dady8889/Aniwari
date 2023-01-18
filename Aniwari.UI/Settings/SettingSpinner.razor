@@ -16,9 +16,6 @@
 </div>
 
 @code {
-
-    private IJSObjectReference? module;
-
     private ElementReference input;
 
     private string InputContent { get; set; } = string.Empty;
@@ -48,9 +45,8 @@
 
         if (firstRender)
         {
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./Settings/SettingSpinner.razor.js");
-            await module.InvokeVoidAsync("addKeyPressEventListener", input);
-            await module.InvokeVoidAsync("addPasteEventListener", input);
+            await JS.InvokeVoidAsync("addKeyPressEventListener", input);
+            await JS.InvokeVoidAsync("addPasteEventListener", input);
 
             // thank you based ChatGPT
         }
@@ -80,14 +76,14 @@
         {
             number = MaxValue.Value;
             var str = SetValue(number);
-            await module!.InvokeVoidAsync("setInputElementValue", input, str);
+            await JS.InvokeVoidAsync("setInputElementValue", input, str);
         }
 
         if (MinValue != null && number < MinValue)
         {
             number = MinValue.Value;
             var str = SetValue(number);
-            await module!.InvokeVoidAsync("setInputElementValue", input, str);
+            await JS.InvokeVoidAsync("setInputElementValue", input, str);
         }
 
         var eventArgs = new ValueChangedEventArgs(oldValue, number, false);

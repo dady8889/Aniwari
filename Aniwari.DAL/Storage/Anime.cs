@@ -27,6 +27,10 @@ public sealed class Anime : ITimeConvertible, ITitle
     public string SearchString { get; set; } = string.Empty;
     public int? EpisodesCount { get; set; }
     public int Watched { get; set; } = 0;
+    public int? CustomEpisodesCount { get; set; }
+
+    #region ITimeConvertible
+
     public DateTime? JSTAiredDate { get; set; }
     public DateTime? LocalAiredDate { get; set; }
     public DayOfWeek JSTScheduleDay { get; set; }
@@ -34,7 +38,14 @@ public sealed class Anime : ITimeConvertible, ITitle
     public TimeOnly? JSTAirTime { get; set; }
     public TimeOnly? LocalAirTime { get; set; }
     public string? Timezone { get; set; }
+
+    #endregion
+
+    #region ITitle
+
     public Dictionary<TitleType, List<string>> Titles { get; set; } = new();
+
+    #endregion
 
     public List<Episode> Episodes { get; set; } = new();
 

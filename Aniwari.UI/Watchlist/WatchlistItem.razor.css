@@ -11,6 +11,13 @@
             border-bottom-right-radius: 4px;
         }
 
+    .episode.unknown {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 0;
+    }
+
 .episode__header {
     display: flex;
     gap: 1rem;
@@ -41,6 +48,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    min-width: 0;
 }
 
 .title-button {
@@ -48,6 +56,9 @@
 }
 
 .title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .episodes-counter {
@@ -55,6 +66,14 @@
     gap: 3px;
     margin-left: 10px;
 }
+
+    .episodes-counter:hover {
+        font-weight: bold;
+    }
+
+    .episodes-counter.custom {
+        color: var(--aniwari-blue);
+    }
 
 .watchlist-item {
     padding-top: 1rem;
@@ -74,4 +93,8 @@
 .button-wrapper {
     display: flex;
     gap: 5px;
+}
+
+.episodes-wrapper {
+    display: flex;
 }

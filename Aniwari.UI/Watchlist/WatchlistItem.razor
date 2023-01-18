@@ -110,7 +110,7 @@
                 {
                     maxEpId = Anime.CustomEpisodesCount.Value;
                 }
-                else // or calculate the max episode from the aired date and schedule time
+                else if (Anime.EpisodesCount != null) // or calculate the max episode from the aired date and schedule time
                 {
                     DateTime? aired = Anime.LocalAiredDate;
                     if (aired != null)

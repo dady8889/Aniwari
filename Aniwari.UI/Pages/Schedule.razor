@@ -14,6 +14,8 @@
 @inject IAnimeRepository AnimeRepository
 @inject IJSRuntime JS
 
+<link href="css/responsive/Schedule.css" rel="stylesheet" />
+
 <div class="aniwari-content schedule">
     @foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
     {

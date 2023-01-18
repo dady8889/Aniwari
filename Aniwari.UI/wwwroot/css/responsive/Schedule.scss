@@ -1,0 +1,29 @@
+﻿@import '../../../Styles/_variables.scss';
+
+@media(min-width: $media-lg) {
+    .schedule {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        margin: 0px 5% !important;
+    }
+
+    .schedule-day {
+        flex-grow: 1 !important;
+        flex-basis: 25% !important;
+        min-width: 25rem !important;
+        min-height: 10rem !important;
+    }
+
+    .schedule-day.noanime {
+        flex-direction: column !important;
+    }
+
+    .schedule-header {
+        flex-wrap: wrap !important;
+    }
+
+    .schedule-header__noanime {
+        padding-right: 0 !important;
+    }
+}

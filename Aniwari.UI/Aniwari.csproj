@@ -95,33 +95,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AndroidResource Remove="Aniwari.BL\**" />
-      <AndroidResource Remove="jikan.net\**" />
-      <AndroidResource Remove="NyaaWrapper\**" />
-      <Compile Remove="Aniwari.BL\**" />
-      <Compile Remove="jikan.net\**" />
-      <Compile Remove="NyaaWrapper\**" />
-      <Content Remove="Aniwari.BL\**" />
-      <Content Remove="jikan.net\**" />
-      <Content Remove="NyaaWrapper\**" />
-      <EmbeddedResource Remove="Aniwari.BL\**" />
-      <EmbeddedResource Remove="jikan.net\**" />
-      <EmbeddedResource Remove="NyaaWrapper\**" />
-      <MauiXaml Remove="Aniwari.BL\**" />
-      <MauiXaml Remove="jikan.net\**" />
-      <MauiXaml Remove="NyaaWrapper\**" />
-      <None Remove="Aniwari.BL\**" />
-      <None Remove="jikan.net\**" />
-      <None Remove="NyaaWrapper\**" />
-      <SassFile Remove="Aniwari.BL\**" />
-      <SassFile Remove="jikan.net\**" />
-      <SassFile Remove="NyaaWrapper\**" />
-      <TypeScriptCompile Remove="Aniwari.BL\**" />
-      <TypeScriptCompile Remove="jikan.net\**" />
-      <TypeScriptCompile Remove="NyaaWrapper\**" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Include="libman.json" />
     </ItemGroup>
 
@@ -135,7 +108,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="Aniwari.BL\Aniwari.BL.csproj" />
+      <ProjectReference Include="..\Aniwari.BL\Aniwari.BL.csproj" />
+      <ProjectReference Include="..\Aniwari.DAL\Aniwari.DAL.csproj" />
     </ItemGroup>
 
 </Project>

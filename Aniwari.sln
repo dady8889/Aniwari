@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31611.283
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aniwari", "Aniwari.csproj", "{C091DC82-1E1C-4C7D-B24C-51C7CB7CF3F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aniwari", "Aniwari.UI\Aniwari.csproj", "{C091DC82-1E1C-4C7D-B24C-51C7CB7CF3F6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{EECD2DBC-41C4-4E84-9AFA-38D4E657DB87} = {EECD2DBC-41C4-4E84-9AFA-38D4E657DB87}
 	EndProjectSection
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NyaaWrapper", "NyaaWrapper\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JikanDotNet", "jikan.net\JikanDotNet\JikanDotNet.csproj", "{BCDAA289-2A38-47AB-BDC6-450B52B0B447}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aniwari.DAL", "..\Aniwari.DAL\Aniwari.DAL.csproj", "{CB9BC2D4-D2BA-4836-9519-92C50FAEE4F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aniwari.DAL", "Aniwari.DAL\Aniwari.DAL.csproj", "{CB9BC2D4-D2BA-4836-9519-92C50FAEE4F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

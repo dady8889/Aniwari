@@ -4,9 +4,9 @@
 @using Aniwari.BL.Messaging;
 @using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
+@using Aniwari.DAL.Interfaces;
 @using Aniwari.DAL.Schedule;
 @using Aniwari.DAL.Storage;
-@using Aniwari.DAL.Time;
 
 @inherits ReactiveComponentBase
 
@@ -24,7 +24,18 @@
             {
                 <div class="title-wrapper">
                     <div class="title" title="@Anime.SearchString">
-                        @Anime.Title
+                        @if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.Romanized)
+                        {
+                            @(((ITitle)Anime).GetDefaultTitle())
+                        }
+                        else if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.English)
+                        {
+                            @(((ITitle)Anime).GetTitle(TitleType.English) ?? ((ITitle)Anime).GetDefaultTitle())
+                        }
+                        else if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.Japanese)
+                        {
+                            @(((ITitle)Anime).GetTitle(TitleType.Japanese) ?? ((ITitle)Anime).GetDefaultTitle())
+                        }
                     </div>
                     <button class="title-button" @onclick:stopPropagation="true" @onclick="OnTitleClicked">
                         Edit

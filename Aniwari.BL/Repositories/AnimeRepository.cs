@@ -1,9 +1,8 @@
 ﻿using Aniwari.BL.Interfaces;
 using Aniwari.BL.Messaging;
-using Aniwari.BL.Services;
 using Aniwari.DAL.Schedule;
 using Aniwari.DAL.Storage;
-using Aniwari.DAL.Time;
+using Aniwari.DAL.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Aniwari.BL.Repositories;
@@ -89,7 +88,7 @@ public class AnimeRepository : IAnimeRepository
     {
         var anime = _store.Animes.FirstOrDefault(x => x.Id == scheduledAnime.MalId);
 
-        var title = scheduledAnime.GetDefaultTitle();
+        var title = ((ITitle)scheduledAnime).GetDefaultTitle();
 
         // if the anime is already in DB, check if it needs some updates
         if (anime != null)
@@ -113,6 +112,7 @@ public class AnimeRepository : IAnimeRepository
                 anime.Timezone = scheduledAnime.Timezone;
 
             (anime as ITimeConvertible).UpdateLocalTime();
+            (anime as ITitle).UpdateTitles(scheduledAnime.Titles);
 
             return anime;
         }
@@ -120,6 +120,7 @@ public class AnimeRepository : IAnimeRepository
         var newAnime = new Anime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.JSTAiredDate, scheduledAnime.JSTScheduleDay, scheduledAnime.JSTAirTime, scheduledAnime.Timezone);
 
         (newAnime as ITimeConvertible).UpdateLocalTime();
+        (newAnime as ITitle).UpdateTitles(scheduledAnime.Titles);
 
         _store.Animes.Add(newAnime);
 

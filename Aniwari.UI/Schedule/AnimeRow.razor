@@ -4,6 +4,7 @@
 @using Aniwari.BL.Services;
 @using Aniwari.DAL.Schedule;
 @using Aniwari.DAL.Storage;
+@using Aniwari.DAL.Interfaces;
 @using Aniwari.Shared;
 
 @inherits ReactiveComponentBase
@@ -30,7 +31,18 @@
                 <WatchButton Anime="Anime" />
             </div>
             <div class="schedule-item__title">
-                @Anime.GetDefaultTitle()
+                @if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.Romanized)
+                {
+                    @(((ITitle)Anime).GetDefaultTitle())
+                }
+                else if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.English)
+                {
+                    @(((ITitle)Anime).GetTitle(TitleType.English) ?? ((ITitle)Anime).GetDefaultTitle())
+                }
+                else if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.Japanese)
+                {
+                    @(((ITitle)Anime).GetTitle(TitleType.Japanese) ?? ((ITitle)Anime).GetDefaultTitle())
+                }
             </div>
         </div>
     </AccordionHeader>

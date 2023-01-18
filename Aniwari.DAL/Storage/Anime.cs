@@ -1,9 +1,9 @@
 ﻿using Aniwari.DAL.Schedule;
-using Aniwari.DAL.Time;
+using Aniwari.DAL.Interfaces;
 
 namespace Aniwari.DAL.Storage;
 
-public sealed class Anime : ITimeConvertible
+public sealed class Anime : ITimeConvertible, ITitle
 {
     public Anime()
     {
@@ -34,6 +34,7 @@ public sealed class Anime : ITimeConvertible
     public TimeOnly? JSTAirTime { get; set; }
     public TimeOnly? LocalAirTime { get; set; }
     public string? Timezone { get; set; }
+    public Dictionary<TitleType, List<string>> Titles { get; set; } = new();
 
     public List<Episode> Episodes { get; set; } = new();
 

@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using Aniwari.BL.Interfaces;
 using Aniwari.DAL.Schedule;
-using Aniwari.DAL.Time;
+using Aniwari.DAL.Interfaces;
 using JikanDotNet;
 using Microsoft.Extensions.Logging;
 

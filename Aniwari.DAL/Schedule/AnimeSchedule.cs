@@ -1,8 +1,8 @@
-﻿using Aniwari.DAL.Time;
+﻿using Aniwari.DAL.Interfaces;
 
 namespace Aniwari.DAL.Schedule;
 
-public class AnimeSchedule : ITimeConvertible
+public class AnimeSchedule : ITimeConvertible, ITitle
 {
     public AnimeSchedule()
     {
@@ -22,9 +22,4 @@ public class AnimeSchedule : ITimeConvertible
     public string? Timezone { get; set; }
     public string RawAirTime { get; set; } = string.Empty;
     public int? Episodes { get; set; }
-
-    public string GetDefaultTitle()
-    {
-        return Titles[TitleType.Default][0];
-    }
 }

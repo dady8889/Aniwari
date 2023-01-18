@@ -29,8 +29,8 @@ public sealed partial class SettingsStore
     public decimal MaximumSeedRatio { get; set; } = -1;
     public int MaximumDownloadSpeed { get; set; } = -1;
     public int MaximumUploadSpeed { get; set; } = -1;
-    public PreferredTime PreferredTime { get; set; } = PreferredTime.JST;
-    public PreferredTitleLanguage PreferredTitleLanguage { get; set; } = PreferredTitleLanguage.Romanized;
+    public PreferredTime PreferredTime { get; set; } = PreferredTime.Local;
+    public PreferredTitleLanguage PreferredTitleLanguage { get; set; } = PreferredTitleLanguage.English;
     public List<Anime> Animes { get; set; } = new();
 }
 

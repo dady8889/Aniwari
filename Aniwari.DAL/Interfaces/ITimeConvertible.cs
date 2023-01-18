@@ -1,6 +1,6 @@
 ﻿using Aniwari.DAL.Schedule;
 
-namespace Aniwari.DAL.Time;
+namespace Aniwari.DAL.Interfaces;
 
 public interface ITimeConvertible
 {

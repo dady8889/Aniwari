@@ -69,7 +69,7 @@
 
     private async Task SearchAnime(WatchlistItem.SearchEventArgs args)
     {
-        savedScroll = await JS.InvokeAsync<int>("getDocumentScrollTop");
+        savedScroll = (int)((await JS.InvokeAsync<double?>("getDocumentScrollTop")) ?? 0.0);
 
         await animateWatchlist!.Hide();
         await animateTorrentPicker!.Show();

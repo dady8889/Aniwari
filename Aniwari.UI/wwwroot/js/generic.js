@@ -1,12 +1,18 @@
 function getDocumentScrollTop() {
-    return document.documentElement.getElementsByTagName("main")[0].scrollTop;
+    const elems = document.documentElement.getElementsByTagName("main");
+    if (elems.length > 0)
+        return elems[0].scrollTop;
+    return;
 }
 function setDocumentScrollTop(scroll, smooth) {
+    const elems = document.documentElement.getElementsByTagName("main");
+    if (elems.length == 0)
+        return;
     if (smooth) {
-        document.documentElement.getElementsByTagName("main")[0].scrollTo({ behavior: "smooth", top: scroll });
+        elems[0].scrollTo({ behavior: "smooth", top: scroll });
     }
     else {
-        document.documentElement.getElementsByTagName("main")[0].scrollTop = scroll;
+        elems[0].scrollTop = scroll;
     }
 }
 function getElementWidth(elem) {

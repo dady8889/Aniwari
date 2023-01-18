@@ -170,7 +170,7 @@
                             {
                                 string day = scheduleDay.ToString();
 
-                                if (scheduleDay == DateTime.Now.DayOfWeek)
+                                if (scheduleDay == DateTime.Now.DayOfWeek && DateTime.Now.TimeOfDay < scheduleTime.Value.ToTimeSpan())
                                 {
                                     day = "Today";
                                 }
@@ -346,7 +346,7 @@
     private async Task OnEpisodeCountEditEnded()
     {
         var content = await episodesCountFieldReference!.GetContent();
-        if (string.IsNullOrWhiteSpace(content) || !int.TryParse(content, out int value))
+        if (string.IsNullOrWhiteSpace(content) || !int.TryParse(content, out int value) || value < 0)
         {
             await OnEpisodeCountResetClicked();
             return;

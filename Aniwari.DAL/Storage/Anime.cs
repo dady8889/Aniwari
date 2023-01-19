@@ -26,7 +26,6 @@ public sealed class Anime : ITimeConvertible, ITitle
     public string Title { get; set; } = string.Empty;
     public string SearchString { get; set; } = string.Empty;
     public int? EpisodesCount { get; set; }
-    public int Watched { get; set; } = 0;
     public int? CustomEpisodesCount { get; set; }
 
     #region ITimeConvertible

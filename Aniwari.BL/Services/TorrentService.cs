@@ -270,6 +270,10 @@ public class TorrentService : ITorrentService
         {
             _logger.LogDebug("Restoring anime {} episode {}", ep.AnimeId, ep.Id);
             string archivePath = _settingsService.GetStore().ArchivePath;
+
+            if (ep.TorrentMagnet == null)
+                continue;
+
             await DownloadAnime(ep.AnimeId, ep.Id, ep.TorrentMagnet, archivePath).ConfigureAwait(false);
         }
     }

@@ -15,9 +15,9 @@ public sealed class Episode
     public bool Seeding { get; set; }
     public int BytesSent { get; set; }
     public int BytesReceived { get; set; }
-    public string TorrentTitle { get; set; } = string.Empty;
-    public string TorrentMagnet { get; set; } = string.Empty;
-    public string VideoFilePath { get; set; } = string.Empty;
+    public string? TorrentTitle { get; set; } = null;
+    public string? TorrentMagnet { get; set; } = null;
+    public string? VideoFilePath { get; set; } = null;
 
     [JsonIgnore] public double SeedRatio => BytesReceived <= 0 ? 0 : BytesSent / (double)BytesReceived;
 }

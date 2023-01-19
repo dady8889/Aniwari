@@ -18,6 +18,10 @@
         padding: 1rem 0;
     }
 
+    .episode.watched {
+        background-color: var(--aniwari-ok);
+    }
+
 .episode__header {
     display: flex;
     gap: 1rem;

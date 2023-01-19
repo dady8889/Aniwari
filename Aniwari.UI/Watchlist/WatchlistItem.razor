@@ -146,9 +146,12 @@
                     }
                 }
 
+
                 foreach (int epId in Enumerable.Range(1, maxEpId))
                 {
-                    <div class="aniwari-list-item episode">
+                    var ep = Anime.Episodes.FirstOrDefault(x => x.Id == epId);
+
+                    <div class="aniwari-list-item episode @(ep?.Watched == true ? "watched" : "")">
                         <div class="episode__header">
                             <div class="episode__title">Episode @epId</div>
                             @{
@@ -181,10 +184,6 @@
                             }
                         </div>
 
-                        @{
-                            var ep = Anime.Episodes.FirstOrDefault(x => x.Id == epId);
-                        }
-
                         @if (ep != null)
                         {
                             @if (!ep.Downloaded)
@@ -192,9 +191,26 @@
                                 @if (!ep.Downloading)
                                 {
                                     <div class="button-wrapper">
-                                        <button class="episode__button" @onclick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
-                                            Download
-                                        </button>
+                                        @if (ep.Watched)
+                                        {
+                                            <button class="episode__button" @onclick="() => OnUnwatchClicked(ep)">
+                                                Unwatch
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="episode__button" @onclick="() => OnWatchedClicked(epId)">
+                                                Already watched
+                                            </button>
+                                        }
+
+                                        @if (ep.TorrentMagnet != null)
+                                        {
+                                            <button class="episode__button" @onclick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
+                                                Download
+                                            </button>
+                                        }
+
                                         <button class="episode__button" @onclick="() => OnSearchClicked(epId)">
                                             Search
                                         </button>
@@ -221,6 +237,8 @@
                                 }
 
                                 <div class="button-wrapper">
+                                    
+
                                     @if (ep.Seeding)
                                     {
                                         <button class="episode__button" @onclick="() => OnCancelSeedClicked(ep)">
@@ -234,6 +252,12 @@
                                         </button>
                                     }
 
+                                    @if (ep.Watched)
+                                    {
+                                        <button class="episode__button" @onclick="() => OnUnwatchClicked(ep)">
+                                            Unwatch
+                                        </button>
+                                    }
                                     <button class="episode__button" @onclick="() => OnWatchClicked(ep)">
                                         Watch
                                     </button>
@@ -245,9 +269,17 @@
                         }
                         else
                         {
-                            <button class="episode__button" @onclick="() => OnSearchClicked(epId)">
-                                Search
-                            </button>
+                            <div class="button-wrapper">
+                                @if (epId != maxEpId)
+                                {
+                                    <button class="episode__button" @onclick="() => OnWatchedClicked(epId)">
+                                        Already watched
+                                    </button>
+                                }
+                                <button class="episode__button" @onclick="() => OnSearchClicked(epId)">
+                                    Search
+                                </button>
+                            </div>
                         }
                     </div>
                 }
@@ -366,6 +398,9 @@
 
     private async Task OnDownloadClicked(Episode episode)
     {
+        if (episode.TorrentMagnet == null)
+            return;
+
         string archivePath = SettingsService.GetStore().ArchivePath;
 
         episode.Downloading = true;
@@ -373,8 +408,11 @@
         await TorrentService.DownloadAnime(Anime!.Id, episode.Id, episode.TorrentMagnet, archivePath);
     }
 
-    private void OnWatchClicked(Episode episode)
+    private async void OnWatchClicked(Episode episode)
     {
+        if (episode.VideoFilePath == null)
+            return;
+
         var archivePath = SettingsService.GetStore().ArchivePath;
         var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
 
@@ -390,6 +428,9 @@
 
             process.Start();
         }
+
+        episode.Watched = true;
+        await SettingsService.SaveAsync();
     }
 
     private async Task OnDeleteClicked(Episode episode)
@@ -399,6 +440,9 @@
             await TorrentService.CancelSeed(Anime!.Id, episode.Id);
             episode.Seeding = false;
         }
+
+        if (episode.VideoFilePath == null)
+            return;
 
         var archivePath = SettingsService.GetStore().ArchivePath;
         var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
@@ -450,5 +494,31 @@
     private void OnEpisodesClicked()
     {
         editingEpisodesCount = true;
+    }
+
+    private async Task OnWatchedClicked(int episode)
+    {
+        var ep = Anime!.Episodes.FirstOrDefault(x => x.Id == episode);
+        if (ep != null)
+        {
+            ep.Watched = true;
+        }
+        else
+        {
+            AnimeRepository.AddEpisode(Anime!, new Episode()
+                {
+                    Id = episode,
+                    AnimeId = Anime!.Id,
+                    Watched = true
+                });
+        }
+
+        await SettingsService.SaveAsync();
+    }
+
+    private async Task OnUnwatchClicked(Episode episode)
+    {
+        episode.Watched = false;
+        await SettingsService.SaveAsync();
     }
 }

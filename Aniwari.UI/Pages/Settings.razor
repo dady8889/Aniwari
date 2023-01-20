@@ -8,7 +8,7 @@
 @page "/settings"
 
 @inject IJSRuntime JS
-@inject IMyAnimeListService MyAnimeListService
+@inject IAnimeRepository AnimeRepository
 @inject ISettingsService SettingsService
 @inject ITorrentService TorrentService
 @inject IFolderPicker FolderPicker
@@ -368,26 +368,6 @@
 
     private async Task OnMyAnimeListImportWatchingClicked()
     {
-        if (!Store!.UsesMAL)
-            return;
-
-        var watchingList = await MyAnimeListService.GetAnimeList(DAL.MyAnimeList.MALAnimeState.Watching);
-        if (watchingList == null)
-            return;
-
-        foreach (var anime in watchingList)
-        {
-            var storedAnime = Store!.Animes.FirstOrDefault(x => x.Id == anime.AnimeId);
-            if (storedAnime != null) // we want to import only new anime
-                continue;
-             
-            // todo
-            //var newAnime = 
-
-            //for (int i = 0; i < anime.WatchedEpisodes; ++i)
-            //{
-            //    var episode = new Episode();
-            //}
-        }
+        await AnimeRepository.ImportFromMAL();
     }
 }

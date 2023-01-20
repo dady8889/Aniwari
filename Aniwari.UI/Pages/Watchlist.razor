@@ -1,6 +1,7 @@
 ﻿@using Aniwari.BL.Interfaces;
 @using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
+@using Aniwari.BL.Messaging;
 @using Aniwari.DAL.Storage;
 @using Aniwari.Watchlist;
 
@@ -65,6 +66,12 @@
 
         Store = SettingsService.GetStore();
         watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
+
+        ReactTo<AnimeImportFinished>(async (e) =>
+        {
+            watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
+            await InvokeAsync(StateHasChanged);
+        });
     }
 
     private async Task SearchAnime(WatchlistItem.SearchEventArgs args)

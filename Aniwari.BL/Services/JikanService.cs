@@ -44,6 +44,9 @@ public class JikanService : IJikanService
     {
         jikanAnime = new();
 
+        if (anime.Broadcast?.String == null) // this anime is not scheduled
+            return false;
+
         DayOfWeek day;
         if (!TryParseScheduleDay(anime.Broadcast.String, out day))
         {

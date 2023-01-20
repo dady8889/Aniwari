@@ -4,6 +4,8 @@ using Aniwari.DAL.Jikan;
 using Aniwari.DAL.Storage;
 using Aniwari.DAL.Interfaces;
 using Microsoft.Extensions.Logging;
+using Aniwari.BL.Services;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Aniwari.BL.Repositories;
 
@@ -12,14 +14,18 @@ public class AnimeRepository : IAnimeRepository
     private readonly ILogger<AnimeRepository> _logger;
     private readonly ISettingsService _settingsService;
     private readonly IMessageBusService _messageBusService;
+    private readonly IMyAnimeListService _myAnimeListService;
+    private readonly IJikanService _jikanService;
     private readonly SettingsStore _store;
 
-    public AnimeRepository(ILogger<AnimeRepository> logger, ISettingsService settingsService, IMessageBusService messageBusService)
+    public AnimeRepository(ILogger<AnimeRepository> logger, ISettingsService settingsService, IMessageBusService messageBusService, IMyAnimeListService myAnimeListService, IJikanService jikanService)
     {
         _logger = logger;
         _settingsService = settingsService;
         _store = _settingsService.GetStore();
         _messageBusService = messageBusService;
+        _myAnimeListService = myAnimeListService;
+        _jikanService = jikanService;
     }
 
     public void SetAnimeWatching(int id, bool watching)
@@ -84,11 +90,11 @@ public class AnimeRepository : IAnimeRepository
         _messageBusService.Publish(new AnimeEpisodeChanged(anime, episode, null));
     }
 
-    public AniwariAnime AddAnime(JikanAnime scheduledAnime)
+    public AniwariAnime AddAnime(JikanAnime jikanAnime)
     {
-        var anime = _store.Animes.FirstOrDefault(x => x.Id == scheduledAnime.MalId);
+        var anime = _store.Animes.FirstOrDefault(x => x.Id == jikanAnime.MalId);
 
-        var title = ((ITitle)scheduledAnime).GetDefaultTitle();
+        var title = ((ITitle)jikanAnime).GetDefaultTitle();
 
         // if the anime is already in DB, check if it needs some updates
         if (anime != null)
@@ -96,34 +102,76 @@ public class AnimeRepository : IAnimeRepository
             if (anime.Title != title)
                 anime.Title = title;
 
-            if (anime.EpisodesCount != scheduledAnime.Episodes)
-                anime.EpisodesCount = scheduledAnime.Episodes;
+            if (anime.EpisodesCount != jikanAnime.Episodes)
+                anime.EpisodesCount = jikanAnime.Episodes;
 
-            if (anime.JSTAiredDate != scheduledAnime.JSTAiredDate)
-                anime.JSTAiredDate = scheduledAnime.JSTAiredDate;
+            if (anime.JSTAiredDate != jikanAnime.JSTAiredDate)
+                anime.JSTAiredDate = jikanAnime.JSTAiredDate;
 
-            if (anime.JSTScheduleDay != scheduledAnime.JSTScheduleDay)
-                anime.JSTScheduleDay = scheduledAnime.JSTScheduleDay;
+            if (anime.JSTScheduleDay != jikanAnime.JSTScheduleDay)
+                anime.JSTScheduleDay = jikanAnime.JSTScheduleDay;
 
-            if (anime.JSTAirTime != scheduledAnime.JSTAirTime)
-                anime.JSTAirTime = scheduledAnime.JSTAirTime;
+            if (anime.JSTAirTime != jikanAnime.JSTAirTime)
+                anime.JSTAirTime = jikanAnime.JSTAirTime;
 
-            if (anime.Timezone != scheduledAnime.Timezone)
-                anime.Timezone = scheduledAnime.Timezone;
+            if (anime.Timezone != jikanAnime.Timezone)
+                anime.Timezone = jikanAnime.Timezone;
 
             (anime as ITimeConvertible).UpdateLocalTime();
-            (anime as ITitle).UpdateTitles(scheduledAnime.Titles);
+            (anime as ITitle).UpdateTitles(jikanAnime.Titles);
 
             return anime;
         }
 
-        var newAnime = new AniwariAnime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.JSTAiredDate, scheduledAnime.JSTScheduleDay, scheduledAnime.JSTAirTime, scheduledAnime.Timezone);
+        var newAnime = new AniwariAnime(jikanAnime.MalId, title, jikanAnime.Episodes, $"{title} @ep", jikanAnime.JSTAiredDate, jikanAnime.JSTScheduleDay, jikanAnime.JSTAirTime, jikanAnime.Timezone);
 
         (newAnime as ITimeConvertible).UpdateLocalTime();
-        (newAnime as ITitle).UpdateTitles(scheduledAnime.Titles);
+        (newAnime as ITitle).UpdateTitles(jikanAnime.Titles);
 
         _store.Animes.Add(newAnime);
-
         return newAnime;
+    }
+
+    public async Task ImportFromMAL()
+    {
+        if (!_store.UsesMAL)
+            return;
+
+        var watchingList = await _myAnimeListService.GetAnimeList(DAL.MyAnimeList.MALAnimeState.Watching);
+        if (watchingList == null)
+            return;
+
+        foreach (var anime in watchingList)
+        {
+            var newAnime = await _jikanService.GetAnime(anime.AnimeId);
+            if (newAnime == null)
+                continue;
+
+            var aniwariAnime = AddAnime(newAnime);
+            aniwariAnime.Watching = true;
+
+            for (int i = 1; i <= anime.WatchedEpisodes; ++i)
+            {
+                // we will skip user saved episodes
+                if (aniwariAnime.Episodes.Any(x => x.Id == i))
+                    continue;
+
+                var aniwariEpisode = new AniwariEpisode()
+                {
+                    Id = i,
+                    AnimeId = newAnime.MalId,
+                    Watched = true
+                };
+
+                // we are not using the repository because we are adding in bulk
+                aniwariAnime.Episodes.Add(aniwariEpisode);
+            }
+
+            _messageBusService.Publish(new AnimeWatchingChanged(aniwariAnime, aniwariAnime.Watching));
+        }
+
+        await _settingsService.SaveAsync();
+
+        _messageBusService.Publish(new AnimeImportFinished());
     }
 }

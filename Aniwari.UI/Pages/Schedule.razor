@@ -10,7 +10,7 @@
 @inherits DisposableComponentBase
 
 @inject ISettingsService SettingsService
-@inject IJikanService ScheduleService
+@inject IJikanService JikanService
 @inject IAnimeRepository AnimeRepository
 @inject IJSRuntime JS
 
@@ -108,7 +108,7 @@
 
         if (firstRender)
         {
-            await foreach (var list in ScheduleService.GetSchedule(CancellationTokenSource.Token))
+            await foreach (var list in JikanService.GetSchedule(CancellationTokenSource.Token))
             {
                 foreach (var anime in list)
                 {

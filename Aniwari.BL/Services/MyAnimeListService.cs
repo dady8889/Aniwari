@@ -16,13 +16,13 @@ public class MyAnimeListService : IMyAnimeListService
     private string GetAnimeListUrl(string username) => $"https://myanimelist.net/animelist/{username}";
     private string GetLoadUrl(string username) => $"https://myanimelist.net/animelist/{username}/load.json";
     private string GetDeleteAnimeUrl(int malAnimeId) => $"https://myanimelist.net/ownlist/anime/{malAnimeId}/delete";
-        
+
     private readonly ILogger<MyAnimeListService> _logger;
     private readonly ISettingsService _settingsService;
     private readonly HttpClient _httpClient;
 
     public MyAnimeListService(ILogger<MyAnimeListService> logger, ISettingsService settingsService, HttpClient httpClient)
-    { 
+    {
         _logger = logger;
         _settingsService = settingsService;
         _httpClient = httpClient;
@@ -116,7 +116,7 @@ public class MyAnimeListService : IMyAnimeListService
         _logger.LogDebug("Request to remove anime ended with code {}", request.StatusCode);
     }
 
-    public async Task EditAnime(int malAnimeId, int watchedEpisodes, MALAnimeState status = MALAnimeState.Watching)
+    public async Task<bool> EditAnime(int malAnimeId, int watchedEpisodes, MALAnimeState status = MALAnimeState.Watching)
     {
         var (csrfToken, username, _) = GetSecrets();
 
@@ -143,6 +143,8 @@ public class MyAnimeListService : IMyAnimeListService
         var request = await _httpClient.SendAsync(httpRequestMessage);
 
         _logger.LogDebug("Request to set anime episodes count ended with code {}", request.StatusCode);
+
+        return request.IsSuccessStatusCode;
     }
 
     public async Task<List<MALAnime>?> GetAnimeList(MALAnimeState state, int offset = 0)

@@ -519,7 +519,16 @@
 
         // todo: show error if unsuccessful
         if (SettingsService.GetStore().UsesMAL)
-            await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
+        {
+            var success = await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
+
+            // if we cant edit an anime, that means it doesnt exist in the list yet, so we have to add it first
+            if (!success)
+            {
+                await MyAnimeListService.AddAnime(Anime!.Id);
+                await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
+            }
+        }
     }
 
     private async Task OnUnwatchClicked(AniwariEpisode episode)
@@ -529,6 +538,8 @@
 
         // todo: show error if unsuccessful
         if (SettingsService.GetStore().UsesMAL)
+        {
             await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
+        }
     }
 }

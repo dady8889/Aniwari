@@ -6,12 +6,12 @@ using System.Text.Json;
 
 namespace Aniwari;
 
-public partial class MAL : ContentPage
+public partial class MALPage : ContentPage
 {
     public event EventHandler<PageClosedEventArgs>? PageClosed;
     private const string MalUrl = "https://myanimelist.net/";
 
-    public MAL()
+    public MALPage()
     {
         InitializeComponent();
     }

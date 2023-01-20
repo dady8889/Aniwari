@@ -113,7 +113,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <MauiXaml Update="MAL.xaml">
+      <Compile Update="MALPage.xaml.cs">
+        <DependentUpon>MALPage.xaml</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiXaml Update="MALPage.xaml">
         <Generator>MSBuild:Compile</Generator>
       </MauiXaml>
     </ItemGroup>

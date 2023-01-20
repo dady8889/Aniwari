@@ -1,4 +1,4 @@
-﻿using Aniwari.DAL.Schedule;
+﻿using Aniwari.DAL.Jikan;
 using Aniwari.DAL.Storage;
 
 namespace Aniwari.BL.Interfaces;
@@ -7,7 +7,7 @@ public interface IAnimeRepository
 {
     void SetAnimeWatching(int id, bool watching);
     bool GetAnimeWatching(int id);
-    Anime AddAnime(AnimeSchedule scheduledAnime);
-    void AddEpisode(Anime anime, Episode episode);
-    void RemoveEpisode(Anime anime, Episode episode);
+    AniwariAnime AddAnime(JikanAnime scheduledAnime);
+    void AddEpisode(AniwariAnime anime, AniwariEpisode episode);
+    void RemoveEpisode(AniwariAnime anime, AniwariEpisode episode);
 }

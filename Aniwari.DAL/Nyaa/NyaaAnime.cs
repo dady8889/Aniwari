@@ -1,6 +1,6 @@
 ﻿namespace Aniwari.DAL.Nyaa;
 
-public class NyaaAnime
+public sealed class NyaaAnime
 {
     public int Id { get; set; }
     public string Category { get; set; } = string.Empty;

@@ -37,7 +37,7 @@ public sealed partial class SettingsStore
     public string? MalUsername { get; set; } = null;
     public bool UsesMAL => MalCsrfToken != null && MalSessionId != null && MalUsername != null;
 
-    public List<Anime> Animes { get; set; } = new();
+    public List<AniwariAnime> Animes { get; set; } = new();
 }
 
 public sealed partial class SettingsStore

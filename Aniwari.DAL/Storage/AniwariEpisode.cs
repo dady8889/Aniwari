@@ -2,7 +2,7 @@
 
 namespace Aniwari.DAL.Storage;
 
-public sealed class Episode
+public sealed class AniwariEpisode
 {
     [JsonIgnore] public int LastAddedBytesSent { get; set; }
     [JsonIgnore] public int LastAddedBytesReceived { get; set; }

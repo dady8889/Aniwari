@@ -49,9 +49,9 @@
 </div>
 
 @code {
-    public record TorrentSelectedEventArgs(Anime Anime, int Episode, bool Canceled, string Title, string Magnet);
+    public record TorrentSelectedEventArgs(AniwariAnime Anime, int Episode, bool Canceled, string Title, string Magnet);
 
-    [Parameter] public Anime? Anime { get; set; }
+    [Parameter] public AniwariAnime? Anime { get; set; }
     [Parameter] public int? Episode { get; set; }
     [Parameter] public EventCallback<TorrentSelectedEventArgs> OnTorrentSelected { get; set; }
 

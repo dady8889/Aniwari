@@ -54,9 +54,9 @@
     private Animate? animateTorrentPicker;
 
     private SettingsStore? Store;
-    private List<Anime> watchingAnime = new();
+    private List<AniwariAnime> watchingAnime = new();
     private int savedScroll = 0;
-    private Anime? selectedAnime;
+    private AniwariAnime? selectedAnime;
     private int? selectedEpisode;
 
     protected override async Task OnInitializedAsync()
@@ -88,7 +88,7 @@
 
         if (!args.Canceled)
         {
-            AnimeRepository.AddEpisode(args.Anime, new Episode()
+            AnimeRepository.AddEpisode(args.Anime, new AniwariEpisode()
                 {
                     Id = args.Episode,
                     AnimeId = args.Anime.Id,

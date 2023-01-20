@@ -1,7 +1,7 @@
 ﻿@using Aniwari.BL.Interfaces;
 @using Aniwari.BL.Services;
 @using Aniwari.BL.Repositories;
-@using Aniwari.DAL.Schedule;
+@using Aniwari.DAL.Jikan;
 @using Aniwari.DAL.Storage;
 @using Aniwari.Schedule;
 
@@ -10,7 +10,7 @@
 @inherits DisposableComponentBase
 
 @inject ISettingsService SettingsService
-@inject IScheduleService ScheduleService
+@inject IJikanService ScheduleService
 @inject IAnimeRepository AnimeRepository
 @inject IJSRuntime JS
 
@@ -43,7 +43,7 @@
             {
                 <hr>
 
-                List<AnimeSchedule> animes = new();
+                List<JikanAnime> animes = new();
 
                 if (SettingsService.GetStore().PreferredTime == PreferredTime.JST)
                 {
@@ -74,7 +74,7 @@
 
 @code {
     private IJSObjectReference? module;
-    private Dictionary<DayOfWeek, List<AnimeSchedule>> dict = new();
+    private Dictionary<DayOfWeek, List<JikanAnime>> dict = new();
     private Dictionary<DayOfWeek, WeekdayDate> dateMap = new();
 
     protected override async Task OnInitializedAsync()
@@ -85,7 +85,7 @@
 
         foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
         {
-            dict.Add(day, new List<AnimeSchedule>());
+            dict.Add(day, new List<JikanAnime>());
 
             // the current day is today
             if (today == day)

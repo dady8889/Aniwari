@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Aniwari.DAL.MyAnimeList;
 
-public class MALAnime
+public sealed class MALAnime
 {
     [JsonPropertyName("status")]
     public MALAnimeState Status { get; set; }

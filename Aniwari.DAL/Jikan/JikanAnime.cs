@@ -1,10 +1,10 @@
 ﻿using Aniwari.DAL.Interfaces;
 
-namespace Aniwari.DAL.Schedule;
+namespace Aniwari.DAL.Jikan;
 
-public class AnimeSchedule : ITimeConvertible, ITitle
+public sealed class JikanAnime : ITimeConvertible, ITitle
 {
-    public AnimeSchedule()
+    public JikanAnime()
     {
     }
 

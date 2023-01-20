@@ -34,7 +34,7 @@ public static class AniwariServicesConfiguration
             return jikan;
         });
 
-        services.AddSingleton<IScheduleService, ScheduleService>();
+        services.AddSingleton<IJikanService, JikanService>();
         services.AddSingleton<IStoreService, StoreService>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IMessageBusService, MessageBusService>();

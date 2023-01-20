@@ -1,6 +1,6 @@
 ﻿using Aniwari.BL.Interfaces;
 using Aniwari.BL.Messaging;
-using Aniwari.DAL.Schedule;
+using Aniwari.DAL.Jikan;
 using Aniwari.DAL.Storage;
 using Aniwari.DAL.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -42,7 +42,7 @@ public class AnimeRepository : IAnimeRepository
         return _store.Animes.FirstOrDefault(x => x.Id == id)?.Watching ?? false;
     }
 
-    public void AddEpisode(Anime anime, Episode episode)
+    public void AddEpisode(AniwariAnime anime, AniwariEpisode episode)
     {
         var ep = anime.Episodes.FirstOrDefault(ep => ep.Id == episode.Id);
 
@@ -74,7 +74,7 @@ public class AnimeRepository : IAnimeRepository
         _messageBusService.Publish(new AnimeEpisodeChanged(anime, null, episode));
     }
 
-    public void RemoveEpisode(Anime anime, Episode episode)
+    public void RemoveEpisode(AniwariAnime anime, AniwariEpisode episode)
     {
         if (!anime.Episodes.Any(ep => ep.Id == episode.Id))
             return;
@@ -84,7 +84,7 @@ public class AnimeRepository : IAnimeRepository
         _messageBusService.Publish(new AnimeEpisodeChanged(anime, episode, null));
     }
 
-    public Anime AddAnime(AnimeSchedule scheduledAnime)
+    public AniwariAnime AddAnime(JikanAnime scheduledAnime)
     {
         var anime = _store.Animes.FirstOrDefault(x => x.Id == scheduledAnime.MalId);
 
@@ -117,7 +117,7 @@ public class AnimeRepository : IAnimeRepository
             return anime;
         }
 
-        var newAnime = new Anime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.JSTAiredDate, scheduledAnime.JSTScheduleDay, scheduledAnime.JSTAirTime, scheduledAnime.Timezone);
+        var newAnime = new AniwariAnime(scheduledAnime.MalId, title, scheduledAnime.Episodes, $"{title} @ep", scheduledAnime.JSTAiredDate, scheduledAnime.JSTScheduleDay, scheduledAnime.JSTAirTime, scheduledAnime.Timezone);
 
         (newAnime as ITimeConvertible).UpdateLocalTime();
         (newAnime as ITitle).UpdateTitles(scheduledAnime.Titles);

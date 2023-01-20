@@ -2,5 +2,5 @@
 
 namespace Aniwari.BL.Messaging;
 
-public record AnimeWatchingChanged(Anime Anime, bool Watching) : IMessage;
-public record AnimeEpisodeChanged(Anime Anime, Episode? OldEpisode, Episode? NewEpisode) : IMessage;
+public record AnimeWatchingChanged(AniwariAnime Anime, bool Watching) : IMessage;
+public record AnimeEpisodeChanged(AniwariAnime Anime, AniwariEpisode? OldEpisode, AniwariEpisode? NewEpisode) : IMessage;

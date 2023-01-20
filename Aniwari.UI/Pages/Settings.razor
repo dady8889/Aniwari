@@ -337,7 +337,7 @@
 
     private async Task OnMyAnimeListLoginClicked()
     {
-        var page = new MAL();
+        var page = new MALPage();
 
         page.PageClosed += async (sender, e) =>
         {
@@ -353,7 +353,7 @@
 
     private async Task OnMyAnimeListLogoutClicked()
     {
-        var page = new MAL()
+        var page = new MALPage()
         {
             DeleteCookies = true
         };

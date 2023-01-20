@@ -1,4 +1,4 @@
-﻿namespace Aniwari.DAL.Schedule;
+﻿namespace Aniwari.DAL.Jikan;
 
 public enum TitleType
 {

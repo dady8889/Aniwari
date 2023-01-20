@@ -33,7 +33,7 @@ public class TorrentService : ITorrentService
 
     #region Internal Methods
 
-    private Episode InternalGetEpisode(int animeId, int episodeId)
+    private AniwariEpisode InternalGetEpisode(int animeId, int episodeId)
     {
         var episode = _settingsService.GetStore().Animes.FirstOrDefault(x => x.Id == animeId)?.Episodes.FirstOrDefault(x => x.Id == episodeId);
 

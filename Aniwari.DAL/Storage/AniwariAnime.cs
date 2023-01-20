@@ -1,15 +1,15 @@
-﻿using Aniwari.DAL.Schedule;
+﻿using Aniwari.DAL.Jikan;
 using Aniwari.DAL.Interfaces;
 
 namespace Aniwari.DAL.Storage;
 
-public sealed class Anime : ITimeConvertible, ITitle
+public sealed class AniwariAnime : ITimeConvertible, ITitle
 {
-    public Anime()
+    public AniwariAnime()
     {
     }
 
-    public Anime(int id, string title, int? episodesCount, string searchString, DateTime? jstAiredDate, DayOfWeek jstScheduleDay, TimeOnly? jstAirTime, string? timezone)
+    public AniwariAnime(int id, string title, int? episodesCount, string searchString, DateTime? jstAiredDate, DayOfWeek jstScheduleDay, TimeOnly? jstAirTime, string? timezone)
     {
         Id = id;
         Title = title;
@@ -46,7 +46,7 @@ public sealed class Anime : ITimeConvertible, ITitle
 
     #endregion
 
-    public List<Episode> Episodes { get; set; } = new();
+    public List<AniwariEpisode> Episodes { get; set; } = new();
 
-    public IEnumerable<Episode> GetWatchedEpisodes() => Episodes.Where(x => x.Watched);
+    public IEnumerable<AniwariEpisode> GetWatchedEpisodes() => Episodes.Where(x => x.Watched);
 }

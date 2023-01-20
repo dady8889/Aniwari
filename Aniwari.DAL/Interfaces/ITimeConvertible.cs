@@ -1,4 +1,4 @@
-﻿using Aniwari.DAL.Schedule;
+﻿using Aniwari.DAL.Jikan;
 
 namespace Aniwari.DAL.Interfaces;
 

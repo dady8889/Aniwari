@@ -5,7 +5,7 @@
 @using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
 @using Aniwari.DAL.Interfaces;
-@using Aniwari.DAL.Schedule;
+@using Aniwari.DAL.Jikan;
 @using Aniwari.DAL.Storage;
 @using Aniwari.DAL.MyAnimeList;
 
@@ -299,9 +299,9 @@
 </Accordion>
 
 @code {
-    public record SearchEventArgs(Anime Anime, int Episode);
+    public record SearchEventArgs(AniwariAnime Anime, int Episode);
 
-    [Parameter] public Anime? Anime { get; set; }
+    [Parameter] public AniwariAnime? Anime { get; set; }
     [Parameter] public EventCallback<SearchEventArgs> OnSearch { get; set; }
 
     private IJSObjectReference? module;
@@ -398,7 +398,7 @@
         editingEpisodesCount = false;
     }
 
-    private async Task OnDownloadClicked(Episode episode)
+    private async Task OnDownloadClicked(AniwariEpisode episode)
     {
         if (episode.TorrentMagnet == null)
             return;
@@ -410,7 +410,7 @@
         await TorrentService.DownloadAnime(Anime!.Id, episode.Id, episode.TorrentMagnet, archivePath);
     }
 
-    private async void OnWatchClicked(Episode episode)
+    private async void OnWatchClicked(AniwariEpisode episode)
     {
         if (episode.VideoFilePath == null)
             return;
@@ -435,7 +435,7 @@
         await SettingsService.SaveAsync();
     }
 
-    private async Task OnDeleteClicked(Episode episode)
+    private async Task OnDeleteClicked(AniwariEpisode episode)
     {
         if (episode.Seeding)
         {
@@ -456,7 +456,7 @@
         await SettingsService.SaveAsync();
     }
 
-    private async Task OnCancelDownloadClicked(Episode episode)
+    private async Task OnCancelDownloadClicked(AniwariEpisode episode)
     {
         var file = await TorrentService.CancelDownload(Anime!.Id, episode.Id);
         if (file != null)
@@ -478,7 +478,7 @@
         await SettingsService.SaveAsync();
     }
 
-    private async Task OnCancelSeedClicked(Episode episode)
+    private async Task OnCancelSeedClicked(AniwariEpisode episode)
     {
         await TorrentService.CancelSeed(Anime!.Id, episode.Id);
         episode.Seeding = false;
@@ -488,7 +488,7 @@
         await SettingsService.SaveAsync();
     }
 
-    private async Task OnSeedClicked(Episode episode)
+    private async Task OnSeedClicked(AniwariEpisode episode)
     {
         await OnDownloadClicked(episode);
     }
@@ -507,7 +507,7 @@
         }
         else
         {
-            AnimeRepository.AddEpisode(Anime!, new Episode()
+            AnimeRepository.AddEpisode(Anime!, new AniwariEpisode()
                 {
                     Id = episode,
                     AnimeId = Anime!.Id,
@@ -522,7 +522,7 @@
             await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
     }
 
-    private async Task OnUnwatchClicked(Episode episode)
+    private async Task OnUnwatchClicked(AniwariEpisode episode)
     {
         episode.Watched = false;
         await SettingsService.SaveAsync();

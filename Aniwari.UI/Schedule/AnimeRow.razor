@@ -2,7 +2,7 @@
 @using Aniwari.BL.Messaging;
 @using Aniwari.BL.Repositories;
 @using Aniwari.BL.Services;
-@using Aniwari.DAL.Schedule;
+@using Aniwari.DAL.Jikan;
 @using Aniwari.DAL.Storage;
 @using Aniwari.DAL.Interfaces;
 @using Aniwari.Shared;
@@ -83,7 +83,7 @@
 </Accordion>
 
 @code {
-    [Parameter] public AnimeSchedule? Anime { get; set; }
+    [Parameter] public JikanAnime? Anime { get; set; }
 
     private bool watching = false;
 

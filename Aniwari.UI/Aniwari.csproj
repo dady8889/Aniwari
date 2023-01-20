@@ -112,4 +112,10 @@
       <ProjectReference Include="..\Aniwari.DAL\Aniwari.DAL.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <MauiXaml Update="MAL.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
+    </ItemGroup>
+
 </Project>

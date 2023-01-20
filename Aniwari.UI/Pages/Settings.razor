@@ -8,6 +8,7 @@
 @page "/settings"
 
 @inject IJSRuntime JS
+@inject IMyAnimeListService MyAnimeListService
 @inject ISettingsService SettingsService
 @inject ITorrentService TorrentService
 @inject IFolderPicker FolderPicker
@@ -114,7 +115,7 @@
                             <SettingSelect TValue="PreferredTime" Value="@(Store.Get<PreferredTime>(propertyName))" OnChange="async (value) => {
                                     Store.Set(setting.Type, propertyName, value);
                                     await SettingsService.SaveAsync();
-                            }"/>
+                            }" />
 
                             <button @onclick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);
@@ -130,7 +131,7 @@
                             <SettingSelect TValue="PreferredTitleLanguage" Value="@(Store.Get<PreferredTitleLanguage>(propertyName))" OnChange="async (value) => {
                                     Store.Set(setting.Type, propertyName, value);
                                     await SettingsService.SaveAsync();
-                            }"/>
+                            }" />
 
                             <button @onclick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);
@@ -181,6 +182,34 @@
                 <button @onclick="OnDeleteWatchlistClicked">
                     Delete
                 </button>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="settings-item">
+            <div class="settings-item__description">
+                MyAnimeList integration
+            </div>
+            <div class="settings-item__control">
+                @if (!Store!.UsesMAL)
+                {
+                    <button @onclick="OnMyAnimeListLoginClicked">
+                        Connect
+                    </button>
+                }
+                else
+                {
+                    <button @onclick="OnMyAnimeListImportWatchingClicked">
+                        Import watching
+                    </button>
+                    <button @onclick="OnMyAnimeListLoginClicked">
+                        Refresh
+                    </button>
+                    <button @onclick="OnMyAnimeListLogoutClicked">
+                        Disconnect
+                    </button>
+                }
             </div>
         </div>
 
@@ -304,5 +333,61 @@
             return -T.One;
 
         return current;
+    }
+
+    private async Task OnMyAnimeListLoginClicked()
+    {
+        var page = new MAL();
+
+        page.PageClosed += async (sender, e) =>
+        {
+            Store!.MalCsrfToken = e.CsrfToken;
+            Store!.MalSessionId = e.MalSessionId;
+            Store!.MalUsername = e.Username;
+            await InvokeAsync(StateHasChanged);
+        };
+
+        if (App.Current?.MainPage != null)
+            await App.Current.MainPage.Navigation.PushModalAsync(page);
+    }
+
+    private async Task OnMyAnimeListLogoutClicked()
+    {
+        var page = new MAL()
+        {
+            DeleteCookies = true
+        };
+
+        Store!.MalCsrfToken = null;
+        Store!.MalSessionId = null;
+        Store!.MalUsername = null;
+
+        if (App.Current?.MainPage != null)
+            await App.Current.MainPage.Navigation.PushModalAsync(page);
+    }
+
+    private async Task OnMyAnimeListImportWatchingClicked()
+    {
+        if (!Store!.UsesMAL)
+            return;
+
+        var watchingList = await MyAnimeListService.GetAnimeList(DAL.MyAnimeList.MALAnimeState.Watching);
+        if (watchingList == null)
+            return;
+
+        foreach (var anime in watchingList)
+        {
+            var storedAnime = Store!.Animes.FirstOrDefault(x => x.Id == anime.AnimeId);
+            if (storedAnime != null) // we want to import only new anime
+                continue;
+             
+            // todo
+            //var newAnime = 
+
+            //for (int i = 0; i < anime.WatchedEpisodes; ++i)
+            //{
+            //    var episode = new Episode();
+            //}
+        }
     }
 }

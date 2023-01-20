@@ -31,6 +31,12 @@ public sealed partial class SettingsStore
     public int MaximumUploadSpeed { get; set; } = -1;
     public PreferredTime PreferredTime { get; set; } = PreferredTime.Local;
     public PreferredTitleLanguage PreferredTitleLanguage { get; set; } = PreferredTitleLanguage.English;
+
+    public string? MalSessionId { get; set; } = null;
+    public string? MalCsrfToken { get; set; } = null;
+    public string? MalUsername { get; set; } = null;
+    public bool UsesMAL => MalCsrfToken != null && MalSessionId != null && MalUsername != null;
+
     public List<Anime> Animes { get; set; } = new();
 }
 

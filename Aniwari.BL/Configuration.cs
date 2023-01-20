@@ -40,8 +40,11 @@ public static class AniwariServicesConfiguration
         services.AddSingleton<IMessageBusService, MessageBusService>();
         services.AddSingleton<INyaaService, NyaaService>();
         services.AddSingleton<ITorrentService, TorrentService>();
+        services.AddSingleton<IMyAnimeListService, MyAnimeListService>();
 
         services.AddTransient<IAnimeRepository, AnimeRepository>();
+
+        services.AddHttpClient<IMyAnimeListService, MyAnimeListService>();
 
         return services;
     }

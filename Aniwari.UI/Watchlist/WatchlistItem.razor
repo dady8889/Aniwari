@@ -7,6 +7,7 @@
 @using Aniwari.DAL.Interfaces;
 @using Aniwari.DAL.Schedule;
 @using Aniwari.DAL.Storage;
+@using Aniwari.DAL.MyAnimeList;
 
 @inherits ReactiveComponentBase
 
@@ -14,6 +15,7 @@
 @inject ISettingsService SettingsService
 @inject ITorrentService TorrentService
 @inject IAnimeRepository AnimeRepository
+@inject IMyAnimeListService MyAnimeListService
 
 @if (Anime == null) return;
 
@@ -237,7 +239,7 @@
                                 }
 
                                 <div class="button-wrapper">
-                                    
+
 
                                     @if (ep.Seeding)
                                     {
@@ -514,11 +516,19 @@
         }
 
         await SettingsService.SaveAsync();
+
+        // todo: show error if unsuccessful
+        if (SettingsService.GetStore().UsesMAL)
+            await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
     }
 
     private async Task OnUnwatchClicked(Episode episode)
     {
         episode.Watched = false;
         await SettingsService.SaveAsync();
+
+        // todo: show error if unsuccessful
+        if (SettingsService.GetStore().UsesMAL)
+            await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
     }
 }

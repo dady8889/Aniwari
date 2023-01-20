@@ -2,6 +2,7 @@
 @using Aniwari.BL.Services;
 @using Aniwari.DAL.Nyaa;
 @using Aniwari.DAL.Storage;
+@using System.Text.RegularExpressions;
 
 @inject INyaaService NyaaService
 
@@ -67,9 +68,33 @@
         if (Anime == null || Episode == null || (Anime == prevAnime && Episode == prevEpisode))
             return;
 
-        string searchString = Anime.SearchString
-        .Replace("@ep", $"{Episode:D2}")
-        .Replace("@EP", $"{Episode}");
+        string searchString = Anime.SearchString;
+
+        var additionRegex = new Regex(@"@(ep|EP)(?:\+(\d+))?");
+        searchString = additionRegex.Replace(searchString, e =>
+            {
+                int episodeIndex = Episode.Value;
+                string replacement = "";
+                string numberTypeGroup = e.Groups[1].Value;
+
+                // increment episode index
+                if (e.Groups[2].Success)
+                {
+                    episodeIndex += Convert.ToInt32(e.Groups[2].Value);
+                }
+
+                // set episode formatting
+                if (numberTypeGroup == "ep")
+                {
+                    replacement = $"{episodeIndex:D2}";
+                }
+                else if (numberTypeGroup == "EP")
+                {
+                    replacement = $"{episodeIndex}";
+                }
+
+                return replacement;
+            });
 
         foundTorrents = await NyaaService.GetAnime(searchString);
         StateHasChanged();

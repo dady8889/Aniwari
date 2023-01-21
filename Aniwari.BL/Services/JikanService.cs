@@ -89,7 +89,7 @@ public class JikanService : IJikanService
         return true;
     }
 
-    public async IAsyncEnumerable<IList<JikanAnime>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<List<JikanAnime>> GetSchedule([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         bool next = true;
         int page = 1;

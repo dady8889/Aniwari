@@ -1,11 +1,8 @@
 ﻿using Aniwari.DAL.Constants;
-using System;
-using System.Collections.Generic;
+using Aniwari.DAL.Jikan;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace Aniwari.DAL.Storage;
 
@@ -38,6 +35,9 @@ public sealed partial class SettingsStore
     public bool UsesMAL => MalCsrfToken != null && MalSessionId != null && MalUsername != null;
 
     public List<AniwariAnime> Animes { get; set; } = new();
+
+    [JsonIgnore]
+    public List<JikanAnime> JikanCache { get; set; } = new();
 }
 
 public sealed partial class SettingsStore

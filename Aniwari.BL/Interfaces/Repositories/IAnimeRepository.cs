@@ -7,8 +7,7 @@ public interface IAnimeRepository
 {
     void SetAnimeWatching(int id, bool watching);
     bool GetAnimeWatching(int id);
-    AniwariAnime AddAnime(JikanAnime scheduledAnime);
+    AniwariAnime AddAnime(JikanAnime jikanAnime);
     void AddEpisode(AniwariAnime anime, AniwariEpisode episode);
     void RemoveEpisode(AniwariAnime anime, AniwariEpisode episode);
-    Task ImportFromMAL();
 }

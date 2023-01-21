@@ -13,4 +13,9 @@ public interface IJikanService
     /// Gets information about anime from Jikan.
     /// </summary>
     Task<JikanAnime?> GetAnime(int malAnimeId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Begin loading of Jikan schedule. Publishes <see cref="Messaging.JikanAnimeAdded"/> message to subscribers.
+    /// </summary>
+    void BeginGetSchedule();
 }

@@ -5,6 +5,8 @@ using Aniwari.DAL.Jikan;
 using Aniwari.DAL.Interfaces;
 using Microsoft.Extensions.Logging;
 using IJikan = JikanDotNet.IJikan;
+using Aniwari.BL.Repositories;
+using Aniwari.BL.Messaging;
 
 namespace Aniwari.BL.Services;
 
@@ -12,11 +14,19 @@ public class JikanService : IJikanService
 {
     private readonly IJikan _jikan;
     private readonly ILogger<JikanService> _logger;
+    private readonly ISettingsService _settingsService;
+    private readonly IAnimeRepository _animeRepository;
+    private readonly IMessageBusService _messageBusService;
 
-    public JikanService(ILogger<JikanService> logger, IJikan jikan)
+    private bool loadingSchedule = false;
+
+    public JikanService(ILogger<JikanService> logger, IJikan jikan, ISettingsService settingsService, IAnimeRepository animeRepository, IMessageBusService messageBusService)
     {
         _jikan = jikan;
         _logger = logger;
+        _settingsService = settingsService;
+        _animeRepository = animeRepository;
+        _messageBusService = messageBusService;
     }
 
     /// <summary>
@@ -155,7 +165,7 @@ public class JikanService : IJikanService
                 if (data == null)
                     return null;
 
-                if(!TryParseJikanAnime(data.Data, out var jikanAnime))
+                if (!TryParseJikanAnime(data.Data, out var jikanAnime))
                 {
                     throw new Exception("Could not parse the Jikan response.");
                 }
@@ -179,5 +189,56 @@ public class JikanService : IJikanService
         } while (repeat);
 
         return null;
+    }
+
+    public void BeginGetSchedule()
+    {
+        if (loadingSchedule)
+            return;
+
+        loadingSchedule = true;
+
+        Task.Run(async () =>
+        {
+            bool loadedCache = false;
+
+            // reuse cache
+            if (_settingsService.GetStore().JikanCache.Count != 0)
+            {
+                LoadAnime(_settingsService.GetStore().JikanCache, true);
+                loadedCache = true;
+            }
+
+            List<JikanAnime> jikanCache = new();
+            await foreach (var list in GetSchedule())
+            {
+                LoadAnime(list, !loadedCache);
+                jikanCache.AddRange(list);
+            }
+
+            _settingsService.GetStore().JikanCache = jikanCache;
+
+            if (loadedCache)
+            {
+                _messageBusService.Publish(new JikanAnimeAdded(jikanCache));
+            }
+
+            // if the store needed updates, save to disk
+            await _settingsService.SaveAsync();
+
+            loadingSchedule = false;
+        });
+    }
+
+    private void LoadAnime(List<JikanAnime> animeList, bool notify)
+    {
+        foreach (var anime in animeList)
+        {
+            // update the local store
+            _animeRepository.AddAnime(anime);
+        }
+
+        if (notify)
+            _messageBusService.Publish(new JikanAnimeAdded(animeList));
     }
 }

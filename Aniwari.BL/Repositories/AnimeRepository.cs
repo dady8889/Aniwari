@@ -14,18 +14,14 @@ public class AnimeRepository : IAnimeRepository
     private readonly ILogger<AnimeRepository> _logger;
     private readonly ISettingsService _settingsService;
     private readonly IMessageBusService _messageBusService;
-    private readonly IMyAnimeListService _myAnimeListService;
-    private readonly IJikanService _jikanService;
     private readonly SettingsStore _store;
 
-    public AnimeRepository(ILogger<AnimeRepository> logger, ISettingsService settingsService, IMessageBusService messageBusService, IMyAnimeListService myAnimeListService, IJikanService jikanService)
+    public AnimeRepository(ILogger<AnimeRepository> logger, ISettingsService settingsService, IMessageBusService messageBusService)
     {
         _logger = logger;
         _settingsService = settingsService;
         _store = _settingsService.GetStore();
         _messageBusService = messageBusService;
-        _myAnimeListService = myAnimeListService;
-        _jikanService = jikanService;
     }
 
     public void SetAnimeWatching(int id, bool watching)
@@ -130,48 +126,5 @@ public class AnimeRepository : IAnimeRepository
 
         _store.Animes.Add(newAnime);
         return newAnime;
-    }
-
-    public async Task ImportFromMAL()
-    {
-        if (!_store.UsesMAL)
-            return;
-
-        var watchingList = await _myAnimeListService.GetAnimeList(DAL.MyAnimeList.MALAnimeState.Watching);
-        if (watchingList == null)
-            return;
-
-        foreach (var anime in watchingList)
-        {
-            var newAnime = await _jikanService.GetAnime(anime.AnimeId);
-            if (newAnime == null)
-                continue;
-
-            var aniwariAnime = AddAnime(newAnime);
-            aniwariAnime.Watching = true;
-
-            for (int i = 1; i <= anime.WatchedEpisodes; ++i)
-            {
-                // we will skip user saved episodes
-                if (aniwariAnime.Episodes.Any(x => x.Id == i))
-                    continue;
-
-                var aniwariEpisode = new AniwariEpisode()
-                {
-                    Id = i,
-                    AnimeId = newAnime.MalId,
-                    Watched = true
-                };
-
-                // we are not using the repository because we are adding in bulk
-                aniwariAnime.Episodes.Add(aniwariEpisode);
-            }
-
-            _messageBusService.Publish(new AnimeWatchingChanged(aniwariAnime, aniwariAnime.Watching));
-        }
-
-        await _settingsService.SaveAsync();
-
-        _messageBusService.Publish(new AnimeImportFinished());
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Aniwari.BL.Interfaces;
+using Aniwari.BL.Messaging;
 using Aniwari.DAL.MyAnimeList;
+using Aniwari.DAL.Storage;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Text;
@@ -19,12 +21,18 @@ public class MyAnimeListService : IMyAnimeListService
 
     private readonly ILogger<MyAnimeListService> _logger;
     private readonly ISettingsService _settingsService;
+    private readonly IJikanService _jikanService;
+    private readonly IAnimeRepository _animeRepository;
+    private readonly IMessageBusService _messageBusService;
     private readonly HttpClient _httpClient;
 
-    public MyAnimeListService(ILogger<MyAnimeListService> logger, ISettingsService settingsService, HttpClient httpClient)
+    public MyAnimeListService(ILogger<MyAnimeListService> logger, ISettingsService settingsService, IJikanService jikanService, IAnimeRepository animeRepository, IMessageBusService messageBusService, HttpClient httpClient)
     {
         _logger = logger;
         _settingsService = settingsService;
+        _jikanService = jikanService;
+        _animeRepository = animeRepository;
+        _messageBusService = messageBusService;
         _httpClient = httpClient;
     }
 
@@ -168,6 +176,49 @@ public class MyAnimeListService : IMyAnimeListService
         var animeList = await request.Content.ReadFromJsonAsync<List<MALAnime>>();
 
         return animeList;
+    }
+
+    public async Task ImportList()
+    {
+        if (!_settingsService.GetStore().UsesMAL)
+            return;
+
+        var watchingList = await GetAnimeList(DAL.MyAnimeList.MALAnimeState.Watching);
+        if (watchingList == null)
+            return;
+
+        foreach (var anime in watchingList)
+        {
+            var newAnime = await _jikanService.GetAnime(anime.AnimeId);
+            if (newAnime == null)
+                continue;
+
+            var aniwariAnime = _animeRepository.AddAnime(newAnime);
+            aniwariAnime.Watching = true;
+
+            for (int i = 1; i <= anime.WatchedEpisodes; ++i)
+            {
+                // we will skip user saved episodes
+                if (aniwariAnime.Episodes.Any(x => x.Id == i))
+                    continue;
+
+                var aniwariEpisode = new AniwariEpisode()
+                {
+                    Id = i,
+                    AnimeId = newAnime.MalId,
+                    Watched = true
+                };
+
+                // we are not using the repository because we are adding in bulk
+                aniwariAnime.Episodes.Add(aniwariEpisode);
+            }
+
+            _messageBusService.Publish(new AnimeWatchingChanged(aniwariAnime, aniwariAnime.Watching));
+        }
+
+        await _settingsService.SaveAsync();
+
+        _messageBusService.Publish(new AnimeImportFinished());
     }
 
     private class MalEditAnimeData

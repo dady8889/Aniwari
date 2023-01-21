@@ -1,13 +1,14 @@
 ﻿@using Aniwari.BL.Interfaces;
 @using Aniwari.BL.Services;
 @using Aniwari.BL.Repositories;
+@using Aniwari.BL.Messaging;
 @using Aniwari.DAL.Jikan;
 @using Aniwari.DAL.Storage;
 @using Aniwari.Schedule;
 
 @page "/schedule"
 
-@inherits DisposableComponentBase
+@inherits ReactiveComponentBase
 
 @inject ISettingsService SettingsService
 @inject IJikanService JikanService
@@ -87,7 +88,6 @@
 </div>
 
 @code {
-    private IJSObjectReference? module;
     private Dictionary<DayOfWeek, List<JikanAnime>> dict = new();
     private Dictionary<DayOfWeek, WeekdayDate> dateMap = new();
 
@@ -113,70 +113,32 @@
             }
         }
 
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Schedule.razor.js");
+        JikanService.BeginGetSchedule();
+
+        ReactTo<JikanAnimeAdded>((e) =>
+        {
+            foreach (var anime in e.Animes)
+                LoadAnime(anime);
+
+            InvokeAsync(StateHasChanged);
+        });
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private void LoadAnime(JikanAnime anime)
     {
-        await base.OnAfterRenderAsync(firstRender);
+        DayOfWeek selector = DayOfWeek.Monday;
 
-        if (firstRender)
-        {
-            bool loadedCache = false;
+        // add to the dictionary per day
+        if (SettingsService.GetStore().PreferredTime == PreferredTime.JST)
+            selector = anime.JSTScheduleDay;
+        else if (SettingsService.GetStore().PreferredTime == PreferredTime.Local)
+            selector = anime.LocalScheduleDay;
 
-            // reuse cache
-            if (SettingsService.GetStore().JikanCache.Count != 0)
-            {
-                LoadAnime(SettingsService.GetStore().JikanCache);
-                StateHasChanged();
-                loadedCache = true;
-            }
+        var old = dict[selector].FirstOrDefault(x => x.MalId == anime.MalId);
+        if (old != null)
+            dict[selector].Remove(old);
 
-            List<JikanAnime> jikanCache = new();
-            await foreach (var list in JikanService.GetSchedule(CancellationTokenSource.Token))
-            {
-                LoadAnime(list);
-                jikanCache.AddRange(list);
-                if (!loadedCache)
-                    StateHasChanged();
-            }
-
-            if (loadedCache)
-                StateHasChanged();
-
-            SettingsService.GetStore().JikanCache = jikanCache;
-
-            // if the store needed updates, save to disk
-            await SettingsService.SaveAsync();
-
-            //if (module != null && !Disposed)
-            //{
-            //    await module.InvokeVoidAsync("scrollToDay", CancellationTokenSource.Token, DateTime.Now.DayOfWeek.ToString());
-            //}
-        }
-    }
-
-    private void LoadAnime(List<JikanAnime> animeList)
-    {
-        foreach (var anime in animeList)
-        {
-            DayOfWeek selector = DayOfWeek.Monday;
-
-            // add to the dictionary per day
-            if (SettingsService.GetStore().PreferredTime == PreferredTime.JST)
-                selector = anime.JSTScheduleDay;
-            else if (SettingsService.GetStore().PreferredTime == PreferredTime.Local)
-                selector = anime.LocalScheduleDay;
-
-            var old = dict[selector].FirstOrDefault(x => x.MalId == anime.MalId);
-            if (old != null)
-                dict[selector].Remove(old);
-
-            dict[selector].Add(anime);
-
-            // update the local store
-            AnimeRepository.AddAnime(anime);
-        }
+        dict[selector].Add(anime);
     }
 
     private record WeekdayDate(string RelativeName = "", DateOnly Date = default);

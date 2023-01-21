@@ -122,25 +122,32 @@
 
         if (firstRender)
         {
-            // cache is empty
-            if (SettingsService.GetStore().JikanCache.Count == 0)
-            {
-                List<JikanAnime> jikanCache = new();
-                await foreach (var list in JikanService.GetSchedule(CancellationTokenSource.Token))
-                {
-                    LoadAnime(list);
-                    jikanCache.AddRange(list);
-                }
+            bool loadedCache = false;
 
-                SettingsService.GetStore().JikanCache = jikanCache;
-
-                // if the store needed updates, save to disk
-                await SettingsService.SaveAsync();
-            }
-            else // reuse cache
+            // reuse cache
+            if (SettingsService.GetStore().JikanCache.Count != 0)
             {
                 LoadAnime(SettingsService.GetStore().JikanCache);
+                StateHasChanged();
+                loadedCache = true;
             }
+
+            List<JikanAnime> jikanCache = new();
+            await foreach (var list in JikanService.GetSchedule(CancellationTokenSource.Token))
+            {
+                LoadAnime(list);
+                jikanCache.AddRange(list);
+                if (!loadedCache)
+                    StateHasChanged();
+            }
+
+            if (loadedCache)
+                StateHasChanged();
+
+            SettingsService.GetStore().JikanCache = jikanCache;
+
+            // if the store needed updates, save to disk
+            await SettingsService.SaveAsync();
 
             //if (module != null && !Disposed)
             //{
@@ -153,21 +160,23 @@
     {
         foreach (var anime in animeList)
         {
+            DayOfWeek selector = DayOfWeek.Monday;
+
             // add to the dictionary per day
             if (SettingsService.GetStore().PreferredTime == PreferredTime.JST)
-            {
-                dict[anime.JSTScheduleDay].Add(anime);
-            }
+                selector = anime.JSTScheduleDay;
             else if (SettingsService.GetStore().PreferredTime == PreferredTime.Local)
-            {
-                dict[anime.LocalScheduleDay].Add(anime);
-            }
+                selector = anime.LocalScheduleDay;
+
+            var old = dict[selector].FirstOrDefault(x => x.MalId == anime.MalId);
+            if (old != null)
+                dict[selector].Remove(old);
+
+            dict[selector].Add(anime);
 
             // update the local store
             AnimeRepository.AddAnime(anime);
         }
-
-        StateHasChanged();
     }
 
     private record WeekdayDate(string RelativeName = "", DateOnly Date = default);

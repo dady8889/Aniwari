@@ -36,9 +36,9 @@
                            @oninput="(e) => OnThemeColorChanged(e, propertyName, setting, false)"
                            @onchange="(e) => OnThemeColorChanged(e, propertyName, setting, true)" />
 
-                            <button @onclick="OnThemeResetClicked">
+                            <Button OnClick="OnThemeResetClicked">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     }
                     else if (propertyName == nameof(SettingsStore.EnableDarkMode))
@@ -55,16 +55,16 @@
                                 @(EllipsePath(Store.Get<string>(propertyName) ?? ""))
                             </div>
 
-                            <button @onclick="OnArchivePathBrowse">
+                            <Button OnClick="OnArchivePathBrowse">
                                 Browse
-                            </button>
+                            </Button>
 
-                            <button @onclick="async () => {
+                            <Button OnClick="async () => {
                                         Store!.Set(setting.Type, propertyName, setting.DefaultValue);
                                         await SettingsService.SaveAsync();
                                     }">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     }
                     else if (propertyName == nameof(SettingsStore.MaximumSeedRatio))
@@ -78,12 +78,12 @@
                                 e.Handled = true;
                             }" />
 
-                            <button @onclick="async () => {
+                            <Button OnClick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);
                                         await SettingsService.SaveAsync();
                                     }">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     }
                     else if (propertyName == nameof(SettingsStore.MaximumDownloadSpeed) || propertyName == nameof(SettingsStore.MaximumUploadSpeed))
@@ -101,12 +101,12 @@
                                 kB/s
                             </label>
 
-                            <button @onclick="async () => {
+                            <Button OnClick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);
                                         await SettingsService.SaveAsync();
                                     }">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     }
                     else if (propertyName == nameof(SettingsStore.PreferredTime))
@@ -117,12 +117,12 @@
                                     await SettingsService.SaveAsync();
                             }" />
 
-                            <button @onclick="async () => {
+                            <Button OnClick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);
                                         await SettingsService.SaveAsync();
                                     }">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     }
                     else if (propertyName == nameof(SettingsStore.PreferredTitleLanguage))
@@ -133,12 +133,12 @@
                                     await SettingsService.SaveAsync();
                             }" />
 
-                            <button @onclick="async () => {
+                            <Button OnClick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);
                                         await SettingsService.SaveAsync();
                                     }">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     }
                     else if (setting.Type == typeof(bool))
@@ -159,12 +159,12 @@
                                 await SettingsService.SaveAsync();
                             }" />
 
-                            <button @onclick="async () => {
+                                    <Button OnClick="async () => {
                                         Store.Set(setting.Type, propertyName, setting.DefaultValue);
                                         await SettingsService.SaveAsync();
                                     }">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     }
 
@@ -179,9 +179,9 @@
                 Delete watchlist
             </div>
             <div class="settings-item__control">
-                <button @onclick="OnDeleteWatchlistClicked">
+                <Button OnClick="OnDeleteWatchlistClicked">
                     Delete
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -194,21 +194,21 @@
             <div class="settings-item__control">
                 @if (!Store!.UsesMAL)
                 {
-                    <button @onclick="OnMyAnimeListLoginClicked">
+                    <Button OnClick="OnMyAnimeListLoginClicked">
                         Connect
-                    </button>
+                    </Button>
                 }
                 else
                 {
-                    <button @onclick="OnMyAnimeListImportWatchingClicked">
+                    <Button OnClick="OnMyAnimeListImportWatchingClicked">
                         Import watchlist
-                    </button>
-                    <button @onclick="OnMyAnimeListLoginClicked">
+                    </Button>
+                    <Button OnClick="OnMyAnimeListLoginClicked">
                         Refresh
-                    </button>
-                    <button @onclick="OnMyAnimeListLogoutClicked">
+                    </Button>
+                    <Button OnClick="OnMyAnimeListLogoutClicked">
                         Disconnect
-                    </button>
+                    </Button>
                 }
             </div>
         </div>
@@ -220,9 +220,9 @@
                 Set default settings
             </div>
             <div class="settings-item__control">
-                <button @onclick="OnRestoreClicked">
+                <Button OnClick="OnRestoreClicked">
                     Restore
-                </button>
+                </Button>
             </div>
         </div>
     </div>

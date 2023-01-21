@@ -7,9 +7,9 @@
 @inject INyaaService NyaaService
 
 <div class="torrent-picker">
-    <button class="return-button" @onclick="() => OnSelectClicked(null)">
+    <Button class="return-button" OnClick="() => OnSelectClicked(null)">
         Return
-    </button>
+    </Button>
 
     <div class="aniwari-card">
 
@@ -38,9 +38,9 @@
                         <div class="leechers">
                             @torrent.Leechers
                         </div>
-                        <button class="torrent-picker-item__select" @onclick="() => OnSelectClicked(torrent)">
+                        <Button class="torrent-picker-item__select" OnClick="() => OnSelectClicked(torrent)">
                             Select
-                        </button>
+                        </Button>
                     </div>
 
                 </div>

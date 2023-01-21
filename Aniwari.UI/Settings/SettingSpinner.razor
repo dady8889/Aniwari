@@ -10,8 +10,8 @@
 *@
 
 <div class="spinner">
-    <button class="spinner-button spinner-up" @onclick="OnUp">&#xF4FE</button>
-    <button class="spinner-button spinner-down" @onclick="OnDown">&#xF2EA</button>
+    <Button class="spinner-button spinner-up" OnClick="OnUp">&#xF4FE</Button>
+    <Button class="spinner-button spinner-down" OnClick="OnDown">&#xF2EA</Button>
     <input @ref="input" @attributes="AdditionalAttributes" type="text" role="spinner" inputmode="decimal" value="@InputContent" @onchange="@OnChanged" />
 </div>
 

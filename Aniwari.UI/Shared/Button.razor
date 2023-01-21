@@ -1,0 +1,21 @@
+﻿<button @attributes="AdditionalAttributes" @onclick:stopPropagation @onclick="OnClicked" disabled="@disabled">
+    @ChildContent
+</button>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    private bool disabled = false;
+
+    private async Task OnClicked()
+    {
+        disabled = true;
+
+        if (OnClick.HasDelegate)
+            await OnClick.InvokeAsync();
+
+        disabled = false;
+    }
+}

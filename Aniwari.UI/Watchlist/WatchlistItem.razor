@@ -42,25 +42,25 @@
 
                     @if (!editingEpisodesCount)
                     {
-                        <button class="title-button" @onclick:stopPropagation="true" @onclick="OnTitleClicked">
+                        <Button class="title-button" OnClick="OnTitleClicked">
                             Edit
-                        </button>
+                        </Button>
                     }
                 </div>
             }
             else
             {
                 <div class="title-wrapper">
-                    <div @ref="searchStringFieldReference" class="searchstring-field" @onclick:stopPropagation="false" contenteditable="true">
+                    <div @ref="searchStringFieldReference" class="searchstring-field" @onclick:stopPropagation contenteditable="true">
                         @Anime.SearchString
                     </div>
                     <div class="button-wrapper">
-                        <button class="title-button" @onclick:stopPropagation="true" @onclick="OnSearchStringEditEnded">
+                        <Button class="title-button" OnClick="OnSearchStringEditEnded">
                             Save
-                        </button>
-                        <button class="title-button" @onclick:stopPropagation="true" @onclick="OnSearchStringResetClicked">
+                        </Button>
+                        <Button class="title-button" OnClick="OnSearchStringResetClicked">
                             Reset
-                        </button>
+                        </Button>
                     </div>
                 </div>
             }
@@ -69,16 +69,16 @@
                 @if (editingEpisodesCount)
                 {
                     <div class="button-wrapper">
-                        <button class="title-button" @onclick:stopPropagation="true" @onclick="OnEpisodeCountResetClicked">
+                        <Button class="title-button" OnClick="OnEpisodeCountResetClicked">
                             Reset
-                        </button>
-                        <button class="title-button" @onclick:stopPropagation="true" @onclick="OnEpisodeCountEditEnded">
+                        </Button>
+                        <Button class="title-button" OnClick="OnEpisodeCountEditEnded">
                             Save
-                        </button>
+                        </Button>
                     </div>
                 }
 
-                <div class="episodes-counter @(Anime.CustomEpisodesCount != null ? "custom" : "")" @onclick:stopPropagation="true" @onclick="OnEpisodesClicked">
+                <div class="episodes-counter @(Anime.CustomEpisodesCount != null ? "custom" : "")" @onclick:stopPropagation @onclick="OnEpisodesClicked">
                     <div>
                         @Anime.GetWatchedEpisodes().Count()
                     </div>
@@ -195,29 +195,29 @@
                                     <div class="button-wrapper button-start">
                                         @if (ep.Watched)
                                         {
-                                            <button class="episode__button" @onclick="() => OnUnwatchClicked(ep)">
+                                            <Button class="episode__button" OnClick="() => OnUnwatchClicked(ep)">
                                                 Unwatch
-                                            </button>
+                                            </Button>
                                         }
                                         else
                                         {
-                                            <button class="episode__button" @onclick="() => OnWatchedClicked(epId)">
+                                            <Button class="episode__button" OnClick="() => OnWatchedClicked(epId)">
                                                 Already watched
-                                            </button>
+                                            </Button>
                                         }
                                     </div>
 
                                     <div class="button-wrapper button-end">
                                         @if (ep.TorrentMagnet != null)
                                         {
-                                            <button class="episode__button" @onclick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
+                                            <Button class="episode__button" OnClick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
                                                 Download
-                                            </button>
+                                            </Button>
                                         }
 
-                                        <button class="episode__button" @onclick="() => OnSearchClicked(epId)">
+                                        <Button class="episode__button" OnClick="() => OnSearchClicked(epId)">
                                             Search
-                                        </button>
+                                        </Button>
                                     </div>
                                 }
                                 else
@@ -226,9 +226,9 @@
                                         @ep.Progress
                                         %
                                     </div>
-                                    <button class="episode__button" @onclick="() => OnCancelDownloadClicked(ep)">
+                                    <Button class="episode__button" OnClick="() => OnCancelDownloadClicked(ep)">
                                         Cancel
-                                    </button>
+                                    </Button>
                                 }
                             }
                             else
@@ -245,30 +245,30 @@
 
                                     @if (ep.Seeding)
                                     {
-                                        <button class="episode__button" @onclick="() => OnCancelSeedClicked(ep)">
+                                        <Button class="episode__button" OnClick="() => OnCancelSeedClicked(ep)">
                                             Stop seeding
-                                        </button>
+                                        </Button>
                                     }
                                     else
                                     {
-                                        <button class="episode__button" @onclick="() => OnSeedClicked(ep)">
+                                        <Button class="episode__button" OnClick="() => OnSeedClicked(ep)">
                                             Seed
-                                        </button>
+                                        </Button>
                                     }
 
                                     @if (ep.Watched)
                                     {
-                                        <button class="episode__button" @onclick="() => OnUnwatchClicked(ep)">
+                                        <Button class="episode__button" OnClick="() => OnUnwatchClicked(ep)">
                                             Unwatch
-                                        </button>
+                                        </Button>
                                     }
 
-                                    <button class="episode__button" @onclick="() => OnWatchClicked(ep)">
+                                    <Button class="episode__button" OnClick="() => OnWatchClicked(ep)">
                                         Watch
-                                    </button>
-                                    <button class="episode__button" @onclick="() => OnDeleteClicked(ep)">
+                                    </Button>
+                                    <Button class="episode__button" OnClick="() => OnDeleteClicked(ep)">
                                         Delete
-                                    </button>
+                                    </Button>
                                 </div>
                             }
                         }
@@ -277,16 +277,16 @@
                             <div class="button-wrapper button-start">
                                 @if (epId != maxEpId)
                                 {
-                                    <button class="episode__button" @onclick="() => OnWatchedClicked(epId)">
+                                    <Button class="episode__button" OnClick="() => OnWatchedClicked(epId)">
                                         Already watched
-                                    </button>
+                                    </Button>
                                 }
                             </div>
 
                             <div class="button-wrapper button-end">
-                                <button class="episode__button" @onclick="() => OnSearchClicked(epId)">
+                                <Button class="episode__button" OnClick="() => OnSearchClicked(epId)">
                                     Search
-                                </button>
+                                </Button>
                             </div>
                         }
                     </div>

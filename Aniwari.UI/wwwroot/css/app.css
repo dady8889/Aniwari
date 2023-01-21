@@ -19,6 +19,7 @@
     --aniwari-ok: hsl(calc(var(--aniwari-primary-h) + 76), max(var(--aniwari-primary-s), 71%), min(var(--aniwari-primary-l), 75%));
     --aniwari-ok-alt: hsl(calc(var(--aniwari-primary-h) + 76), max(var(--aniwari-primary-s), 71%), calc(min(var(--aniwari-primary-l), 75%) - 5%));
     --aniwari-blue: hsl(calc(var(--aniwari-primary-h) + 200), max(var(--aniwari-primary-s), 100%), clamp(50%, var(--aniwari-primary-l), 65%));
+    --aniwari-disabled: #adb5bd;
 }
 
 html, body {
@@ -171,7 +172,7 @@ button {
     min-height: 1.5rem;
 }
 
-    button:active {
+    button:active:not(:disabled) {
         box-shadow: inset 4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), inset -4px -4px 8px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), inset 4px 4px 10px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
         outline: 0;
         border: 0;
@@ -179,6 +180,10 @@ button {
 
     button:focus-visible {
         outline: var(--aniwari-text) solid 1px !important;
+    }
+
+    button:disabled {
+        color: var(--aniwari-disabled);
     }
 
 input[type="color"] {

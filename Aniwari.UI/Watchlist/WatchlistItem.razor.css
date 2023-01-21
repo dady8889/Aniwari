@@ -59,8 +59,8 @@
     min-width: 0;
 }
 
-.title-button {
-    margin-left: 7px;
+::deep .title-button {
+    margin-left: 0.5rem;
 }
 
 .title {

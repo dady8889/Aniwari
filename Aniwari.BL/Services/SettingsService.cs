@@ -6,6 +6,7 @@ namespace Aniwari.BL.Services;
 
 public class SettingsService : ISettingsService
 {
+    private readonly SemaphoreSlim _mutex;
     private readonly ILogger<SettingsService> _logger;
     private readonly IStoreService _storeService;
 
@@ -15,11 +16,21 @@ public class SettingsService : ISettingsService
     {
         _logger = logger;
         _storeService = storeService;
+        _mutex = new SemaphoreSlim(1, 1);
     }
 
     public async Task LoadAsync()
     {
-        cachedSettings = await _storeService.LoadAsync().ConfigureAwait(false);
+        await _mutex.WaitAsync();
+
+        try
+        {
+            cachedSettings = await _storeService.LoadAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            _mutex.Release();
+        }
     }
 
     public async Task SaveAsync()
@@ -30,7 +41,16 @@ public class SettingsService : ISettingsService
             throw new Exception("Settings file has not yet been loaded.");
         }
 
-        await _storeService.SaveAsync(cachedSettings).ConfigureAwait(false);
+        await _mutex.WaitAsync();
+        try
+        {
+            await _storeService.SaveAsync(cachedSettings).ConfigureAwait(false);
+
+        }
+        finally
+        {
+            _mutex.Release();
+        }
     }
 
     public SettingsStore GetStore()

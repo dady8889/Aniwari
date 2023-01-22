@@ -104,6 +104,7 @@ public static class MauiProgram
         // Windows specific services
 #if WINDOWS
         builder.Services.AddTransient<IFolderPicker, Platforms.Windows.FolderPicker>();
+        builder.Services.AddTransient<Platforms.IFilePicker, Platforms.Windows.FilePicker>();
 #endif
 
         return builder.Build();

@@ -36,9 +36,9 @@
         });
 
         ReactTo<TorrentFinished>((e) =>
-       {
-           Toast.Show(ToastType.Success, $"Finished downloading {Title.GetPreferredAnimeTitle(e.AnimeId)} episode {e.EpisodeId}.");
-       });
+        {
+            Toast.Show(ToastType.Success, $"Finished downloading {Title.GetPreferredAnimeTitle(e.AnimeId)} episode {e.EpisodeId}.");
+        });
     }
 
     private void OnToastDismissed(ToastDismissedEventArgs args)

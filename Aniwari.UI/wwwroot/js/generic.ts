@@ -114,10 +114,22 @@ function setInputElementValue(input: HTMLInputElement, value: string) {
 }
 
 function moveCursorToEnd(input: HTMLInputElement) {
-    var range = document.createRange();
-    var sel = window.getSelection();
+    const range = document.createRange();
+    const sel = window.getSelection();
     range.setStart(input, 1);
     range.collapse(true);
     sel.removeAllRanges();
     sel.addRange(range);
+}
+
+function setMainBackground(image: string | null) {
+    const main = document.documentElement.querySelector("main");
+
+    if (image == null) {
+        main.style.backgroundImage = "";
+        main.classList.remove("custom-bg");
+    } else {
+        main.style.backgroundImage = `url(${image})`;
+        main.classList.add("custom-bg");
+    }
 }

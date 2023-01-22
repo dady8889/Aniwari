@@ -2,6 +2,10 @@
 using Aniwari.BL.Services;
 using Aniwari.DAL.Constants;
 using Microsoft.JSInterop;
+using Microsoft.Maui.Storage;
+using MonoTorrent;
+using System.IO;
+using System.Net.Mime;
 
 namespace Aniwari.Managers;
 
@@ -11,6 +15,8 @@ public interface IThemeManager
     /// Set colors according to the values stored in <see cref="SettingsStore"/>.
     /// </summary>
     Task SetThemeColor(IJSRuntime js);
+
+    Task SetMainBackground(IJSRuntime js);
 }
 
 public class ThemeManager : IThemeManager
@@ -55,5 +61,31 @@ public class ThemeManager : IThemeManager
     private async Task SetDefaultDark(IJSRuntime js)
     {
         await SetThemeColor(js, ThemeColors.DarkColor);
+    }
+
+    public async Task SetMainBackground(IJSRuntime js)
+    {
+        await js.InvokeVoidAsync("setMainBackground", GetBackgroundImage());
+    }
+
+    private string? GetBackgroundImage()
+    {
+        var backgroundFile = _settingsService.GetStore().BackgroundFile;
+        if (backgroundFile == null)
+            return null;
+
+        var fileBytes = File.ReadAllBytes(Path.Combine(Paths.AppDataPath, backgroundFile));
+
+        var ext = Path.GetExtension(backgroundFile);
+        string mimeType = "";
+
+        if (ext == ".jpg" || ext == ".jpeg")
+            mimeType = "jpeg";
+        else if (ext == ".png")
+            mimeType = "png";
+
+        var base64Image = "data:image/" + mimeType + ";base64," + Convert.ToBase64String(fileBytes);
+
+        return base64Image;
     }
 }

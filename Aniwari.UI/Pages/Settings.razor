@@ -12,6 +12,7 @@
 @inject ISettingsService SettingsService
 @inject ITorrentService TorrentService
 @inject IFolderPicker FolderPicker
+@inject IFilePicker FilePicker
 @inject IThemeManager Theme
 @inject IToastManager Toast
 
@@ -125,6 +126,21 @@
                             <Button OnClick="() => SetDefault(propertyName, setting)">
                                 Reset
                             </Button>
+                        </div>
+                    }
+                    else if (propertyName == nameof(SettingsStore.BackgroundFile))
+                    {
+                        <div class="button-wrapper">
+                            <Button OnClick="OnBackgroundFileSelect">
+                                Select
+                            </Button>
+
+                            @if (Store.BackgroundFile != null)
+                            {
+                                <Button OnClick="OnBackgroundFileReset">
+                                    Delete
+                                </Button>
+                            }
                         </div>
                     }
                     else if (setting.Type == typeof(bool))
@@ -290,6 +306,44 @@
 
         await Theme.SetThemeColor(JS);
         await SettingsService.SaveAsync();
+    }
+
+    private async Task OnBackgroundFileSelect()
+    {
+        var file = await FilePicker.PickFile(new[] { ".png", ".jpeg", ".jpg" });
+        if (file != null && File.Exists(file))
+        {
+            if (Store.BackgroundFile != null)
+            {
+                var previousFilePath = Path.Combine(Paths.AppDataPath, Store.BackgroundFile);
+                if (File.Exists(previousFilePath))
+                    File.Delete(previousFilePath);
+            }
+
+            var fileName = Path.GetFileName(file);
+            var backgroundFilePath = Path.Combine(Paths.AppDataPath, fileName);
+            Store.BackgroundFile = fileName;
+            File.Copy(file, backgroundFilePath, true);
+            await SettingsService.SaveAsync();
+
+            await Theme.SetMainBackground(JS);
+        }
+    }
+
+    private async Task OnBackgroundFileReset()
+    {
+        if (Store.BackgroundFile != null)
+        {
+            var backgroundFilePath = Path.Combine(Paths.AppDataPath, Store.BackgroundFile);
+
+            if (File.Exists(backgroundFilePath))
+                File.Delete(backgroundFilePath);
+        }
+
+        Store.BackgroundFile = (string?)Store.GetSettings()[nameof(SettingsStore.BackgroundFile)].DefaultValue;
+        await SettingsService.SaveAsync();
+
+        await Theme.SetMainBackground(JS);
     }
 
     #endregion

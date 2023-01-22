@@ -327,3 +327,13 @@ select {
     padding: 3px 5px 0 5px;
     cursor: pointer;
 }
+
+/* Custom background */
+
+main.custom-bg .aniwari-card {
+    opacity: 0.9;
+}
+
+main.custom-bg {
+    background-size: cover;
+}

@@ -12,6 +12,7 @@ public sealed partial class SettingsStore
     {
         AddSetting(() => EnableDarkMode, "Enable dark mode");
         AddSetting(() => ThemeColor, "Theme color");
+        AddSetting(() => BackgroundFile, "Custom background");
         AddSetting(() => ArchivePath, "Archive location");
         AddSetting(() => MaximumSeedRatio, "Maximum seed ratio");
         AddSetting(() => MaximumDownloadSpeed, "Maximum download speed");
@@ -28,6 +29,7 @@ public sealed partial class SettingsStore
     public int MaximumUploadSpeed { get; set; } = -1;
     public PreferredTime PreferredTime { get; set; } = PreferredTime.Local;
     public PreferredTitleLanguage PreferredTitleLanguage { get; set; } = PreferredTitleLanguage.English;
+    public string? BackgroundFile { get; set; } = null;
 
     public string? MalSessionId { get; set; } = null;
     public string? MalCsrfToken { get; set; } = null;
@@ -35,8 +37,6 @@ public sealed partial class SettingsStore
     public bool UsesMAL => MalCsrfToken != null && MalSessionId != null && MalUsername != null;
 
     public List<AniwariAnime> Animes { get; set; } = new();
-
-    [JsonIgnore]
     public List<JikanAnime> JikanCache { get; set; } = new();
 }
 

@@ -1,0 +1,111 @@
+﻿@using Aniwari.Managers;
+
+@{
+    string colorClass = "";
+
+    switch (Type)
+    {
+        case ToastType.Info:
+            colorClass = "toast-blue";
+            break;
+        case ToastType.Success:
+            colorClass = "toast-green";
+            break;
+        case ToastType.Warning:
+            colorClass = "toast-orange";
+            break;
+        case ToastType.Error:
+            colorClass = "toast-red";
+            break;
+    }
+}
+
+<Animate @ref="animator">
+    <div class="toast @(colorClass)">
+        <div class="toast-icon">
+            @switch (Type)
+            {
+                case ToastType.Info:
+                    <text>&#xF431;</text>
+                    break;
+                case ToastType.Success:
+                    <text>&#xF26B;</text>
+                    break;
+                case ToastType.Warning:
+                    <text>&#xF33B;</text>
+                    break;
+                case ToastType.Error:
+                    <text>&#xF623;</text>
+                    break;
+            }
+        </div>
+        <div class="toast-body">
+            <div class="toast-heading">
+                @if (Heading == null)
+                {
+                    @switch (Type)
+                    {
+                        case ToastType.Info:
+                            <text>Info</text>
+                            break;
+                        case ToastType.Success:
+                            <text>Success</text>
+                            break;
+                        case ToastType.Warning:
+                            <text>Warning</text>
+                            break;
+                        case ToastType.Error:
+                            <text>Error</text>
+                            break;
+                    }
+                }
+                else
+                {
+                    @Heading
+                }
+            </div>
+            <div class="toast-text">
+                @Text
+            </div>
+        </div>
+        <div class="toast-dismiss">
+            <button @onclick="OnDismissClicked">&#xF62A;</button>
+        </div>
+    </div>
+</Animate>
+
+
+@code {
+    [Parameter] public ToastType Type { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Heading { get; set; }
+    [Parameter] public string? Guid { get; set; }
+    [Parameter] public EventCallback<ToastDismissedEventArgs> OnDismiss { get; set; }
+
+    private Animate? animator;
+    private Timer? dismissTimer;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        dismissTimer = new(DismissTimerTick);
+        dismissTimer.Change(5000, Timeout.Infinite);
+    }
+
+    private async Task OnDismissClicked()
+    {
+        await animator!.Hide();
+
+        if (OnDismiss.HasDelegate)
+            await OnDismiss.InvokeAsync(new ToastDismissedEventArgs(this, Guid!));
+    }
+
+    private async void DismissTimerTick(object? state)
+    {
+        await InvokeAsync(OnDismissClicked);
+        dismissTimer!.Change(Timeout.Infinite, Timeout.Infinite);
+    }
+
+    public record ToastDismissedEventArgs(Toast Sender, string Guid);
+}

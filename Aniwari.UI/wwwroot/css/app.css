@@ -20,6 +20,14 @@
     --aniwari-ok-alt: hsl(calc(var(--aniwari-primary-h) + 76), max(var(--aniwari-primary-s), 71%), calc(min(var(--aniwari-primary-l), 75%) - 5%));
     --aniwari-blue: hsl(calc(var(--aniwari-primary-h) + 200), max(var(--aniwari-primary-s), 100%), clamp(50%, var(--aniwari-primary-l), 65%));
     --aniwari-disabled: #adb5bd;
+    --aniwari-toast-green: #14A44D;
+    --aniwari-toast-red: #D90429;
+    --aniwari-toast-orange: #F9A02C;
+    --aniwari-toast-blue: #17a2b8;
+}
+
+*, ::after, ::before {
+    box-sizing: border-box;
 }
 
 html, body {
@@ -29,6 +37,39 @@ html, body {
     background-color: var(--aniwari-bg);
     color: var(--aniwari-text);
 }
+
+body {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Bootstrap defaults */
+
+hr {
+    margin: 1rem 0;
+    color: inherit;
+    background-color: currentColor;
+    border: 0;
+    opacity: .25;
+}
+
+button, input, optgroup, select, textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+a {
+    color: #0d6efd;
+    text-decoration: underline;
+}
+
+/* Blazor defaults */
 
 #app {
     height: 100%;
@@ -100,6 +141,8 @@ h1:focus {
     }
 }
 
+/* Scrollbar */
+
 ::-webkit-scrollbar {
     width: 10px;
 }
@@ -119,6 +162,7 @@ h1:focus {
         background: #555;
     }
 
+/* Aniwari */
 .aniwari-content {
     display: flex;
     flex-direction: column;
@@ -162,6 +206,7 @@ h1:focus {
 }
 
 button {
+    cursor: pointer;
     font-size: 0.7rem;
     box-shadow: 4px -4px 2px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 20%), -2px -1px 4px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) + 10%) / 90%), 1px 2px 3px hsla(var(--aniwari-primary-h) var(--aniwari-primary-s) calc(var(--aniwari-primary-l) - 10%) / 90%);
     background-color: var(--aniwari-bg-alt);
@@ -193,7 +238,15 @@ input[type="color"] {
     width: 3.5rem;
     height: 1.5rem;
     cursor: pointer;
+    border: 1px solid var(--aniwari-bg);
+}
+
+::-webkit-color-swatch {
     border: 0;
+}
+
+::-webkit-color-swatch-wrapper {
+    padding: 0;
 }
 
 input[role="switch"] {

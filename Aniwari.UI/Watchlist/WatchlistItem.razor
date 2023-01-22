@@ -8,6 +8,7 @@
 @using Aniwari.DAL.Jikan;
 @using Aniwari.DAL.Storage;
 @using Aniwari.DAL.MyAnimeList;
+@using Aniwari.Managers;
 
 @inherits ReactiveComponentBase
 
@@ -16,6 +17,8 @@
 @inject ITorrentService TorrentService
 @inject IAnimeRepository AnimeRepository
 @inject IMyAnimeListService MyAnimeListService
+@inject IToastManager Toast
+@inject ITitleManager Title
 
 @if (Anime == null) return;
 
@@ -26,18 +29,7 @@
             {
                 <div class="title-wrapper">
                     <div class="title" title="@Anime.SearchString">
-                        @if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.Romanized)
-                        {
-                            @(((ITitle)Anime).GetDefaultTitle())
-                        }
-                        else if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.English)
-                        {
-                            @(((ITitle)Anime).GetTitle(TitleType.English) ?? ((ITitle)Anime).GetDefaultTitle())
-                        }
-                        else if (SettingsService.GetStore().PreferredTitleLanguage == PreferredTitleLanguage.Japanese)
-                        {
-                            @(((ITitle)Anime).GetTitle(TitleType.Japanese) ?? ((ITitle)Anime).GetDefaultTitle())
-                        }
+                        @AnimeTitle
                     </div>
 
                     @if (!editingEpisodesCount)
@@ -148,7 +140,6 @@
                     }
                 }
 
-
                 foreach (int epId in Enumerable.Range(1, maxEpId))
                 {
                     var ep = Anime.Episodes.FirstOrDefault(x => x.Id == epId);
@@ -195,13 +186,13 @@
                                     <div class="button-wrapper button-start">
                                         @if (ep.Watched)
                                         {
-                                            <Button class="episode__button" OnClick="() => OnUnwatchClicked(ep)">
+                                            <Button OnClick="() => OnUnwatchClicked(ep)">
                                                 Unwatch
                                             </Button>
                                         }
                                         else
                                         {
-                                            <Button class="episode__button" OnClick="() => OnWatchedClicked(epId)">
+                                            <Button OnClick="() => OnWatchedClicked(epId)">
                                                 Already watched
                                             </Button>
                                         }
@@ -210,12 +201,12 @@
                                     <div class="button-wrapper button-end">
                                         @if (ep.TorrentMagnet != null)
                                         {
-                                            <Button class="episode__button" OnClick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
+                                            <Button OnClick="() => OnDownloadClicked(ep)" title="@(ep.TorrentTitle)">
                                                 Download
                                             </Button>
                                         }
 
-                                        <Button class="episode__button" OnClick="() => OnSearchClicked(epId)">
+                                        <Button OnClick="() => OnSearchClicked(epId)">
                                             Search
                                         </Button>
                                     </div>
@@ -226,7 +217,7 @@
                                         @ep.Progress
                                         %
                                     </div>
-                                    <Button class="episode__button" OnClick="() => OnCancelDownloadClicked(ep)">
+                                    <Button OnClick="() => OnCancelDownloadClicked(ep)">
                                         Cancel
                                     </Button>
                                 }
@@ -245,28 +236,28 @@
 
                                     @if (ep.Seeding)
                                     {
-                                        <Button class="episode__button" OnClick="() => OnCancelSeedClicked(ep)">
+                                        <Button OnClick="() => OnCancelSeedClicked(ep)">
                                             Stop seeding
                                         </Button>
                                     }
                                     else
                                     {
-                                        <Button class="episode__button" OnClick="() => OnSeedClicked(ep)">
+                                        <Button OnClick="() => OnSeedClicked(ep)">
                                             Seed
                                         </Button>
                                     }
 
                                     @if (ep.Watched)
                                     {
-                                        <Button class="episode__button" OnClick="() => OnUnwatchClicked(ep)">
+                                        <Button OnClick="() => OnUnwatchClicked(ep)">
                                             Unwatch
                                         </Button>
                                     }
 
-                                    <Button class="episode__button" OnClick="() => OnWatchClicked(ep)">
+                                    <Button OnClick="() => OnWatchClicked(ep)">
                                         Watch
                                     </Button>
-                                    <Button class="episode__button" OnClick="() => OnDeleteClicked(ep)">
+                                    <Button OnClick="() => OnDeleteClicked(ep)">
                                         Delete
                                     </Button>
                                 </div>
@@ -277,14 +268,14 @@
                             <div class="button-wrapper button-start">
                                 @if (epId != maxEpId)
                                 {
-                                    <Button class="episode__button" OnClick="() => OnWatchedClicked(epId)">
+                                    <Button OnClick="() => OnWatchedClicked(epId)">
                                         Already watched
                                     </Button>
                                 }
                             </div>
 
                             <div class="button-wrapper button-end">
-                                <Button class="episode__button" OnClick="() => OnSearchClicked(epId)">
+                                <Button OnClick="() => OnSearchClicked(epId)">
                                     Search
                                 </Button>
                             </div>
@@ -310,6 +301,8 @@
     [Parameter] public AniwariAnime? Anime { get; set; }
     [Parameter] public EventCallback<SearchEventArgs> OnSearch { get; set; }
 
+    private string AnimeTitle => Anime == null ? string.Empty : Title.GetPreferredAnimeTitle(Anime);
+
     private IJSObjectReference? module;
     private ElementReference searchStringFieldReference;
     private NumberEdit? episodesCountFieldReference;
@@ -322,42 +315,21 @@
 
         module = await JS.InvokeAsync<IJSObjectReference>("import", "./Watchlist/WatchlistItem.razor.js");
 
-        ReactTo<TorrentUpdated>(async (e) =>
-        {
-            if (e.AnimeId == Anime?.Id)
-            {
-                var episode = Anime.Episodes.FirstOrDefault(x => x.Id == e.EpisodeId);
-                if (episode != null)
-                {
-                    await InvokeAsync(StateHasChanged);
-                }
-            }
-        });
+        ReactTo<TorrentUpdated>(async (e) => await Update(e.AnimeId, e.EpisodeId));
+        ReactTo<TorrentFinished>(async (e) => await Update(e.AnimeId, e.EpisodeId));
+        ReactTo<TorrentErrored>(async (e) => await Update(e.AnimeId, e.EpisodeId));
+    }
 
-        ReactTo<TorrentFinished>(async (e) =>
-        {
-            if (e.AnimeId == Anime?.Id)
-            {
-                var episode = Anime.Episodes.FirstOrDefault(x => x.Id == e.EpisodeId);
-                if (episode != null)
-                {
-                    await InvokeAsync(StateHasChanged);
-                }
-            }
-        });
+    private async Task Update(int animeId, int episodeId)
+    {
+        if (animeId != Anime?.Id)
+            return;
 
-        ReactTo<TorrentErrored>(async (e) =>
+        var episode = Anime.Episodes.FirstOrDefault(x => x.Id == episodeId);
+        if (episode != null)
         {
-            if (e.AnimeId == Anime?.Id)
-            {
-                var episode = Anime.Episodes.FirstOrDefault(x => x.Id == e.EpisodeId);
-                if (episode != null)
-                {
-                    await InvokeAsync(StateHasChanged);
-                    // todo: show error
-                }
-            }
-        });
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task OnSearchClicked(int episode)
@@ -395,6 +367,8 @@
         Anime!.CustomEpisodesCount = value;
         await SettingsService.SaveAsync();
         editingEpisodesCount = false;
+
+        Toast.Show(ToastType.Info, $"Forcing {value} episodes for {AnimeTitle}.");
     }
 
     private async Task OnEpisodeCountResetClicked()
@@ -402,6 +376,8 @@
         Anime!.CustomEpisodesCount = null;
         await SettingsService.SaveAsync();
         editingEpisodesCount = false;
+
+        Toast.Show(ToastType.Info, $"Using default episode count for {AnimeTitle}.");
     }
 
     private async Task OnDownloadClicked(AniwariEpisode episode)
@@ -414,6 +390,8 @@
         episode.Downloading = true;
 
         await TorrentService.DownloadAnime(Anime!.Id, episode.Id, episode.TorrentMagnet, archivePath);
+
+        Toast.Show(ToastType.Success, $"Started downloading {AnimeTitle} episode {episode.Id}.");
     }
 
     private async void OnWatchClicked(AniwariEpisode episode)
@@ -460,6 +438,8 @@
 
         AnimeRepository.RemoveEpisode(Anime!, episode);
         await SettingsService.SaveAsync();
+
+        Toast.Show(ToastType.Success, $"Deleted {AnimeTitle} episode {episode.Id}.");
     }
 
     private async Task OnCancelDownloadClicked(AniwariEpisode episode)
@@ -482,6 +462,8 @@
         StateHasChanged();
 
         await SettingsService.SaveAsync();
+
+        Toast.Show(ToastType.Success, $"Cancelled download for {AnimeTitle} episode {episode.Id}.");
     }
 
     private async Task OnCancelSeedClicked(AniwariEpisode episode)
@@ -523,17 +505,23 @@
 
         await SettingsService.SaveAsync();
 
-        // todo: show error if unsuccessful
         if (SettingsService.GetStore().UsesMAL)
         {
-            var success = await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
+            var episodeCount = Anime!.GetWatchedEpisodes().Count();
+            var success = await MyAnimeListService.EditAnime(Anime!.Id, episodeCount);
 
             // if we cant edit an anime, that means it doesnt exist in the list yet, so we have to add it first
             if (!success)
             {
                 await MyAnimeListService.AddAnime(Anime!.Id);
-                await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
+                if (!await MyAnimeListService.EditAnime(Anime!.Id, episodeCount))
+                {
+                    Toast.Show(ToastType.Error, $"Could not update {AnimeTitle} anime on MAL.");
+                    return;
+                }
             }
+
+            Toast.Show(ToastType.Success, $"Updated MAL entry for {AnimeTitle} to {episodeCount} episodes.");
         }
     }
 
@@ -542,10 +530,16 @@
         episode.Watched = false;
         await SettingsService.SaveAsync();
 
-        // todo: show error if unsuccessful
         if (SettingsService.GetStore().UsesMAL)
         {
-            await MyAnimeListService.EditAnime(Anime!.Id, Anime!.GetWatchedEpisodes().Count());
+            var episodeCount = Anime!.GetWatchedEpisodes().Count();
+            if (!await MyAnimeListService.EditAnime(Anime!.Id, episodeCount))
+            {
+                Toast.Show(ToastType.Error, $"Could not update anime {AnimeTitle} on MAL.");
+                return;
+            }
+
+            Toast.Show(ToastType.Success, $"Updated MAL entry for {AnimeTitle} to {episodeCount} episodes.");
         }
     }
 }

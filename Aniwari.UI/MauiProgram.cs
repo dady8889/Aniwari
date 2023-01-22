@@ -95,6 +95,8 @@ public static class MauiProgram
 
         // Internal services
         builder.Services.AddSingleton<IThemeManager, ThemeManager>();
+        builder.Services.AddSingleton<IToastManager, ToastManager>();
+        builder.Services.AddSingleton<ITitleManager, TitleManager>();
 
         // BL services
         builder.Services.AddAniwari();

@@ -13,6 +13,7 @@
 @inject ITorrentService TorrentService
 @inject IFolderPicker FolderPicker
 @inject IThemeManager Theme
+@inject IToastManager Toast
 
 @if (Store == null) return;
 
@@ -59,10 +60,7 @@
                                 Browse
                             </Button>
 
-                            <Button OnClick="async () => {
-                                        Store!.Set(setting.Type, propertyName, setting.DefaultValue);
-                                        await SettingsService.SaveAsync();
-                                    }">
+                            <Button OnClick="() => SetDefault(propertyName, setting)">
                                 Reset
                             </Button>
                         </div>
@@ -78,10 +76,7 @@
                                 e.Handled = true;
                             }" />
 
-                            <Button OnClick="async () => {
-                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
-                                        await SettingsService.SaveAsync();
-                                    }">
+                            <Button OnClick="() => SetDefault(propertyName, setting)">
                                 Reset
                             </Button>
                         </div>
@@ -101,10 +96,7 @@
                                 kB/s
                             </label>
 
-                            <Button OnClick="async () => {
-                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
-                                        await SettingsService.SaveAsync();
-                                    }">
+                            <Button OnClick="() => SetDefault(propertyName, setting)">
                                 Reset
                             </Button>
                         </div>
@@ -117,10 +109,7 @@
                                     await SettingsService.SaveAsync();
                             }" />
 
-                            <Button OnClick="async () => {
-                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
-                                        await SettingsService.SaveAsync();
-                                    }">
+                            <Button OnClick="() => SetDefault(propertyName, setting)">
                                 Reset
                             </Button>
                         </div>
@@ -133,10 +122,7 @@
                                     await SettingsService.SaveAsync();
                             }" />
 
-                            <Button OnClick="async () => {
-                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
-                                        await SettingsService.SaveAsync();
-                                    }">
+                            <Button OnClick="() => SetDefault(propertyName, setting)">
                                 Reset
                             </Button>
                         </div>
@@ -159,10 +145,7 @@
                                 await SettingsService.SaveAsync();
                             }" />
 
-                                    <Button OnClick="async () => {
-                                        Store.Set(setting.Type, propertyName, setting.DefaultValue);
-                                        await SettingsService.SaveAsync();
-                                    }">
+                            <Button OnClick="() => SetDefault(propertyName, setting)">
                                 Reset
                             </Button>
                         </div>
@@ -229,57 +212,9 @@
 </div>
 
 @code {
-    private SettingsStore? Store;
+    private SettingsStore Store = null!;
 
-    private IJSObjectReference? module;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        Store = SettingsService.GetStore();
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Settings.razor.js");
-    }
-
-    private async Task OnThemeColorChanged(ChangeEventArgs args, string propertyName, Setting setting, bool save)
-    {
-        string color = (string?)args.Value ?? ThemeColors.LightColor;
-        Store!.Set(propertyName, color);
-        await Theme.SetThemeColor(JS);
-
-        if (save)
-            await SettingsService.SaveAsync();
-    }
-
-    private async Task OnThemeResetClicked()
-    {
-        Store!.ThemeColor = ThemeColors.LightColor;
-        await Theme.SetThemeColor(JS);
-    }
-
-    private async Task OnDarkModeChanged(bool value)
-    {
-        Store!.EnableDarkMode = value;
-
-        await Theme.SetThemeColor(JS);
-        await SettingsService.SaveAsync();
-    }
-
-    private async Task OnArchivePathBrowse()
-    {
-        var folder = await FolderPicker.PickFolder();
-        if (folder != null)
-        {
-            Store!.Set(nameof(SettingsStore.ArchivePath), folder);
-            await SettingsService.SaveAsync();
-        }
-    }
+    #region Helper methods
 
     private string EllipsePath(string path)
     {
@@ -304,26 +239,6 @@
         return path;
     }
 
-    private async Task OnRestoreClicked()
-    {
-        foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
-        {
-            Store!.Set(setting.Type, propertyName, setting.DefaultValue);
-            if (propertyName == nameof(SettingsStore.ThemeColor))
-            {
-                await Theme.SetThemeColor(JS);
-            }
-        }
-
-        await SettingsService.SaveAsync();
-    }
-
-    private async Task OnDeleteWatchlistClicked()
-    {
-        Store!.Animes.Clear();
-        await SettingsService.SaveAsync();
-    }
-
     private Nullable<T> ClampUnlimited<T>(Nullable<T> previous, Nullable<T> current) where T : struct, System.Numerics.INumber<T>
     {
         if (previous <= -T.One && current > -T.One)
@@ -335,16 +250,101 @@
         return current;
     }
 
+    private async Task SetDefault(string propertyName, Setting setting)
+    {
+        Store.Set(setting.Type, propertyName, setting.DefaultValue);
+        await SettingsService.SaveAsync();
+    }
+
+    #endregion
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Store = SettingsService.GetStore();
+    }
+
+    #region Theming
+
+    private async Task OnThemeColorChanged(ChangeEventArgs args, string propertyName, Setting setting, bool save)
+    {
+        string color = (string?)args.Value ?? ThemeColors.LightColor;
+        Store.Set(propertyName, color);
+        await Theme.SetThemeColor(JS);
+
+        if (save)
+            await SettingsService.SaveAsync();
+    }
+
+    private async Task OnThemeResetClicked()
+    {
+        Store.ThemeColor = ThemeColors.LightColor;
+        await Theme.SetThemeColor(JS);
+        await SettingsService.SaveAsync();
+    }
+
+    private async Task OnDarkModeChanged(bool value)
+    {
+        Store.EnableDarkMode = value;
+
+        await Theme.SetThemeColor(JS);
+        await SettingsService.SaveAsync();
+    }
+
+    #endregion
+
+    private async Task OnArchivePathBrowse()
+    {
+        var folder = await FolderPicker.PickFolder();
+        if (folder != null)
+        {
+            Store.Set(nameof(SettingsStore.ArchivePath), folder);
+            await SettingsService.SaveAsync();
+        }
+    }
+
+    private async Task OnRestoreClicked()
+    {
+        foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
+        {
+            Store.Set(setting.Type, propertyName, setting.DefaultValue);
+            if (propertyName == nameof(SettingsStore.ThemeColor))
+            {
+                await Theme.SetThemeColor(JS);
+            }
+        }
+
+        await SettingsService.SaveAsync();
+
+        Toast.Show(ToastType.Success, "Default settings have been restored.");
+    }
+
+    private async Task OnDeleteWatchlistClicked()
+    {
+        Store.Animes.Clear();
+        await SettingsService.SaveAsync();
+
+        Toast.Show(ToastType.Success, "Your watchlist has been deleted.");
+    }
+
+    #region MyAnimeList
+
     private async Task OnMyAnimeListLoginClicked()
     {
         var page = new MALPage();
 
         page.PageClosed += async (sender, e) =>
         {
-            Store!.MalCsrfToken = e.CsrfToken;
-            Store!.MalSessionId = e.MalSessionId;
-            Store!.MalUsername = e.Username;
+            Store.MalCsrfToken = e.CsrfToken;
+            Store.MalSessionId = e.MalSessionId;
+            Store.MalUsername = e.Username;
             await InvokeAsync(StateHasChanged);
+
+            if (!Store.UsesMAL)
+                Toast.Show(ToastType.Error, "Your MyAnimeList data could not be found.");
+            else
+                Toast.Show(ToastType.Success, "Connected to MyAnimeList.");
         };
 
         if (App.Current?.MainPage != null)
@@ -354,13 +354,18 @@
     private async Task OnMyAnimeListLogoutClicked()
     {
         var page = new MALPage()
+            {
+                DeleteCookies = true
+            };
+
+        page.PageClosed += (sender, e) =>
         {
-            DeleteCookies = true
+            Toast.Show(ToastType.Success, "You were logged out from MyAnimeList.");
         };
 
-        Store!.MalCsrfToken = null;
-        Store!.MalSessionId = null;
-        Store!.MalUsername = null;
+        Store.MalCsrfToken = null;
+        Store.MalSessionId = null;
+        Store.MalUsername = null;
 
         if (App.Current?.MainPage != null)
             await App.Current.MainPage.Navigation.PushModalAsync(page);
@@ -368,6 +373,18 @@
 
     private async Task OnMyAnimeListImportWatchingClicked()
     {
-        await MyAnimeListService.ImportList();
+        Toast.Show(ToastType.Info, "Started importing anime from your MyAnimeList.");
+
+        try
+        {
+            await MyAnimeListService.ImportList();
+            Toast.Show(ToastType.Success, "Import from MyAnimeList has been finished.");
+        }
+        catch (Exception ex)
+        {
+            Toast.Show(ToastType.Error, $"Import from MyAnimeList ended with error. {ex.Message}");
+        }
     }
+
+    #endregion
 }

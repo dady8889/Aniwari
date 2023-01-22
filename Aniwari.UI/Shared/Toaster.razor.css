@@ -1,0 +1,9 @@
+﻿.toaster {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: absolute;
+    right: 1rem;
+    bottom: 9rem;
+    max-width: 25rem;
+}

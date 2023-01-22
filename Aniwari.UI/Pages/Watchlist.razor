@@ -65,13 +65,18 @@
         await base.OnInitializedAsync();
 
         Store = SettingsService.GetStore();
-        watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
+        LoadAnime();
 
         ReactTo<AnimeImportFinished>(async (e) =>
         {
-            watchingAnime = Store.Animes.Where(x => x.Watching).ToList();
+            LoadAnime();
             await InvokeAsync(StateHasChanged);
         });
+    }
+
+    private void LoadAnime()
+    {
+        watchingAnime = Store!.Animes.Where(x => x.Watching).ToList();
     }
 
     private async Task SearchAnime(WatchlistItem.SearchEventArgs args)

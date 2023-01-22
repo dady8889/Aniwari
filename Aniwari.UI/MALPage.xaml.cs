@@ -35,6 +35,9 @@ public partial class MALPage : ContentPage
             cookieManager?.DeleteAllCookies();
             if (App.Current?.MainPage != null)
                 await App.Current.MainPage.Navigation.PopModalAsync();
+
+            PageClosed?.Invoke(this, new PageClosedEventArgs());
+
             return;
         }
 

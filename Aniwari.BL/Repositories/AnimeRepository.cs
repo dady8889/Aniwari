@@ -127,4 +127,10 @@ public class AnimeRepository : IAnimeRepository
         _store.Animes.Add(newAnime);
         return newAnime;
     }
+
+    public AniwariAnime? GetAnimeById(int id)
+    {
+        var anime = _store.Animes.FirstOrDefault(x => x.Id == id);
+        return anime;
+    }
 }

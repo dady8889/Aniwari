@@ -1,0 +1,52 @@
+﻿@using Aniwari.BL.Interfaces;
+@using Aniwari.BL.Messaging;
+@using static Aniwari.Shared.Toast;
+@using Aniwari.DAL.Interfaces;
+@using Aniwari.Managers;
+
+@inherits ReactiveComponentBase
+
+@inject IToastManager Toast
+@inject ITitleManager Title
+
+<div class="toaster">
+    @foreach (ToastMessage message in Messages)
+    {
+        <Toast @key="@message.Guid" Guid="@message.Guid" Type="@message.Type" Text="@message.Text" Heading="@message.Heading" OnDismiss="OnToastDismissed" />
+    }
+</div>
+
+@code {
+    [Parameter] public List<ToastMessage> Messages { get; set; } = new();
+
+    public void AddMessage(ToastMessage toastMessage)
+    {
+        Messages.Add(toastMessage);
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Toast.RegisterToaster(this);
+
+        ReactTo<TorrentErrored>((e) =>
+        {
+            Toast.Show(ToastType.Error, $"Could not download anime {Title.GetPreferredAnimeTitle(e.AnimeId)} episode {e.EpisodeId}. {e.ErrorMessage}");
+        });
+
+        ReactTo<TorrentFinished>((e) =>
+       {
+           Toast.Show(ToastType.Success, $"Finished downloading {Title.GetPreferredAnimeTitle(e.AnimeId)} episode {e.EpisodeId}.");
+       });
+    }
+
+    private void OnToastDismissed(ToastDismissedEventArgs args)
+    {
+        var msg = Messages.FirstOrDefault(x => x.Guid == args.Guid);
+        if (msg == null) return;
+
+        Messages.Remove(msg);
+        InvokeAsync(StateHasChanged);
+    }
+}

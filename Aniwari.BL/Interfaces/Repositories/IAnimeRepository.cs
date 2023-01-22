@@ -10,4 +10,5 @@ public interface IAnimeRepository
     AniwariAnime AddAnime(JikanAnime jikanAnime);
     void AddEpisode(AniwariAnime anime, AniwariEpisode episode);
     void RemoveEpisode(AniwariAnime anime, AniwariEpisode episode);
+    AniwariAnime? GetAnimeById(int id);
 }

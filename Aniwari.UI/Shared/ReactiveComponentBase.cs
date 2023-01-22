@@ -4,7 +4,7 @@ using Aniwari.BL.Messaging;
 
 namespace Aniwari.Shared;
 
-public class ReactiveComponentBase : DisposableComponentBase
+public abstract class ReactiveComponentBase : DisposableComponentBase
 {
 #nullable disable
     [Inject]

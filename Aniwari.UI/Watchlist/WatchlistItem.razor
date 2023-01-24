@@ -417,6 +417,8 @@
 
         episode.Watched = true;
         await SettingsService.SaveAsync();
+
+        await UpdateMAL();
     }
 
     private async Task OnDeleteClicked(AniwariEpisode episode)
@@ -505,6 +507,19 @@
 
         await SettingsService.SaveAsync();
 
+        await UpdateMAL();
+    }
+
+    private async Task OnUnwatchClicked(AniwariEpisode episode)
+    {
+        episode.Watched = false;
+        await SettingsService.SaveAsync();
+
+        await UpdateMAL();
+    }
+
+    private async Task UpdateMAL()
+    {
         if (SettingsService.GetStore().UsesMAL)
         {
             var episodeCount = Anime!.GetWatchedEpisodes().Count();
@@ -519,24 +534,6 @@
                     Toast.Show(ToastType.Error, $"Could not update {AnimeTitle} anime on MAL.");
                     return;
                 }
-            }
-
-            Toast.Show(ToastType.Success, $"Updated MAL entry for {AnimeTitle} to {episodeCount} episodes.");
-        }
-    }
-
-    private async Task OnUnwatchClicked(AniwariEpisode episode)
-    {
-        episode.Watched = false;
-        await SettingsService.SaveAsync();
-
-        if (SettingsService.GetStore().UsesMAL)
-        {
-            var episodeCount = Anime!.GetWatchedEpisodes().Count();
-            if (!await MyAnimeListService.EditAnime(Anime!.Id, episodeCount))
-            {
-                Toast.Show(ToastType.Error, $"Could not update anime {AnimeTitle} on MAL.");
-                return;
             }
 
             Toast.Show(ToastType.Success, $"Updated MAL entry for {AnimeTitle} to {episodeCount} episodes.");

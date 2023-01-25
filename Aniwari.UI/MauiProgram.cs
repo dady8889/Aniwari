@@ -65,17 +65,17 @@ public static class MauiProgram
 
                                // System.Diagnostics.Debug.WriteLine($"WM_EXITSIZEMOVE");
                            }
-                       })
-                       .OnClosed((window, args) =>
-                       {
-                           var mauiWindow = window.GetWindow();
-                           if (mauiWindow != null && mauiWindow.Handler != null)
+                           else if (args.MessageId == 16) // WM_CLOSE
                            {
-                               var torrents = mauiWindow.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
-                               torrents.SaveStateAndExit().Wait();
+                               var mauiWindow = window.GetWindow();
+                               if (mauiWindow != null && mauiWindow.Handler != null)
+                               {
+                                   var torrents = mauiWindow.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
+                                   torrents.SaveStateAndExit().Wait();
 
-                               var settings = mauiWindow.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
-                               settings.SaveAsync().Wait();
+                                   var settings = mauiWindow.Handler.MauiContext?.Services.GetService<ISettingsService>()!;
+                                   settings.SaveAsync().Wait();
+                               }
                            }
                        })
                 );

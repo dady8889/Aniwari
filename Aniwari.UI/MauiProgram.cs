@@ -23,7 +23,6 @@ public static class MauiProgram
             })
             .ConfigureLifecycleEvents(events =>
             {
-
                 // Fix WebView bug with popups
 #if WINDOWS
                 events.AddWindows(windows => windows

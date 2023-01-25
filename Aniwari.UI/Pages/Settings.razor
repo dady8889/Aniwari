@@ -21,55 +21,63 @@
 <link href="css/responsive/Settings.css" rel="stylesheet" />
 
 <div class="aniwari-content settings">
-    <div class="aniwari-card">
-        @foreach (var (propertyName, setting) in SettingsService.GetStore().GetSettings())
-        {
-            <div @key="propertyName" class="settings-item">
-                <div class="settings-item__description">
-                    @setting.Description
-                </div>
-                <div class="settings-item__control">
-                    @if (propertyName == nameof(SettingsStore.ThemeColor))
-                    {
-                        <div class="button-wrapper">
-                            <div class="accent-preview" title="Accent color">
-                            </div>
-                            <input type="color" value="@(Store.Get<string>(propertyName))"
+    @foreach (var (categoryName, category) in SettingsService.GetStore().GetCategories())
+    {
+        <div class="category">
+            @categoryName
+        </div>
+
+        <div class="aniwari-card">
+            @foreach (var setting in category.Settings)
+            {
+                var propertyName = setting.Name;
+
+                <div @key="propertyName" class="settings-item">
+                    <div class="settings-item__description">
+                        @setting.Description
+                    </div>
+                    <div class="settings-item__control">
+                        @if (propertyName == nameof(SettingsStore.ThemeColor))
+                        {
+                            <div class="button-wrapper">
+                                <div class="accent-preview" title="Accent color">
+                                </div>
+                                <input type="color" value="@(Store.Get<string>(propertyName))"
                            @oninput="(e) => OnThemeColorChanged(e, propertyName, setting, false)"
                            @onchange="(e) => OnThemeColorChanged(e, propertyName, setting, true)" />
 
-                            <Button OnClick="OnThemeResetClicked">
-                                Reset
-                            </Button>
-                        </div>
-                    }
-                    else if (propertyName == nameof(SettingsStore.EnableDarkMode))
-                    {
-                        <div class="button-wrapper">
-                            <SettingCheckbox IsChecked="Store.EnableDarkMode" OnChange="OnDarkModeChanged" />
-                        </div>
-                    }
-                    else if (propertyName == nameof(SettingsStore.ArchivePath))
-                    {
-                        <div class="button-wrapper">
-
-                            <div>
-                                @(EllipsePath(Store.Get<string>(propertyName) ?? ""))
+                                <Button OnClick="OnThemeResetClicked">
+                                    Reset
+                                </Button>
                             </div>
+                        }
+                        else if (propertyName == nameof(SettingsStore.EnableDarkMode))
+                        {
+                            <div class="button-wrapper">
+                                <SettingCheckbox IsChecked="Store.EnableDarkMode" OnChange="OnDarkModeChanged" />
+                            </div>
+                        }
+                        else if (propertyName == nameof(SettingsStore.ArchivePath))
+                        {
+                            <div class="button-wrapper">
 
-                            <Button OnClick="OnArchivePathBrowse">
-                                Browse
-                            </Button>
+                                <div>
+                                    @(EllipsePath(Store.Get<string>(propertyName) ?? ""))
+                                </div>
 
-                            <Button OnClick="() => SetDefault(propertyName, setting)">
-                                Reset
-                            </Button>
-                        </div>
-                    }
-                    else if (propertyName == nameof(SettingsStore.MaximumSeedRatio))
-                    {
-                        <div class="button-wrapper">
-                            <SettingSpinner title="-1 = Unlimited" MinValue="-1" Step="0.1m" TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
+                                <Button OnClick="OnArchivePathBrowse">
+                                    Browse
+                                </Button>
+
+                                <Button OnClick="() => SetDefault(propertyName, setting)">
+                                    Reset
+                                </Button>
+                            </div>
+                        }
+                        else if (propertyName == nameof(SettingsStore.MaximumSeedRatio))
+                        {
+                            <div class="button-wrapper">
+                                <SettingSpinner title="-1 = Unlimited" MinValue="-1" Step="0.1m" TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
                                 var value = ClampUnlimited(e.Old, e.New);
                                 if (value == null) return;
                                 Store.Set<decimal>(propertyName, value.Value);
@@ -77,15 +85,15 @@
                                 e.Handled = true;
                             }" />
 
-                            <Button OnClick="() => SetDefault(propertyName, setting)">
-                                Reset
-                            </Button>
-                        </div>
-                    }
-                    else if (propertyName == nameof(SettingsStore.MaximumDownloadSpeed) || propertyName == nameof(SettingsStore.MaximumUploadSpeed))
-                    {
-                        <div class="button-wrapper">
-                            <SettingSpinner title="-1 = Unlimited" MinValue="-1" Step="1000" TValue="int" Value="@(Store.Get<int>(propertyName))" OnChange="async (e) => {
+                                <Button OnClick="() => SetDefault(propertyName, setting)">
+                                    Reset
+                                </Button>
+                            </div>
+                        }
+                        else if (propertyName == nameof(SettingsStore.MaximumDownloadSpeed) || propertyName == nameof(SettingsStore.MaximumUploadSpeed))
+                        {
+                            <div class="button-wrapper">
+                                <SettingSpinner title="-1 = Unlimited" MinValue="-1" Step="1000" TValue="int" Value="@(Store.Get<int>(propertyName))" OnChange="async (e) => {
                                 var value = ClampUnlimited(e.Old, e.New);
                                 if (value == null) return;
                                 Store.Set<int>(propertyName, value.Value);
@@ -93,98 +101,95 @@
                                 await TorrentService.ApplySettings();
                                 e.Handled = true;
                             }" />
-                            <label>
-                                kB/s
-                            </label>
+                                <label>
+                                    kB/s
+                                </label>
 
-                            <Button OnClick="() => SetDefault(propertyName, setting)">
-                                Reset
-                            </Button>
-                        </div>
-                    }
-                    else if (propertyName == nameof(SettingsStore.PreferredTime))
-                    {
-                        <div class="button-wrapper">
-                            <SettingSelect TValue="PreferredTime" Value="@(Store.Get<PreferredTime>(propertyName))" OnChange="async (value) => {
-                                    Store.Set(setting.Type, propertyName, value);
-                                    await SettingsService.SaveAsync();
-                            }" />
-
-                            <Button OnClick="() => SetDefault(propertyName, setting)">
-                                Reset
-                            </Button>
-                        </div>
-                    }
-                    else if (propertyName == nameof(SettingsStore.PreferredTitleLanguage))
-                    {
-                        <div class="button-wrapper">
-                            <SettingSelect TValue="PreferredTitleLanguage" Value="@(Store.Get<PreferredTitleLanguage>(propertyName))" OnChange="async (value) => {
-                                    Store.Set(setting.Type, propertyName, value);
-                                    await SettingsService.SaveAsync();
-                            }" />
-
-                            <Button OnClick="() => SetDefault(propertyName, setting)">
-                                Reset
-                            </Button>
-                        </div>
-                    }
-                    else if (propertyName == nameof(SettingsStore.BackgroundFile))
-                    {
-                        <div class="button-wrapper">
-                            <Button OnClick="OnBackgroundFileSelect">
-                                Select
-                            </Button>
-
-                            @if (Store.BackgroundFile != null)
-                            {
-                                <Button OnClick="OnBackgroundFileReset">
-                                    Delete
+                                <Button OnClick="() => SetDefault(propertyName, setting)">
+                                    Reset
                                 </Button>
-                            }
-                        </div>
-                    }
-                    else if (setting.Type == typeof(bool))
-                    {
-                        <div class="button-wrapper">
-                            <SettingCheckbox IsChecked="@(Store.Get<bool>(propertyName))" OnChange="async (value) => {
-                                Store.Set<bool>(propertyName, value);
-                                await SettingsService.SaveAsync();
-                            }" />
-                        </div>
-                    }
-                    else if (setting.Type == typeof(decimal))
-                    {
-                        <div class="button-wrapper">
-                            <SettingSpinner TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
-                                if (e.New == null) return;
-                                Store.Set<decimal>(propertyName, e.New.Value);
-                                await SettingsService.SaveAsync();
+                            </div>
+                        }
+                        else if (propertyName == nameof(SettingsStore.PreferredTime))
+                        {
+                            <div class="button-wrapper">
+                                <SettingSelect TValue="PreferredTime" Value="@(Store.Get<PreferredTime>(propertyName))" OnChange="async (value) => {
+                                    Store.Set(setting.Type, propertyName, value);
+                                    await SettingsService.SaveAsync();
                             }" />
 
-                            <Button OnClick="() => SetDefault(propertyName, setting)">
-                                Reset
-                            </Button>
-                        </div>
-                    }
+                                <Button OnClick="() => SetDefault(propertyName, setting)">
+                                    Reset
+                                </Button>
+                            </div>
+                        }
+                        else if (propertyName == nameof(SettingsStore.PreferredTitleLanguage))
+                        {
+                            <div class="button-wrapper">
+                                <SettingSelect TValue="PreferredTitleLanguage" Value="@(Store.Get<PreferredTitleLanguage>(propertyName))" OnChange="async (value) => {
+                                    Store.Set(setting.Type, propertyName, value);
+                                    await SettingsService.SaveAsync();
+                            }" />
 
+                                <Button OnClick="() => SetDefault(propertyName, setting)">
+                                    Reset
+                                </Button>
+                            </div>
+                        }
+                        else if (propertyName == nameof(SettingsStore.BackgroundFile))
+                        {
+                            <div class="button-wrapper">
+                                <Button OnClick="OnBackgroundFileSelect">
+                                    Select
+                                </Button>
+
+                                @if (Store.BackgroundFile != null)
+                                {
+                                    <Button OnClick="OnBackgroundFileReset">
+                                        Delete
+                                    </Button>
+                                }
+                            </div>
+                        }
+                        else if (setting.Type == typeof(bool))
+                        {
+                            <div class="button-wrapper">
+                                <SettingCheckbox IsChecked="@(Store.Get<bool>(propertyName))" OnChange="async (value) => {
+                                    Store.Set<bool>(propertyName, value);
+                                    await SettingsService.SaveAsync();
+                                }" />
+                            </div>
+                        }
+                        else if (setting.Type == typeof(decimal))
+                        {
+                            <div class="button-wrapper">
+                                <SettingSpinner TValue="decimal" Value="@(Store.Get<decimal>(propertyName))" OnChange="async (e) => {
+                                    if (e.New == null) return;
+                                    Store.Set<decimal>(propertyName, e.New.Value);
+                                    await SettingsService.SaveAsync();
+                                }" />
+
+                                <Button OnClick="() => SetDefault(propertyName, setting)">
+                                    Reset
+                                </Button>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
 
-            <hr />
-        }
-
-        <div class="settings-item">
-            <div class="settings-item__description">
-                Delete watchlist
-            </div>
-            <div class="settings-item__control">
-                <Button OnClick="OnDeleteWatchlistClicked">
-                    Delete
-                </Button>
-            </div>
+                @if (setting != category.Settings.Last())
+                {
+                    <hr />
+                }
+            }
         </div>
+    }
 
-        <hr />
+    <div class="category">
+        Other
+    </div>
+
+    <div class="aniwari-card">
 
         <div class="settings-item">
             <div class="settings-item__description">
@@ -209,6 +214,19 @@
                         Disconnect
                     </Button>
                 }
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="settings-item">
+            <div class="settings-item__description">
+                Delete watchlist
+            </div>
+            <div class="settings-item__control">
+                <Button OnClick="OnDeleteWatchlistClicked">
+                    Delete
+                </Button>
             </div>
         </div>
 

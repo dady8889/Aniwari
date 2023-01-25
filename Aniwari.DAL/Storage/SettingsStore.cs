@@ -10,15 +10,21 @@ public sealed partial class SettingsStore
 {
     public SettingsStore()
     {
-        AddSetting(() => EnableDarkMode, "Enable dark mode");
-        AddSetting(() => ThemeColor, "Theme color");
-        AddSetting(() => BackgroundFile, "Custom background");
-        AddSetting(() => ArchivePath, "Archive location");
-        AddSetting(() => MaximumSeedRatio, "Maximum seed ratio");
-        AddSetting(() => MaximumDownloadSpeed, "Maximum download speed");
-        AddSetting(() => MaximumUploadSpeed, "Maximum upload speed");
-        AddSetting(() => PreferredTime, "Time format");
-        AddSetting(() => PreferredTitleLanguage, "Anime title language");
+        var preferencesCategory = AddCategory("Preferences");
+        var themeCategory = AddCategory("Theme");
+        var torrentCategory = AddCategory("Torrents");
+
+        AddSetting(preferencesCategory, () => ArchivePath, "Archive location");
+        AddSetting(preferencesCategory, () => PreferredTime, "Time format");
+        AddSetting(preferencesCategory, () => PreferredTitleLanguage, "Anime title language");
+
+        AddSetting(themeCategory, () => EnableDarkMode, "Enable dark mode");
+        AddSetting(themeCategory, () => ThemeColor, "Theme color");
+        AddSetting(themeCategory, () => BackgroundFile, "Custom background");
+
+        AddSetting(torrentCategory, () => MaximumSeedRatio, "Maximum seed ratio");
+        AddSetting(torrentCategory, () => MaximumDownloadSpeed, "Maximum download speed");
+        AddSetting(torrentCategory, () => MaximumUploadSpeed, "Maximum upload speed");
     }
 
     public bool EnableDarkMode { get; set; } = false;
@@ -45,13 +51,43 @@ public sealed partial class SettingsStore
 public sealed partial class SettingsStore
 {
     private readonly Dictionary<string, Setting> _settings = new();
+    private readonly Dictionary<string, SettingCategory> _categories = new();
 
-    private void AddSetting(string propertyName, Type settingType, string settingDescription, object? defaultValue)
+    public SettingCategory AddCategory(string categoryName)
     {
-        _settings.Add(propertyName, new Setting(settingType, settingDescription, defaultValue));
+        if (!_categories.TryGetValue(categoryName, out var cat))
+        {
+            var category = new SettingCategory(categoryName, new List<Setting>());
+            _categories.Add(categoryName, category);
+            return category;
+        }
+
+        return cat;
+    }
+
+    private void AddSetting(string propertyName, Setting setting)
+    {
+        _settings.Add(propertyName, setting);
     }
 
     private void AddSetting<T>(Expression<Func<T>> expression, string settingDescription)
+    {
+        var (propertyName, propertyType, defaultValue) = GetSettingProperties(expression);
+        var setting = new Setting(propertyName, propertyType, settingDescription, defaultValue);
+
+        AddSetting(propertyName, setting);
+    }
+
+    private void AddSetting<T>(SettingCategory category, Expression<Func<T>> expression, string settingDescription)
+    {
+        var (propertyName, propertyType, defaultValue) = GetSettingProperties(expression);
+        var setting = new Setting(propertyName, propertyType, settingDescription, defaultValue);
+
+        AddSetting(propertyName, setting);
+        category.Settings.Add(setting);
+    }
+
+    private (string propertyName, Type propertyType, object? defaultValue) GetSettingProperties<T>(Expression<Func<T>> expression)
     {
         var memberExpression = (MemberExpression)expression.Body;
 
@@ -68,10 +104,12 @@ public sealed partial class SettingsStore
         if (propertyType == null)
             throw new ArgumentNullException(nameof(expression));
 
-        AddSetting(propertyName, propertyType, settingDescription, defaultValue);
+        return (propertyName, propertyType, defaultValue);
     }
 
     public ReadOnlyDictionary<string, Setting> GetSettings() => new(_settings);
+
+    public ReadOnlyDictionary<string, SettingCategory> GetCategories() => new(_categories);
 
     public void SetDefaults()
     {

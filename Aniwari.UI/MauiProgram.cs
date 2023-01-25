@@ -30,7 +30,7 @@ public static class MauiProgram
                        .OnPlatformMessage((window, args) =>
                        {
                            // force redraw of webview => causes all popups to close
-                           if (args.MessageId == 561) // WM_ENTERSIZEMOVE
+                           /*if (args.MessageId == 561) // WM_ENTERSIZEMOVE
                            {
                                var mauiWindow = window.GetWindow();
                                if (mauiWindow != null)
@@ -53,7 +53,7 @@ public static class MauiProgram
                            }
 
                            // force resize => causes popups to show at the correct location
-                           else if (args.MessageId == 562) // WM_EXITSIZEMOVE
+                           else */if (args.MessageId == 562) // WM_EXITSIZEMOVE
                            {
                                var windowsWindow = window.GetAppWindow();
                                if (windowsWindow != null)

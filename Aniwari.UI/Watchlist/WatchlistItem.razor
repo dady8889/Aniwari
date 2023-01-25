@@ -22,7 +22,7 @@
 
 @if (Anime == null) return;
 
-<Accordion @key="Anime.Id" PreventExpanding="editingSearchString || editingEpisodesCount">
+<Accordion @ref="accordion" @key="Anime.Id" PreventExpanding="editingSearchString || editingEpisodesCount">
     <AccordionHeader>
         <div class="aniwari-list-item watchlist-item @(context.Expanded ? "expanded" : "")">
             @if (!editingSearchString)
@@ -34,7 +34,7 @@
 
                     @if (!editingEpisodesCount)
                     {
-                        <Button class="title-button" OnClick="OnTitleClicked">
+                        <Button class="title-button" OnClick="OnTitleEditClicked">
                             Edit
                         </Button>
                     }
@@ -304,6 +304,7 @@
     private string AnimeTitle => Anime == null ? string.Empty : Title.GetPreferredAnimeTitle(Anime);
 
     private IJSObjectReference? module;
+    private Accordion? accordion;
     private ElementReference searchStringFieldReference;
     private NumberEdit? episodesCountFieldReference;
     private bool editingSearchString = false;
@@ -338,7 +339,7 @@
             await OnSearch.InvokeAsync(new SearchEventArgs(Anime, episode));
     }
 
-    private void OnTitleClicked()
+    private void OnTitleEditClicked()
     {
         editingSearchString = true;
     }
@@ -483,8 +484,9 @@
         await OnDownloadClicked(episode);
     }
 
-    private void OnEpisodesClicked()
+    private async Task OnEpisodesClicked()
     {
+        await accordion!.Close();
         editingEpisodesCount = true;
     }
 

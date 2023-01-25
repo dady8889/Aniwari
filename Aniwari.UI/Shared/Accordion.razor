@@ -38,9 +38,28 @@
         if (PreventExpanding)
             return;
 
+        await Toggle();
+    }
+
+    public async Task Close()
+    {
+        if (Expanded)
+            await Toggle();
+    }
+
+    public async Task Open()
+    {
+        if (!Expanded)
+            await Toggle();
+    }
+
+    public async Task Toggle()
+    {
+        if (module == null)
+            throw new Exception("Unable to call JS.");
+
         Expanded = !Expanded;
 
-        if (module != null)
-            await module.InvokeVoidAsync("toggleDetails", bodyReference, Expanded);
+        await module.InvokeVoidAsync("toggleDetails", bodyReference, Expanded);
     }
 }

@@ -28,16 +28,16 @@
             @if (!editingSearchString)
             {
                 <div class="title-wrapper">
-                    <div class="title" title="@Anime.SearchString">
-                        @AnimeTitle
-                    </div>
-
                     @if (!editingEpisodesCount)
                     {
-                        <Button class="title-button" OnClick="OnTitleEditClicked">
+                        <Button class="edit-button" OnClick="OnTitleEditClicked">
                             Edit
                         </Button>
                     }
+
+                    <div class="title" title="@Anime.SearchString">
+                        @AnimeTitle
+                    </div>
                 </div>
             }
             else
@@ -47,7 +47,7 @@
                         @Anime.SearchString
                     </div>
                     <div class="button-wrapper">
-                        <Button class="title-button" OnClick="OnSearchStringEditEnded">
+                        <Button class="title-button" OnClick="OnSearchStringSaveClicked">
                             Save
                         </Button>
                         <Button class="title-button" OnClick="OnSearchStringResetClicked">
@@ -62,10 +62,10 @@
                 {
                     <div class="button-wrapper">
                         <Button class="title-button" OnClick="OnEpisodeCountResetClicked">
-                            Reset
+                            Cancel
                         </Button>
                         <Button class="title-button" OnClick="OnEpisodeCountEditEnded">
-                            Save
+                            Force
                         </Button>
                     </div>
                 }
@@ -338,16 +338,22 @@
         editingSearchString = true;
     }
 
-    private async Task OnSearchStringEditEnded()
+    private async Task OnSearchStringSaveClicked()
     {
         Anime!.SearchString = await JS.InvokeAsync<string>("getElementInnerText", searchStringFieldReference);
         await SettingsService.SaveAsync();
         editingSearchString = false;
+
+        Toast.Show(ToastType.Success, $"Changed search string for {AnimeTitle}.");
     }
 
-    private void OnSearchStringResetClicked()
+    private async Task OnSearchStringResetClicked()
     {
         Anime!.SearchString = $"{Anime!.Title} @ep";
+        await SettingsService.SaveAsync();
+        editingSearchString = false;
+
+        Toast.Show(ToastType.Success, $"Set default search string for {AnimeTitle}.");
     }
 
     private async Task OnEpisodeCountEditEnded()

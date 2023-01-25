@@ -28,14 +28,14 @@
                 <div class="aniwari-list-item">
 
                     <div class="torrent-picker-item__name">
-                        @torrent.Name
+                        <a href="@torrent.Url">@torrent.Name</a>
                     </div>
 
                     <div class="torrent-info-wrapper">
-                        <div class="seeders">
+                        <div class="seeders" title="Seeders">
                             @torrent.Seeders
                         </div>
-                        <div class="leechers">
+                        <div class="leechers" title="Leechers">
                             @torrent.Leechers
                         </div>
                         <Button class="torrent-picker-item__select" OnClick="() => OnSelectClicked(torrent)">

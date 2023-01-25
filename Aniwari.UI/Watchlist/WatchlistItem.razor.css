@@ -75,7 +75,7 @@
     margin-left: 10px;
 }
 
-    .episodes-counter:hover {
+    .episodes-counter:hover, .episodes-counter:active {
         font-weight: bold;
     }
 

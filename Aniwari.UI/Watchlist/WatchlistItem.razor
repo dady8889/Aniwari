@@ -179,25 +179,25 @@
 
                         @if (ep != null)
                         {
+                            <div class="button-wrapper button-start">
+                                @if (ep.Watched)
+                                {
+                                    <Button OnClick="() => OnUnwatchClicked(ep)">
+                                        Unwatch
+                                    </Button>
+                                }
+                                else
+                                {
+                                    <Button OnClick="() => OnWatchedClicked(epId)">
+                                        Already watched
+                                    </Button>
+                                }
+                            </div>
+
                             @if (!ep.Downloaded)
                             {
                                 @if (!ep.Downloading)
                                 {
-                                    <div class="button-wrapper button-start">
-                                        @if (ep.Watched)
-                                        {
-                                            <Button OnClick="() => OnUnwatchClicked(ep)">
-                                                Unwatch
-                                            </Button>
-                                        }
-                                        else
-                                        {
-                                            <Button OnClick="() => OnWatchedClicked(epId)">
-                                                Already watched
-                                            </Button>
-                                        }
-                                    </div>
-
                                     <div class="button-wrapper button-end">
                                         @if (ep.TorrentMagnet != null)
                                         {
@@ -217,9 +217,12 @@
                                         @ep.Progress
                                         %
                                     </div>
-                                    <Button OnClick="() => OnCancelDownloadClicked(ep)">
-                                        Cancel
-                                    </Button>
+
+                                    <div class="button-wrapper button-end">
+                                        <Button OnClick="() => OnCancelDownloadClicked(ep)">
+                                            Cancel
+                                        </Button>
+                                    </div>
                                 }
                             }
                             else
@@ -231,9 +234,7 @@
                                     </div>
                                 }
 
-                                <div class="button-wrapper">
-
-
+                                <div class="button-wrapper button-end">
                                     @if (ep.Seeding)
                                     {
                                         <Button OnClick="() => OnCancelSeedClicked(ep)">
@@ -244,13 +245,6 @@
                                     {
                                         <Button OnClick="() => OnSeedClicked(ep)">
                                             Seed
-                                        </Button>
-                                    }
-
-                                    @if (ep.Watched)
-                                    {
-                                        <Button OnClick="() => OnUnwatchClicked(ep)">
-                                            Unwatch
                                         </Button>
                                     }
 
@@ -436,10 +430,22 @@
         var archivePath = SettingsService.GetStore().ArchivePath;
         var videoPath = Path.Combine(archivePath, episode.VideoFilePath);
 
-        if (File.Exists(videoPath))
-            File.Delete(videoPath);
+        try
+        {
+            if (File.Exists(videoPath))
+                File.Delete(videoPath);
+        }
+        catch (Exception)
+        {
+            await SettingsService.SaveAsync();
+            Toast.Show(ToastType.Error, $"Could not delete {AnimeTitle} episode {episode.Id} from disk.");
+            return;
+        }
 
-        AnimeRepository.RemoveEpisode(Anime!, episode);
+        episode.Progress = 0;
+        episode.Downloading = false;
+        episode.Downloaded = false;
+
         await SettingsService.SaveAsync();
 
         Toast.Show(ToastType.Success, $"Deleted {AnimeTitle} episode {episode.Id}.");
@@ -453,8 +459,17 @@
             var archivePath = SettingsService.GetStore().ArchivePath;
             var videoPath = Path.Combine(archivePath, file);
 
-            if (File.Exists(videoPath))
-                File.Delete(videoPath);
+            try
+            {
+                if (File.Exists(videoPath))
+                    File.Delete(videoPath);
+            }
+            catch (Exception)
+            {
+                await SettingsService.SaveAsync();
+                Toast.Show(ToastType.Error, $"Could not delete {AnimeTitle} episode {episode.Id} from disk.");
+                return;
+            }
         }
 
         episode.Progress = 0;
@@ -481,6 +496,7 @@
 
     private async Task OnSeedClicked(AniwariEpisode episode)
     {
+        episode.Seeding = true;
         await OnDownloadClicked(episode);
     }
 

@@ -13,7 +13,7 @@
 </ul>
 
 <p align="center" width="100%">
-<img width="33%" src="./doc/intro.gif" alt="Showcase" />
+<img width="66%" src="./doc/intro.gif" alt="Showcase" />
 </p>
 
 ## **About**

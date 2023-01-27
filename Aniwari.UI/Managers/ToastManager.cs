@@ -10,6 +10,7 @@ namespace Aniwari.Managers;
 
 public interface IToastManager
 {
+    List<ToastMessage> Messages { get; }
     void RegisterToaster(Toaster toaster);
     void Show(ToastType type, string text, string? heading = null);
 }
@@ -18,6 +19,8 @@ public class ToastManager : IToastManager
 {
     private readonly ILogger<ToastManager> _logger;
     private Toaster? _toaster;
+
+    public List<ToastMessage> Messages { get; private set; } = new();
 
     public ToastManager(ILogger<ToastManager> logger)
     {
@@ -34,12 +37,12 @@ public class ToastManager : IToastManager
 
     public void Show(ToastType type, string text, string? heading = null)
     {
-        if (_toaster == null)
-            throw new Exception("Toaster instance is not registered.");
-
         _logger.LogDebug("{}: {}", type.ToString(), text);
 
-        _toaster.AddMessage(new ToastMessage(Guid.NewGuid().ToString(), type, text, heading));
+        Messages.Add(new ToastMessage(Guid.NewGuid().ToString(), type, text, heading));
+
+        if (_toaster != null)
+            _toaster.Update();
     }
 }
 

@@ -71,3 +71,7 @@
     padding-top: 1px;
     margin-right: 10px;
 }
+
+.mal-link {
+    word-break: break-all;
+}

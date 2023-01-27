@@ -1,7 +1,6 @@
 ﻿using Aniwari.BL.Interfaces;
-using Microsoft.UI;
-using Microsoft.UI.Windowing;
-using Windows.Graphics;
+using Aniwari.Managers;
+using System.Reflection;
 
 namespace Aniwari;
 
@@ -17,7 +16,7 @@ public partial class App : Application
     {
         var window = base.CreateWindow(activationState);
         window.Width = 800;
-        window.Height = 1000;
+        window.Height = 800;
 
         return window;
     }
@@ -31,5 +30,13 @@ public partial class App : Application
 
         var torrents = this.Handler.MauiContext?.Services.GetService<ITorrentService>()!;
         await torrents.RestoreState();
+
+        var updates = this.Handler.MauiContext?.Services.GetService<IUpdateService>()!;
+        var toast = this.Handler.MauiContext?.Services.GetService<IToastManager>()!;
+        var (CanUpdate, NewestVersion) = await updates.CanUpdate(Assembly.GetExecutingAssembly());
+        if (CanUpdate)
+        {
+            toast.Show(ToastType.Info, "New version available. Check out the Settings tab.");
+        }
     }
 }

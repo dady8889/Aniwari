@@ -28,12 +28,12 @@
 		<ApplicationTitle>Aniwari</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.aniwari</ApplicationId>
+		<ApplicationId>com.dady8889.aniwari</ApplicationId>
 		<ApplicationIdGuid>251A91D9-E4C3-4821-B87D-7AA8A9CF5AE5</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>0.9.0</ApplicationDisplayVersion>
+		<ApplicationVersion>0.9.0</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -61,10 +61,27 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="OnovaPublish\**" />
+	  <Content Remove="OnovaPublish\**" />
+	  <EmbeddedResource Remove="OnovaPublish\**" />
+	  <MauiXaml Remove="OnovaPublish\**" />
+	  <None Remove="OnovaPublish\**" />
+	  <SassFile Remove="OnovaPublish\**" />
+	  <TypeScriptCompile Remove="OnovaPublish\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<MauiAsset Remove="Resources\Raw\AboutAssets.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Remove="libman.json" />
+		<Content Remove="libman.json" />
+		<EmbeddedResource Remove="libman.json" />
+		<MauiXaml Remove="libman.json" />
+		<None Remove="libman.json" />
+		<SassFile Remove="libman.json" />
+		<TypeScriptCompile Remove="libman.json" />
 		<None Include="libman.json" />
 	</ItemGroup>
 
@@ -75,6 +92,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Onova.Publisher" Version="1.2.4" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -4,6 +4,7 @@
 @using Aniwari.Managers;
 @using Aniwari.Platforms;
 @using Aniwari.Settings;
+@using System.Reflection;
 
 @page "/settings"
 
@@ -15,6 +16,7 @@
 @inject IFilePicker FilePicker
 @inject IThemeManager Theme
 @inject IToastManager Toast
+@inject IUpdateService UpdateService
 
 @if (Store == null) return;
 
@@ -190,7 +192,6 @@
     </div>
 
     <div class="aniwari-card">
-
         <div class="settings-item">
             <div class="settings-item__description">
                 MyAnimeList integration
@@ -243,10 +244,88 @@
             </div>
         </div>
     </div>
+
+    <div class="category">
+        About
+    </div>
+
+    <div class="aniwari-card">
+        <div class="settings-item">
+            <div class="settings-item__description">
+                GitHub project link
+            </div>
+            <div class="settings-item__control">
+                <Button OnClick="@(() => {
+                    using System.Diagnostics.Process process = new()
+                    {
+                        StartInfo = new("https://github.com/dady8889/Aniwari")
+                        {
+                            UseShellExecute = true
+                        }
+                    };
+
+                    process.Start();
+                })">
+                    Open
+                </Button>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="settings-item">
+            <div class="settings-item__description">
+                Version
+            </div>
+            <div class="settings-item__control">
+                @System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
+            </div>
+        </div>
+
+        <hr />
+
+        @if (updateAvailable)
+        {
+            <div class="settings-item">
+                <div class="settings-item__description">
+                    New version @newVersion
+                </div>
+
+                @if (installing)
+                {
+                    @(updateProgress + " %")
+                }
+
+                <div class="settings-item__control">
+                    <Button OnClick="OnInstallUpdateClicked">
+                        Install
+                    </Button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="settings-item">
+                <div class="settings-item__description">
+                    Check for updates
+                </div>
+                <div class="settings-item__control">
+                    <Button OnClick="OnCheckUpdateClicked">
+                        Check
+                    </Button>
+                </div>
+            </div>
+        }
+    </div>
 </div>
 
 @code {
     private SettingsStore Store = null!;
+
+    private bool updateAvailable = false;
+    private string newVersion = string.Empty;
+    private bool installing = false;
+    private int updateProgress = 0;
 
     #region Helper methods
 
@@ -459,4 +538,53 @@
     }
 
     #endregion
+
+    private async Task OnCheckUpdateClicked()
+    {
+        try
+        {
+            var update = await UpdateService.CanUpdate(Assembly.GetExecutingAssembly());
+
+            updateAvailable = update.CanUpdate;
+
+            if (updateAvailable)
+            {
+                newVersion = update.NewestVersion.ToString(3);
+            }
+            else
+            {
+                Toast.Show(ToastType.Info, "You have the latest version.");
+            }
+        }
+        catch (Exception)
+        {
+            Toast.Show(ToastType.Error, "Could not find updates.");
+        }
+    }
+
+    private async Task OnInstallUpdateClicked()
+    {
+        try
+        {
+            var progress = new Progress<double>(async (percent) =>
+            {
+                var intPercent = (int)(percent * 100);
+                if (intPercent != updateProgress)
+                {
+                    updateProgress = intPercent;
+                    await InvokeAsync(StateHasChanged);
+                }
+            });
+
+            installing = true;
+
+            await UpdateService.Update(Assembly.GetExecutingAssembly(), progress);
+
+            Application.Current?.Quit();
+        }
+        catch (Exception)
+        {
+            Toast.Show(ToastType.Error, "Could not install the newest version.");
+        }
+    }
 }

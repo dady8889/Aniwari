@@ -41,6 +41,7 @@ public static class AniwariServicesConfiguration
         services.AddSingleton<INyaaService, NyaaService>();
         services.AddSingleton<ITorrentService, TorrentService>();
         services.AddSingleton<IMyAnimeListService, MyAnimeListService>();
+        services.AddSingleton<IUpdateService, UpdateService>();
 
         services.AddTransient<IAnimeRepository, AnimeRepository>();
 

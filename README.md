@@ -12,7 +12,9 @@
 <a href="https://github.com/dady8889/Aniwari/releases">Download</a>
 </ul>
 
-![Intro](./doc/intro.gif)
+<p align="center" width="100%">
+<img width="33%" src="./doc/intro.gif" alt="Showcase" />
+</p>
 
 ## **About**
 

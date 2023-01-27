@@ -37,9 +37,9 @@ You can often find yourself in situations where you open a schedule + MAL + Nyaa
 <ul>
 <li>View all anime you are watching</li>
 <li>Click on an anime to list all aired episodes</li>
-<li>Force a number of episodes (in case of irregular schedule)</li>
-<li>Search for a torrent on Nyaa</li>
-<li>Set a preferred search string</li>
+<li>Force a number of episodes (in case of irregular schedule) <a href="https://github.com/dady8889/Aniwari/wiki/Number-of-episodes">Read more</a></li>
+<li>Search for a torrent on Nyaa <a href="https://github.com/dady8889/Aniwari/wiki/Searching-torrents">Read more</a></li>
+<li>Set a preferred search string <a href="https://github.com/dady8889/Aniwari/wiki/Searching-torrents">Read more</a></li>
 <li>Track the torrent's status</li>
 <li>Opens your video player to watch an episode</li>
 <li>Delete a downloaded episode</li>
@@ -47,7 +47,7 @@ You can often find yourself in situations where you open a schedule + MAL + Nyaa
 
 ### **MyAnimeList**
 <ul>
-<li>Log in to your MAL</li>
+<li>Log in to your MAL <a href="https://github.com/dady8889/Aniwari/wiki/Frequently-Asked-Questions#how-does-the-mal-integration-work-will-you-steal-my-account">Read more</a></li>
 <li>Import your watching list</li>
 <li>Automatically update your watched episodes</li>
 <li>Automatically add new anime to your MAL</li>

@@ -33,14 +33,13 @@ public class TorrentService : ITorrentService
 
     #region Internal Methods
 
-    private AniwariEpisode InternalGetEpisode(int animeId, int episodeId)
+    private AniwariEpisode? InternalGetEpisode(int animeId, int episodeId)
     {
         var episode = _settingsService.GetStore().Animes.FirstOrDefault(x => x.Id == animeId)?.Episodes.FirstOrDefault(x => x.Id == episodeId);
 
         if (episode == null)
         {
             _logger.LogError("Episode {} for anime {} was not found.", episodeId, animeId);
-            throw new NullReferenceException($"Episode {episodeId} for anime {animeId} was not found.");
         }
 
         return episode;
@@ -120,6 +119,9 @@ public class TorrentService : ITorrentService
 
         var key = (animeId, episodeId);
         var episode = InternalGetEpisode(animeId, episodeId);
+
+        if (episode == null)
+            return;
 
         var torrentHandle = await InternalGetTorrent(magnet, path,
            onUpdate: (e) =>
@@ -291,6 +293,9 @@ public class TorrentService : ITorrentService
     private async Task UpdateStats(TorrentManager torrent, int animeId, int episodeId, bool notify)
     {
         var episode = InternalGetEpisode(animeId, episodeId);
+
+        if (episode == null)
+            return;
 
         // update bytes received for seed ratio
         var mbytesReceived = (int)(torrent.Monitor.DataBytesDownloaded / (double)1024000);

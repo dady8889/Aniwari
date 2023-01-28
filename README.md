@@ -27,15 +27,16 @@ You can often find yourself in situations where you open a schedule + MAL + Nyaa
 
 ### **Schedule**
 <ul>
-<li>View airing anime for each day</li>
+<li>List airing anime for each day</li>
 <li>Automatic conversion from Japan to Local time</li>
 <li>Click on an anime to view more information</li>
 <li>Choose which anime you are planning to watch</li>
+<li>View multiple days at once in fullscreen</li>
 </ul>
 
 ### **Watchlist**
 <ul>
-<li>View all anime you are watching</li>
+<li>List all anime you are watching</li>
 <li>Click on an anime to list all aired episodes</li>
 <li>Force a number of episodes (in case of irregular schedule) <a href="https://github.com/dady8889/Aniwari/wiki/Number-of-episodes">Read more</a></li>
 <li>Search for a torrent on Nyaa <a href="https://github.com/dady8889/Aniwari/wiki/Searching-torrents">Read more</a></li>
@@ -47,7 +48,7 @@ You can often find yourself in situations where you open a schedule + MAL + Nyaa
 
 ### **MyAnimeList**
 <ul>
-<li>Log in to your MAL <a href="https://github.com/dady8889/Aniwari/wiki/Frequently-Asked-Questions#how-does-the-mal-integration-work-will-you-steal-my-account">Read more</a></li>
+<li>Log into your MAL <a href="https://github.com/dady8889/Aniwari/wiki/MyAnimeList">Read more</a></li>
 <li>Import your watching list</li>
 <li>Automatically update your watched episodes</li>
 <li>Automatically add new anime to your MAL</li>
@@ -70,7 +71,7 @@ You can often find yourself in situations where you open a schedule + MAL + Nyaa
 <li>Custom theme color</li>
 <li>Automatically generated accent colors</li>
 <li>Custom background</li>
-<li>Responsive layouts</li>
+<li>Responsive layout</li>
 <li>Touch friendly</li>
 <li>Heads up notifications</li>
 <li>Anime titles language preference (Japanese, English, Romanized)</li>
@@ -91,6 +92,11 @@ Aniwari needs the .NET 7 framework to work, however if you don't have it install
 Application preferences are saved into the `%appdata%\Aniwari` folder.
 
 <b>(Installer is work in progress)</b>
+
+## **Bugs**
+
+The following bugs has been found and cannot be fixed, because they are in the framework itself.
+- Windows 10 19044 - Scrolling while scroll lock is OFF doesn't work - apparently turning scroll lock ON fixes the issue
 
 ## **Building and Development**
 

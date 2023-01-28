@@ -9,7 +9,7 @@
     </div>
 
     <div @ref="bodyReference" class="aniwari-accordion__body @(expandedClass)">
-        @if (AccordionBody != null)
+        @if (AccordionBody != null && Expanded)
         {
             @AccordionBody(this)
         }
@@ -58,8 +58,21 @@
         if (module == null)
             throw new Exception("Unable to call JS.");
 
-        Expanded = !Expanded;
+        bool expanded = !Expanded;
 
-        await module.InvokeVoidAsync("toggleDetails", bodyReference, Expanded);
+        if (expanded)
+        {
+            Expanded = !Expanded;
+            StateHasChanged();
+            await Task.Delay(50);
+        }
+
+        await module.InvokeVoidAsync("toggleDetails", bodyReference, expanded);
+
+        if (!expanded)
+        {
+            await Task.Delay(300);
+            Expanded = expanded;
+        }
     }
 }

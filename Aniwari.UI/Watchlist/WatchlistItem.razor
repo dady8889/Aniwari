@@ -93,8 +93,7 @@
     </AccordionHeader>
     <AccordionBody>
         <div class="aniwari-list-detail">
-            @if (Anime.EpisodesCount != null || Anime.CustomEpisodesCount != null)
-            {
+            @{
                 (Anime as ITimeConvertible).UpdateLocalTime();
 
                 var maxEpId = 0;
@@ -104,7 +103,7 @@
                 {
                     maxEpId = Anime.CustomEpisodesCount.Value;
                 }
-                else if (Anime.EpisodesCount != null) // or calculate the max episode from the aired date and schedule time
+                else // or calculate the max episode from the aired date and schedule time
                 {
                     DateTime? aired = Anime.LocalAiredDate;
                     if (aired != null)
@@ -138,21 +137,26 @@
                         }
 
                         // the anime has finished airing according to the current calendar
-                        if (maxEpId > Anime.EpisodesCount.Value)
+                        if (Anime.EpisodesCount != null && maxEpId > Anime.EpisodesCount.Value)
                         {
                             maxEpId = Anime.EpisodesCount.Value;
                         }
                     }
                 }
 
-                foreach (int epId in Enumerable.Range(1, maxEpId))
-                {
-                    var ep = Anime.Episodes.FirstOrDefault(x => x.Id == epId);
+                @* Print row for each episode *@
+                <Virtualize Context="epId" Items="Enumerable.Range(1, maxEpId).ToList()">
+                    @{
+                        var ep = Anime.Episodes.FirstOrDefault(x => x.Id == epId);
+                    }
 
-                    <div class="aniwari-list-item episode @(ep?.Watched == true ? "watched" : "")">
+                    <div @key="epId" class="aniwari-list-item episode @(ep?.Watched == true ? "watched" : "")">
                         <div class="episode__header">
                             <div class="episode__title">Episode @epId</div>
-                            @{
+
+                            @* If custom episodes are set, dont show next airing time *@
+                            @if (Anime.CustomEpisodesCount == null)
+                            {
                                 DayOfWeek scheduleDay = DayOfWeek.Monday;
                                 TimeOnly? scheduleTime = null;
 
@@ -166,19 +170,20 @@
                                     scheduleDay = Anime.LocalScheduleDay;
                                     scheduleTime = Anime.LocalAirTime;
                                 }
-                            }
-                            @if (scheduleTime != null && epId == maxEpId)
-                            {
-                                string day = scheduleDay.ToString();
 
-                                if (scheduleDay == DateTime.Now.DayOfWeek && DateTime.Now.TimeOfDay < scheduleTime.Value.ToTimeSpan())
+                                if (scheduleTime != null && epId == maxEpId)
                                 {
-                                    day = "Today";
-                                }
+                                    string day = scheduleDay.ToString();
 
-                                <div class="episode__reminder">
-                                    @day at @(scheduleTime.Value.ToString("HH:mm"))
-                                </div>
+                                    if (scheduleDay == DateTime.Now.DayOfWeek && DateTime.Now.TimeOfDay < scheduleTime.Value.ToTimeSpan())
+                                    {
+                                        day = "Today";
+                                    }
+
+                                    <div class="episode__reminder">
+                                        @day at @(scheduleTime.Value.ToString("HH:mm"))
+                                    </div>
+                                }
                             }
                         </div>
 
@@ -280,16 +285,9 @@
                             </div>
                         }
                     </div>
-                }
+                </Virtualize>
             }
-            else
-            {
-                <div class="aniwari-list-item episode unknown">
-                    Sorry, this anime has unknown number of episodes.
-                    <br>
-                    Click on the episodes counter to set the limit by yourself.
-                </div>
-            }
+
         </div>
     </AccordionBody>
 </Accordion>

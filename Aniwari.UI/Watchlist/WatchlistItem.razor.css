@@ -1,5 +1,7 @@
 ﻿.episode {
     min-height: 2rem;
+    height: 2rem;
+    max-height: 2rem;
 }
 
     .episode:hover {

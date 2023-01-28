@@ -270,7 +270,7 @@
                         else
                         {
                             <div class="button-wrapper button-start">
-                                @if (epId != maxEpId)
+                                @if (epId != maxEpId || epId == maxEpId && Anime.CustomEpisodesCount != null)
                                 {
                                     <Button OnClick="() => OnWatchedClicked(epId)">
                                         Already watched

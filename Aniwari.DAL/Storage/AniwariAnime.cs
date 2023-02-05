@@ -49,4 +49,50 @@ public sealed class AniwariAnime : ITimeConvertible, ITitle
     public List<AniwariEpisode> Episodes { get; set; } = new();
 
     public IEnumerable<AniwariEpisode> GetWatchedEpisodes() => Episodes.Where(x => x.Watched);
+
+    public int GetEstimatedAiredEpisodes()
+    {
+        var maxEpId = 0;
+
+        if (LocalAiredDate == null)
+        {
+            return maxEpId;
+        }
+
+        // the aired date can differ with the scheduled time
+        // we need to ignore this date and find the closest next day
+        // we are assuming that the next episode airs at least after 7 next days
+        DateTime dayAfterFirstAiring = LocalAiredDate.Value.Date.AddDays(7);
+
+        while (dayAfterFirstAiring.DayOfWeek != LocalScheduleDay)
+        {
+            dayAfterFirstAiring = dayAfterFirstAiring.AddDays(1);
+        }
+
+        var betweenAiredToNow = DateTime.Today - dayAfterFirstAiring;
+        var daysBetween = betweenAiredToNow.TotalDays;
+
+        // we are still waiting for second episode
+        if (daysBetween < 0)
+        {
+            maxEpId = 1;
+        }
+        else
+        {
+            maxEpId = (int)Math.Floor(daysBetween / 7) + 2;
+
+            if (daysBetween % 7 == 0 && LocalAirTime != null && DateTime.Now.TimeOfDay < LocalAirTime.Value.ToTimeSpan())
+            {
+                maxEpId -= 1;
+            }
+        }
+
+        // the anime has finished airing according to the current calendar
+        if (EpisodesCount != null && maxEpId > EpisodesCount.Value)
+        {
+            maxEpId = EpisodesCount.Value;
+        }
+
+        return maxEpId;
+    }
 }

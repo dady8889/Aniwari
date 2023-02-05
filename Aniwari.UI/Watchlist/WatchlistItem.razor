@@ -84,7 +84,7 @@
                     else
                     {
                         <div>
-                            @(Anime.CustomEpisodesCount == null ? (Anime.EpisodesCount?.ToString() ?? "?") : Anime.CustomEpisodesCount.ToString())
+                            @(Anime.CustomEpisodesCount == null ? Anime.GetEstimatedAiredEpisodes().ToString() : Anime.CustomEpisodesCount.ToString())
                         </div>
                     }
                 </div>
@@ -105,43 +105,7 @@
                 }
                 else // or calculate the max episode from the aired date and schedule time
                 {
-                    DateTime? aired = Anime.LocalAiredDate;
-                    if (aired != null)
-                    {
-                        // the aired date can differ with the scheduled time
-                        // we need to ignore this date and find the closest next day
-                        // we are assuming that the next episode airs at least after 7 next days
-                        DateTime dayAfterFirstAiring = aired.Value.Date.AddDays(7);
-
-                        while (dayAfterFirstAiring.DayOfWeek != Anime.LocalScheduleDay)
-                        {
-                            dayAfterFirstAiring = dayAfterFirstAiring.AddDays(1);
-                        }
-
-                        var betweenAiredToNow = DateTime.Today - dayAfterFirstAiring;
-                        var daysBetween = betweenAiredToNow.TotalDays;
-
-                        // we are still waiting for second episode
-                        if (daysBetween < 0)
-                        {
-                            maxEpId = 2;
-                        }
-                        else
-                        {
-                            maxEpId = (int)Math.Floor(daysBetween / 7) + 3;
-
-                            if (daysBetween % 7 == 0 && Anime.LocalAirTime != null && DateTime.Now.TimeOfDay < Anime.LocalAirTime.Value.ToTimeSpan())
-                            {
-                                maxEpId -= 1;
-                            }
-                        }
-
-                        // the anime has finished airing according to the current calendar
-                        if (Anime.EpisodesCount != null && maxEpId > Anime.EpisodesCount.Value)
-                        {
-                            maxEpId = Anime.EpisodesCount.Value;
-                        }
-                    }
+                    maxEpId = Anime.GetEstimatedAiredEpisodes() + 1;
                 }
 
                 @* Print row for each episode *@

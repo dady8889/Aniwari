@@ -20,8 +20,10 @@ public interface ITitle
 
     public void UpdateTitles(Dictionary<TitleType, List<string>> titles)
     {
+        var oldTitles = new Dictionary<TitleType, List<string>>(titles);
+
         // remove items that are in OLD but are not in NEW
-        foreach (var (k, v) in Titles)
+        foreach (var (k, v) in oldTitles)
         {
             foreach (var item in v)
             {

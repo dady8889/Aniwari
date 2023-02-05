@@ -64,7 +64,7 @@
         {
             Expanded = !Expanded;
             StateHasChanged();
-            await Task.Delay(50);
+            await Task.Delay(150);
         }
 
         await module.InvokeVoidAsync("toggleDetails", bodyReference, expanded);

@@ -76,7 +76,7 @@
 
     private void LoadAnime()
     {
-        watchingAnime = Store!.Animes.Where(x => x.Watching).ToList();
+        watchingAnime = Store!.Animes.Where(x => x.Watching).OrderByDescending(x => Math.Abs(x.GetEstimatedAiredEpisodes() - x.GetWatchedEpisodes().Count())).ToList();
     }
 
     private async Task SearchAnime(WatchlistItem.SearchEventArgs args)
